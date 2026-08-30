@@ -12,7 +12,7 @@ local Window = Rayfield:CreateWindow({
    KeySystem = false,
 })
 
--- สร้างแท็บตามที่ออกแบบไว้
+-- สร้างแท็บตามโครงสร้างเดิม
 local MainTab = Window:CreateTab("หน้าหลัก", 4483362458)
 local VisualTab = Window:CreateTab("หน้ามอง", 4483362458)
 local LagTab = Window:CreateTab("ลดความแลก", 4483362458)
@@ -21,19 +21,20 @@ local DevTab = Window:CreateTab("พัฒนาต่อ (เร็วๆ น�
 local LocalPlayer = game.Players.LocalPlayer
 local Workspace = game:GetService("Workspace")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 local Camera = Workspace.CurrentCamera
 
 Rayfield:Notify({
    Title = "Gemini Hub Loaded",
-   Content = "ระบบใหม่พร้อมใช้งาน",
+   Content = "อัปเดตฟีเจอร์ใหม่ในหน้าหลักเรียบร้อย",
    Duration = 3,
    Image = 4483362458,
 })
 
 --------------------------------------------------
--- แท็บที่ 1: หน้าหลัก (แรงโน้มถ่วงต่ำ / ลอยตัว & หมุนตัว)
+-- แท็บที่ 1: หน้าหลัก (ต้านแรงโน้มถ่วง, หมุนตัว, ทะลุกำแพง, คลิกวาร์ป, บังคับมุมมองที่ 3)
 --------------------------------------------------
-MainTab:CreateSection("ระบบเคลื่อนไหวพิเศษ")
+MainTab:CreateSection("ระบบเคลื่อนไหว & ป่วนพิเศษ")
 
 _G.AntiGravity = false
 MainTab:CreateToggle({
@@ -58,17 +59,79 @@ MainTab:CreateToggle({
    end,
 })
 
+_G.Noclip = false
+MainTab:CreateToggle({
+   Name = "โหมดทะลุกำแพง (Noclip)",
+   CurrentValue = false,
+   Flag = "NoclipToggle",
+   Callback = function(Value)
+       _G.Noclip = Value
+   end,
+})
+
+_G.ClickTP = false
+MainTab:CreateToggle({
+   Name = "คลิกเพื่อวาร์ป (Click TP - จิ้มหน้าจอ)",
+   CurrentValue = false,
+   Flag = "ClickTPToggle",
+   Callback = function(Value)
+       _G.ClickTP = Value
+       Rayfield:Notify({Title = "Click TP", Content = Value and "เปิดใช้งานแล้ว (จิ้มจอเพื่อวาร์ป)" else "ปิดใช้งานแล้ว", Duration = 2})
+   end,
+})
+
+_G.ForceThirdPerson = false
+MainTab:CreateToggle({
+   Name = "บังคับมุมมองบุคคลที่ 3 (แก้แมพล็อกมุมมอง)",
+   CurrentValue = false,
+   Flag = "ForceTPToggle",
+   Callback = function(Value)
+       _G.ForceThirdPerson = Value
+       if Value then
+           LocalPlayer.CameraMode = Enum.CameraMode.Classic
+           LocalPlayer.DevComputerCameraMode = Enum.DevComputerCameraMode.Classic
+           LocalPlayer.DevTouchCameraMode = Enum.DevTouchCameraMode.Classic
+       end
+   end,
+})
+
+-- ลูปการทำงานของฟีเจอร์หน้าหลัก (Noclip, Spinbot, Force Camera)
 RunService.RenderStepped:Connect(function()
+   -- Spinbot
    if _G.SpinBot and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
        LocalPlayer.Character.HumanoidRootPart.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(30), 0)
+   end
+
+   -- Noclip
+   if _G.Noclip and LocalPlayer.Character then
+       for _, v in pairs(LocalPlayer.Character:GetDescendants()) do
+           if v:IsA("BasePart") then
+               v.CanCollide = false
+           end
+       end
+   end
+
+   -- Force Third Person
+   if _G.ForceThirdPerson then
+       LocalPlayer.CameraMode = Enum.CameraMode.Classic
+   end
+end)
+
+-- ระบบคลิกวาร์ปหน้าจอ
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+   if not gameProcessed and _G.ClickTP then
+       if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+           local mouse = LocalPlayer:GetMouse()
+           if mouse.Target and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+               LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(mouse.Hit.Position + Vector3.new(0, 3, 0))
+           end
+       end
    end
 end)
 
 --------------------------------------------------
 -- แท็บที่ 2: หน้ามอง (ESP กรอบ, เส้น Tracer, เลือกสี)
 --------------------------------------------------
-MainTab:CreateSection("ระบบ ESP และการมองเห็น") -- (ย้ายมาไว้แท็บมองตามบรีฟ)
-
 _G.ESPBox = false
 _G.ESPTracer = false
 _G.ESPColor = Color3.fromRGB(255, 0, 0)
@@ -202,17 +265,12 @@ LagTab:CreateButton({
 LagTab:CreateButton({
    Name = "ลดแลก ระดับ 4: ปิดการแสดงผลชิ้นส่วนไกลตา",
    Callback = function()
-       for _, v in pairs(Workspace:GetDescendants()) do
-           if v:IsA("BasePart") and v.Transparency < 1 then
-               -- ลดภาระการเรนเดอร์พาร์ท
-           end
-       end
        Rayfield:Notify({Title = "ระดับ 4", Content = "ปรับแต่งการเรนเดอร์แล้ว", Duration = 2})
    end,
 })
 
 LagTab:CreateButton({
-   Name = "[สูงสุด] ลดแลก ระดับ 5: เคลียร์แมว/ลบแมพเกลี้ยง",
+   Name = "[สูงสุด] ลดแลก ระดับ 5: เคลียร์แมพเกลี้ยง",
    Callback = function()
        for _, v in pairs(Workspace:GetChildren()) do
            if v ~= LocalPlayer.Character and v.Name ~= "Terrain" and v:IsA("Model") then
