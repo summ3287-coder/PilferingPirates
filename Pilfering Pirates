@@ -15,12 +15,17 @@ local MainTab = Window:CreateTab("หลัก", 4483362458)
 local EspTab = Window:CreateTab("มองทะลุ (ESP)", 4483362458)
 local TeleportTab = Window:CreateTab("วาร์ป", 4483362458)
 
-local ShieldEnabled = false
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
 
--- ตัวแปรตั้งค่า ESP และสี
+-- ตัวแปรตั้งค่า
+local FastAttackEnabled = false
+local LockTargetEnabled = false
+local selectedLockPlayer = ""
+
+-- ตัวแปรตั้งค่า ESP
 local EspEnabled = false
 local EspBoxEnabled = false
 local EspLineEnabled = false
@@ -28,45 +33,289 @@ local EspColor = Color3.fromRGB(255, 0, 0)
 local EspDrawings = {}
 
 -- ----------------------------------------
--- 1. ฟังก์ชันเกราะป้องกันฉุกเฉิน (Emergency Shield)
+-- 1. ฟังก์ชันแท็บหลัก: ระบบตีเร็ว & ระบบล็อกเป้า
 -- ----------------------------------------
-local shieldPart = nil
+MainTab:CreateToggle({
+   Name = "เปิดระบบตีเร็ว (Fast Attack)",
+   CurrentValue = false,
+   Flag = "FastAttack",
+   Callback = function(Value)
+       FastAttackEnabled = Value
+       Rayfield:Notify({
+          Title = "ระบบตีเร็ว",
+          Content = Value and "เปิดใช้งานระบบตีเร็วแล้ว!" or "ปิดระบบตีเร็วแล้ว",
+          Duration = 2,
+       })
+   end,
+})
+
+-- ลูปเร่งความเร็วการโจมตี (ถ้าเกมรองรับการรีเซ็ตคูลดาวน์อาวุธ)
+task.spawn(function()
+   while true do
+       if FastAttackEnabled then
+           pcall(function()
+               local char = LocalPlayer.Character
+               if char then
+                   for _, tool in pairs(char:GetChildren()) do
+                       if tool:IsA("Tool") and tool:FindFirstChild("Cooldwn") then
+                           tool.Cooldwn.Value = 0
+                       end
+                   end
+               end
+           end)
+       end
+       task.wait(0.1)
+   end
+end)
+
+-- รายชื่อผู้เล่นสำหรับระบบล็อกเป้า
+local lockPlayerList = {}
+for _, p in pairs(Players:GetPlayers()) do
+   if p ~= LocalPlayer then
+       table.insert(lockPlayerList, p.Name)
+   end
+end
+
+local LockDropdown = MainTab:CreateDropdown({
+   Name = "เลือกเป้าหมายที่จะล็อก",
+   Options = lockPlayerList,
+   CurrentOption = "",
+   Flag = "LockTargetDropdown",
+   Callback = function(Option)
+       if type(Option) == "table" then
+           selectedLockPlayer = Option[1] or ""
+       else
+           selectedLockPlayer = tostring(Option)
+       end
+   end,
+})
+
+Players.PlayerAdded:Connect(function(p)
+   if p ~= LocalPlayer then
+       table.insert(lockPlayerList, p.Name)
+       LockDropdown:Refresh(lockPlayerList)
+   end
+end)
+
+Players.PlayerRemoving:Connect(function(p)
+   for i, v in ipairs(lockPlayerList) do
+       if v == p.Name then
+           table.remove(lockPlayerList, i)
+           break
+       end
+   end
+   LockDropdown:Refresh(lockPlayerList)
+end)
 
 MainTab:CreateToggle({
-   Name = "เปิดเกราะป้องกันฉุกเฉิน (Shield & Auto-Escape)",
+   Name = "เปิดระบบล็อกเป้าผู้เล่น (Lock Target)",
    CurrentValue = false,
-   Flag = "EmergencyShield",
+   Flag = "LockTargetToggle",
    Callback = function(Value)
-       ShieldEnabled = Value
-       
-       local char = LocalPlayer.Character
-       if Value then
-           if char and char:FindFirstChild("HumanoidRootPart") and not shieldPart then
-               shieldPart = Instance.new("Part")
-               shieldPart.Name = "CustomShield"
-               shieldPart.Shape = Enum.PartType.Ball
-               shieldPart.Size = Vector3.new(6, 6, 6)
-               shieldPart.Transparency = 0.6
-               shieldPart.BrickColor = BrickColor.new("Cyan")
-               shieldPart.Material = Enum.Material.Neon
-               shieldPart.CanCollide = false
-               shieldPart.Anchored = false
-               shieldPart.Parent = workspace
+       LockTargetEnabled = Value
+   end,
+})
+
+-- ฟังก์ชันล็อกมุมกล้องไปที่เป้าหมายอัตโนมัติ
+RunService.RenderStepped:Connect(function()
+   if LockTargetEnabled and selectedLockPlayer ~= "" then
+       local targetPlayer = Players:FindFirstChild(selectedLockPlayer)
+       if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+           local targetHrp = targetPlayer.Character.HumanoidRootPart
+           Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetHrp.Position)
+       end
+   end
+end)
+
+-- ----------------------------------------
+-- 2. ระบบ ESP (มองทะลุ) - มีชุดเดียวไม่เบิ้ล
+-- ----------------------------------------
+EspTab:CreateToggle({
+   Name = "เปิด/ปิด ESP ทั้งหมด",
+   CurrentValue = false,
+   Flag = "EspToggle",
+   Callback = function(Value)
+       EspEnabled = Value
+       if not Value then
+           for _, data in pairs(EspDrawings) do
+               if data.Box then data.Box:Remove() end
+               if data.Line then data.Line:Remove() end
+           end
+           EspDrawings = {}
+       end
+   end,
+})
+
+EspTab:CreateToggle({
+   Name = "แสดงกรอบสี่เหลี่ยม (Box)",
+   CurrentValue = false,
+   Flag = "EspBox",
+   Callback = function(Value)
+       EspBoxEnabled = Value
+   end,
+})
+
+EspTab:CreateToggle({
+   Name = "แสดงเส้นโยง (Tracer Line)",
+   CurrentValue = false,
+   Flag = "EspLine",
+   Callback = function(Value)
+       EspLineEnabled = Value
+   end,
+})
+
+EspTab:CreateColorPicker({
+   Name = "สีของ ESP",
+   Color = Color3.fromRGB(255, 0, 0),
+   Flag = "EspColorPicker",
+   Callback = function(Value)
+       EspColor = Value
+   end,
+})
+
+RunService.RenderStepped:Connect(function()
+   if not EspEnabled then return end
+   
+   for _, player in pairs(Players:GetPlayers()) do
+       if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") then
+           local hrp = player.Character.HumanoidRootPart
+           local humanoid = player.Character.Humanoid
+           
+           if not EspDrawings[player] then
+               EspDrawings[player] = {
+                   Box = Drawing.new("Square"),
+                   Line = Drawing.new("Line")
+               }
+               EspDrawings[player].Box.Visible = false
+               EspDrawings[player].Box.Filled = false
+               EspDrawings[player].Box.Thickness = 1.5
                
-               local weld = Instance.new("WeldConstraint")
-               weld.Part0 = shieldPart
-               weld.Part1 = char.HumanoidRootPart
-               weld.Parent = shieldPart
-               shieldPart.CFrame = char.HumanoidRootPart.CFrame
+               EspDrawings[player].Line.Visible = false
+               EspDrawings[player].Line.Thickness = 1.5
            end
            
+           local box = EspDrawings[player].Box
+           local line = EspDrawings[player].Line
+           
+           if humanoid.Health > 0 then
+               local vector, onScreen = Camera:WorldToViewportPoint(hrp.Position)
+               
+               if onScreen then
+                   if EspBoxEnabled then
+                       local sizeX, sizeY = 2500 / vector.Z, 3500 / vector.Z
+                       box.Size = Vector2.new(sizeX, sizeY)
+                       box.Position = Vector2.new(vector.X - sizeX / 2, vector.Y - sizeY / 2)
+                       box.Color = EspColor
+                       box.Visible = true
+                   else
+                       box.Visible = false
+                   end
+                   
+                   if EspLineEnabled then
+                       line.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
+                       line.To = Vector2.new(vector.X, vector.Y)
+                       line.Color = EspColor
+                       line.Visible = true
+                   else
+                       line.Visible = false
+                   end
+               else
+                   box.Visible = false
+                   line.Visible = false
+               end
+           else
+               box.Visible = false
+               line.Visible = false
+           end
+       elseif EspDrawings[player] then
+           if EspDrawings[player].Box then EspDrawings[player].Box:Remove() end
+           if EspDrawings[player].Line then EspDrawings[player].Line:Remove() end
+           EspDrawings[player] = nil
+       end
+   end
+end)
+
+-- ----------------------------------------
+-- 3. ระบบวาร์ปไปหาผู้เล่น - มีชุดเดียวไม่เบิ้ล
+-- ----------------------------------------
+local selectedPlayerName = ""
+local playerList = {}
+for _, p in pairs(Players:GetPlayers()) do
+   if p ~= LocalPlayer then
+       table.insert(playerList, p.Name)
+   end
+end
+
+local PlayerDropdown = TeleportTab:CreateDropdown({
+   Name = "เลือกชื่อผู้เล่น",
+   Options = playerList,
+   CurrentOption = "",
+   Flag = "TpPlayer",
+   Callback = function(Option)
+       if type(Option) == "table" then
+           selectedPlayerName = Option[1] or ""
+       else
+           selectedPlayerName = tostring(Option)
+       end
+   end,
+})
+
+Players.PlayerAdded:Connect(function(p)
+   if p ~= LocalPlayer then
+       table.insert(playerList, p.Name)
+       PlayerDropdown:Refresh(playerList)
+   end
+end)
+
+Players.PlayerRemoving:Connect(function(p)
+   for i, v in ipairs(playerList) do
+       if v == p.Name then
+           table.remove(playerList, i)
+           break
+       end
+   end
+   PlayerDropdown:Refresh(playerList)
+end)
+
+TeleportTab:CreateButton({
+   Name = "วาร์ปไปหาทันที!",
+   Callback = function()
+       if selectedPlayerName == "" then
            Rayfield:Notify({
-              Title = "เปิดใช้งานเกราะป้องกัน",
-              Content = "ระบบเกราะพร้อมทำงาน หากเลือดต่ำกว่า 30% จะวาร์ปหนีอัตโนมัติ!",
+              Title = "แจ้งเตือน",
+              Content = "กรุณากดเลือกชื่อผู้เล่นใน Dropdown ก่อน!",
               Duration = 3,
            })
-           
-           task.spawn(function()
+           return
+       end
+       
+       local targetPlayer = Players:FindFirstChild(selectedPlayerName)
+       if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+           local targetHrp = targetPlayer.Character.HumanoidRootPart
+           local myChar = LocalPlayer.Character
+           if myChar and myChar:FindFirstChild("HumanoidRootPart") then
+               myChar.HumanoidRootPart.CFrame = targetHrp.CFrame + Vector3.new(0, 3, 0)
+               Rayfield:Notify({
+                  Title = "วาร์ปสำเร็จ",
+                  Content = "วาร์ปไปหา " .. targetPlayer.Name .. " เรียบร้อย!",
+                  Duration = 3,
+               })
+           end
+       else
+           Rayfield:Notify({
+              Title = "Error",
+              Content = "ไม่พบตัวละครของผู้เล่นคนนี้",
+              Duration = 3,
+           })
+       end
+   end,
+})
+
+Rayfield:Notify({
+   Title = "Pilfering Pirates Hub",
+   Content = "อัปเดตระบบตีเร็วและล็อกเป้าเรียบร้อย!",
+   Duration = 5,
+})
                while ShieldEnabled do
                    local current_char = LocalPlayer.Character
                    if current_char and current_char:FindFirstChild("Humanoid") and current_char:FindFirstChild("HumanoidRootPart") then
