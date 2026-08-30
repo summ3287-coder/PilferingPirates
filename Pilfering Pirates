@@ -23,6 +23,7 @@ local UITab = Window:CreateTab("ปรับแต่ง UI & ตั้งค่
 local LocalPlayer = game.Players.LocalPlayer
 local Workspace = game:GetService("Workspace")
 local RunService = game:GetService("RunService")
+local Camera = Workspace.CurrentCamera
 
 -- แจ้งเตือนเปิดใช้งาน
 Rayfield:Notify({
@@ -47,7 +48,7 @@ MainTab:CreateToggle({
    CurrentValue = false,
    Flag = "TargetLockToggle",
    Callback = function(Value)
-       -- โค้ด Target Locking
+       _G.TargetLock = Value
    end,
 })
 
@@ -60,7 +61,7 @@ MainTab:CreateButton({
 })
 
 --------------------------------------------------
--- 2. ฟังก์ชันแท็บปั่น & ลดแลก (เรียงเลเวลดินน้ำมันถึงลบแมพ)
+-- 2. ฟังก์ชันแท็บปั่น & ลดแลก + 2 ฟังก์ชันลับสุดยอด
 --------------------------------------------------
 FunTab:CreateToggle({
    Name = "โหมดทะลุกำแพง (Noclip)",
@@ -80,16 +81,43 @@ FunTab:CreateToggle({
    end,
 })
 
+-- [ฟังก์ชันลับที่ 1]: ระบบจำลองแรงโน้มถ่วงศูนย์ (Zero Gravity Float)
 FunTab:CreateToggle({
-   Name = "ซูมกล้องไร้ขีดจำกัด (Infinite Zoom)",
-   CurrentValue = true,
-   Flag = "ZoomToggle",
+   Name = "โหมดตัวเบาหวิวไร้แรงโน้มถ่วง",
+   CurrentValue = false,
+   Flag = "SecretSkill1",
    Callback = function(Value)
-       if Value then
-           LocalPlayer.CameraMaxZoomDistance = 999999
-       else
-           LocalPlayer.CameraMaxZoomDistance = 400
-       end
+       _G.ZeroG = Value
+       RunService.Stepped:Connect(function()
+           if _G.ZeroG and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+               LocalPlayer.Character.HumanoidRootPart.Velocity = Vector3.new(LocalPlayer.Character.HumanoidRootPart.Velocity.X, 2, LocalPlayer.Character.HumanoidRootPart.Velocity.Z)
+           end
+       end)
+       Rayfield:Notify({Title = "Secret Skill 01", Content = "ระบบตัวเบาทำงานแล้ว", Duration = 2})
+   end,
+})
+
+-- [ฟังก์ชันลับที่ 2]: ระบบออร่ากระแทกวัตถรอบตัว (Aura Shockwave)
+FunTab:CreateToggle({
+   Name = "เปิดออร่าผลักวัตถุกระเด็นรอบตัว",
+   CurrentValue = false,
+   Flag = "SecretSkill2",
+   Callback = function(Value)
+       _G.ShockwaveAura = Value
+       task.spawn(function()
+           while _G.ShockwaveAura do
+               local char = LocalPlayer.Character
+               if char and char:FindFirstChild("HumanoidRootPart") then
+                   for _, obj in pairs(Workspace:GetPartsInPart(char.HumanoidRootPart)) do
+                       if obj.Parent ~= char and obj:IsA("BasePart") and not obj.Anchored then
+                           obj.Velocity = (obj.Position - char.HumanoidRootPart.Position).Unit * 50 + Vector3.new(0, 20, 0)
+                       end
+                   end
+               end
+               task.wait(0.2)
+           end
+       end)
+       Rayfield:Notify({Title = "Secret Skill 02", Content = "ออร่ากระแทกวัตถุเปิดใช้งาน", Duration = 2})
    end,
 })
 
@@ -145,7 +173,7 @@ FunTab:CreateButton({
 })
 
 --------------------------------------------------
--- 3. ฟังก์ชันแท็บ ESP & การมองเห็น (กรอบสี่เหลี่ยม + เส้น Tracer)
+-- 3. ฟังก์ชันแท็บ ESP & การมองเห็น (กรอบสี่เหลี่ยม + เส้น Tracer ทำงานจริง)
 --------------------------------------------------
 _G.ESPBoxEnabled = false
 _G.ESPTracerEnabled = false
@@ -178,11 +206,13 @@ VisualTab:CreateColorPicker({
    end,
 })
 
--- ระบบรันลูป ESP กรอบและเส้น
+local tracers = {}
+
 RunService.RenderStepped:Connect(function()
    for _, player in pairs(game.Players:GetPlayers()) do
        if player ~= LocalPlayer and player.Character then
            local char = player.Character
+           local rootPart = char:FindFirstChild("HumanoidRootPart")
            local highlight = char:FindFirstChild("GeminiESPBox")
            
            if _G.ESPBoxEnabled then
@@ -199,6 +229,30 @@ RunService.RenderStepped:Connect(function()
            else
                if highlight then
                    highlight:Destroy()
+               end
+           end
+
+           if _G.ESPTracerEnabled and rootPart then
+               if not tracers[player] then
+                   local line = Drawing.new("Line")
+                   line.Thickness = 1.5
+                   line.Visible = false
+                   tracers[player] = line
+               end
+               
+               local vector, onScreen = Camera:WorldToViewportPoint(rootPart.Position)
+               local line = tracers[player]
+               if onScreen then
+                   line.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
+                   line.To = Vector2.new(vector.X, vector.Y)
+                   line.Color = _G.ESPColor
+                   line.Visible = true
+               else
+                   line.Visible = false
+               end
+           else
+               if tracers[player] then
+                   tracers[player].Visible = false
                end
            end
        end
@@ -220,8 +274,27 @@ TeleportTab:CreateButton({
 })
 
 --------------------------------------------------
--- 5. แท็บใหม่: ปรับแต่ง UI & แชร์ตั้งค่า (Custom UI & Config)
+-- 5. แท็บปรับแต่ง UI & ตั้งค่า
 --------------------------------------------------
+UITab:CreateSection("ระบบปรับแต่งหน้าตา UI")
+
+UITab:CreateColorPicker({
+   Name = "เปลี่ยนสีพื้นหลัง UI",
+   Color = Color3.fromRGB(40, 40, 40),
+   Flag = "UIBackgroundColor",
+   Callback = function(Value)
+       local coreGui = game:GetService("CoreGui")
+       local rayfieldGui = coreGui:FindFirstChild("Rayfield")
+       if rayfieldGui then
+           for _, descendant in pairs(rayfieldGui:GetDescendants()) do
+               if descendant:IsA("Frame") and descendant.BackgroundColor3 ~= Color3.fromRGB(0,0,0) then
+                   descendant.BackgroundColor3 = Value
+               end
+           end
+       end
+   end,
+})
+
 UITab:CreateSection("ระบบจัดการการตั้งค่าสคริปต์")
 
 UITab:CreateButton({
