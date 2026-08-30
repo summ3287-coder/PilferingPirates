@@ -30,27 +30,6 @@ Rayfield:Notify({
 })
 
 --------------------------------------------------
--- ฟังก์ชันเสริม: ขอบเมนูไฟรุ้งกระพริบวิบวับ
---------------------------------------------------
-task.spawn(function()
-   local CoreGui = game:GetService("CoreGui")
-   local RunService = game:GetService("RunService")
-   local rayfieldGui = CoreGui:FindFirstChild("Rayfield")
-   if rayfieldGui then
-       local mainFrame = rayfieldGui:FindFirstChild("Main", true)
-       if mainFrame then
-           local uiStroke = mainFrame:FindFirstChild("RainbowBorder") or Instance.new("UIStroke")
-           uiStroke.Name = "RainbowBorder"
-           uiStroke.Thickness = 3
-           uiStroke.Parent = mainFrame
-           RunService.RenderStepped:Connect(function()
-               uiStroke.Color = Color3.fromHSV(tick() % 5 / 5, 1, 1)
-           end)
-       end
-   end
-end)
-
---------------------------------------------------
 -- 1. ฟังก์ชันเดิม: Fast Attack & Target Locking
 --------------------------------------------------
 MainTab:CreateButton({
@@ -229,7 +208,6 @@ FunTab:CreateButton({
 FunTab:CreateButton({
    Name = "🔥 [อันตราย] ลดแลก V5: ลบหมดทุกอย่าง ไม่ มี ทาง แก้ ได้ ฮ่าๆ",
    Callback = function()
-       -- ทำลายล้างทุกสิ่งใน Workspace ยกเว้นผู้เล่น
        for _, v in pairs(workspace:GetChildren()) do
            if v ~= LocalPlayer.Character and v.Name ~= "Terrain" and v:IsA("Model") then
                v:Destroy()
