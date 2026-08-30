@@ -2,8 +2,8 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
    Name = "Gemini Hub | John Wick Edition",
-   LoadingTitle = "กำลังเตรียมระบบ Gemini Hub...",
-   LoadingSubtitle = "โดย John Wick",
+   LoadingTitle = "Loading Gemini Hub...",
+   LoadingSubtitle = "By John Wick",
    ConfigurationSaving = {
       Enabled = true,
       FolderName = "GeminiHubConfig",
@@ -12,12 +12,11 @@ local Window = Rayfield:CreateWindow({
    KeySystem = false,
 })
 
--- สร้างแท็บหลักตามหมวดหมู่
-local MainTab = Window:CreateTab("หน้าแรก / ฟังก์ชันหลัก", 4483362458)
-local FunTab = Window:CreateTab("ฟังก์ชันปั่น & ลดแลก", 4483362458)
-local VisualTab = Window:CreateTab("ESP & การมองเห็น", 4483362458)
-local TeleportTab = Window:CreateTab("เทเลพอร์ต", 4483362458)
-local UITab = Window:CreateTab("ปรับแต่ง UI & ตั้งค่า", 4483362458)
+local MainTab = Window:CreateTab("Main", 4483362458)
+local FunTab = Window:CreateTab("Fun & Lag", 4483362458)
+local VisualTab = Window:CreateTab("ESP", 4483362458)
+local TeleportTab = Window:CreateTab("Teleport", 4483362458)
+local UITab = Window:CreateTab("Settings", 4483362458)
 
 local LocalPlayer = game.Players.LocalPlayer
 local Workspace = game:GetService("Workspace")
@@ -25,46 +24,42 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 Rayfield:Notify({
-   Title = "ยินดีต้อนรับสู่ Gemini Hub",
-   Content = "ระบบพร้อมลุยในโหมด John Wick",
+   Title = "Gemini Hub Loaded",
+   Content = "John Wick Mode Ready",
    Duration = 4,
    Image = 4483362458,
 })
 
---------------------------------------------------
--- 1. ฟังก์ชันแท็บหลัก: Fast Attack & Target Locking & Chat Spammer
---------------------------------------------------
+-- Main Tab
 MainTab:CreateButton({
-   Name = "เปิดระบบ Fast Attack",
+   Name = "Fast Attack",
    Callback = function()
-       Rayfield:Notify({Title = "Fast Attack", Content = "เปิดการโจมตีเร็วเรียบร้อย", Duration = 2})
+       Rayfield:Notify({Title = "Fast Attack", Content = "Activated", Duration = 2})
    end,
 })
 
 MainTab:CreateToggle({
-   Name = "ล็อกเป้าหมาย (Target Locking)",
+   Name = "Target Locking",
    CurrentValue = false,
-   Flag = "TargetLockToggle",
+   Flag = "TargetLock",
    Callback = function(Value)
        _G.TargetLock = Value
    end,
 })
 
 MainTab:CreateButton({
-   Name = "เปิดแชทสแปม (Chat Spammer)",
+   Name = "Chat Spammer",
    Callback = function()
        local args = {[1] = "Gemini Hub On Top!", [2] = "All"}
        game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(unpack(args))
    end,
 })
 
---------------------------------------------------
--- 2. ฟังก์ชันแท็บปั่น & ลดแลก
---------------------------------------------------
+-- Fun & Lag Tab
 FunTab:CreateToggle({
-   Name = "โหมดทะลุกำแพง (Noclip)",
+   Name = "Noclip",
    CurrentValue = false,
-   Flag = "NoclipToggle",
+   Flag = "Noclip",
    Callback = function(Value)
        _G.Noclip = Value
        RunService.Stepped:Connect(function()
@@ -79,76 +74,45 @@ FunTab:CreateToggle({
    end,
 })
 
-FunTab:CreateSection("โหมดลดแลก (Potato Graphics เลเวล)")
+FunTab:CreateSection("Potato Graphics")
 
 FunTab:CreateButton({
-   Name = "ลดแลก เวล 1: ปิดเงาและเอฟเฟกต์เบื้องต้น",
+   Name = "Potato Level 1: Disable Shadows",
    Callback = function()
        game:GetService("Lighting").GlobalShadows = false
-       Rayfield:Notify({Title = "ลดแลก เวล 1", Content = "ปิดเงาเรียบร้อย", Duration = 2})
+       Rayfield:Notify({Title = "Potato Lv.1", Content = "Shadows disabled", Duration = 2})
    end,
 })
 
 FunTab:CreateButton({
-   Name = "ลดแลก เวล 2: เปลี่ยนทุกอย่างเป็นพลาสติกเรียบ (ดินน้ำมัน)",
+   Name = "Potato Level 2: Smooth Plastic",
    Callback = function()
        for _, v in pairs(Workspace:GetDescendants()) do
            if v:IsA("BasePart") then
                v.Material = Enum.Material.SmoothPlastic
-               v.Reflectance = 0
            end
        end
-       Rayfield:Notify({Title = "ลดแลก เวล 2", Content = "ปรับพื้นผิวเป็นพลาสติกเรียบหมดแล้ว", Duration = 2})
+       Rayfield:Notify({Title = "Potato Lv.2", Content = "Materials changed to plastic", Duration = 2})
    end,
 })
 
-FunTab:CreateButton({
-   Name = "ลดแลก เวล 3: ลบพาร์ทขยะและเอฟเฟกต์หนักๆ",
-   Callback = function()
-       for _, v in pairs(Workspace:GetDescendants()) do
-           if v:IsA("SpecialMesh") or v:IsA("ParticleEmitter") then
-               v:Destroy()
-           end
-       end
-       Rayfield:Notify({Title = "ลดแลก เวล 3", Content = "กวาดล้างพาร์ทขยะเรียบร้อย", Duration = 2})
-   end,
-})
-
-FunTab:CreateButton({
-   Name = "[สูงสุด] ลดแลก เวล 4: ลบแมพเกลี้ยงเกลา (ลบทุกสิ่ง)",
-   Callback = function()
-       for _, v in pairs(Workspace:GetChildren()) do
-           if v ~= LocalPlayer.Character and v.Name ~= "Terrain" and v:IsA("Model") then
-               v:Destroy()
-           end
-       end
-       Rayfield:Notify({
-          Title = "ลดแลกเวลสูงสุดทำงานแล้ว",
-          Content = "ลบแมพเกลี้ยงเกลา ไม่มีทางแก้แล้ว",
-          Duration = 4,
-       })
-   end,
-})
-
---------------------------------------------------
--- 3. ฟังก์ชันแท็บ ESP & การมองเห็น
---------------------------------------------------
-_G.ESPBoxEnabled = false
+-- ESP Tab
+_G.ESPBox = false
 _G.ESPColor = Color3.fromRGB(255, 0, 0)
 
 VisualTab:CreateToggle({
-   Name = "เปิดใช้งาน ESP กรอบสี่เหลี่ยมมองทะลุกำแพง",
+   Name = "ESP Box (Highlight)",
    CurrentValue = false,
    Flag = "ESPBoxToggle",
    Callback = function(Value)
-       _G.ESPBoxEnabled = Value
+       _G.ESPBox = Value
    end,
 })
 
 VisualTab:CreateColorPicker({
-   Name = "เลือกสีกรอบ ESP",
+   Name = "ESP Color",
    Color = Color3.fromRGB(255, 0, 0),
-   Flag = "ESPColorPicker",
+   Flag = "ESPColor",
    Callback = function(Value)
        _G.ESPColor = Value
    end,
@@ -158,12 +122,12 @@ RunService.RenderStepped:Connect(function()
    for _, player in pairs(game.Players:GetPlayers()) do
        if player ~= LocalPlayer and player.Character then
            local char = player.Character
-           local highlight = char:FindFirstChild("GeminiESPBox")
+           local highlight = char:FindFirstChild("GeminiESP")
            
-           if _G.ESPBoxEnabled then
+           if _G.ESPBox then
                if not highlight then
                    highlight = Instance.new("Highlight")
-                   highlight.Name = "GeminiESPBox"
+                   highlight.Name = "GeminiESP"
                    highlight.Adornee = char
                    highlight.Parent = char
                    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
@@ -180,25 +144,23 @@ RunService.RenderStepped:Connect(function()
    end
 end)
 
---------------------------------------------------
--- 4. แท็บเทเลพอร์ต (ระบบคลิกวาร์ปอิสระ)
---------------------------------------------------
-TeleportTab:CreateSection("ระบบวาร์ปอัจฉริยะ")
+-- Teleport Tab
+TeleportTab:CreateSection("Smart Teleport")
 
-_G.ClickTeleportEnabled = false
+_G.ClickTP = false
 
 TeleportTab:CreateToggle({
-   Name = "เปิดใช้งานคลิกวาร์ป (กดจอเพื่อวาร์ปไปจุดนั้น)",
+   Name = "Click to Teleport (Tap screen)",
    CurrentValue = false,
-   Flag = "ClickTeleportToggle",
+   Flag = "ClickTPToggle",
    Callback = function(Value)
-       _G.ClickTeleportEnabled = Value
-       Rayfield:Notify({Title = "Click Teleport", Content = Value and "เปิดโหมดคลิกวาร์ปแล้ว" else "ปิดโหมดคลิกวาร์ปแล้ว", Duration = 2})
+       _G.ClickTP = Value
+       Rayfield:Notify({Title = "Click TP", Content = Value and "Enabled" else "Disabled", Duration = 2})
    end,
 })
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
-   if not gameProcessed and _G.ClickTeleportEnabled then
+   if not gameProcessed and _G.ClickTP then
        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
            local mouse = LocalPlayer:GetMouse()
            if mouse.Target and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
@@ -208,23 +170,21 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
    end
 end)
 
---------------------------------------------------
--- 5. แท็บปรับแต่ง UI & ตั้งค่า (เอาตัวมีปัญหาออก เหลือระบบ Config ปกติ)
---------------------------------------------------
-UITab:CreateSection("ระบบจัดการการตั้งค่าสคริปต์")
+-- Settings Tab
+UITab:CreateSection("Config Manager")
 
 UITab:CreateButton({
-   Name = "บันทึกการตั้งค่าปัจจุบัน (Save Config)",
+   Name = "Save Config",
    Callback = function()
        Rayfield:SaveConfiguration()
-       Rayfield:Notify({Title = "Config System", Content = "บันทึกค่าสคริปต์เรียบร้อย", Duration = 2})
+       Rayfield:Notify({Title = "Config", Content = "Saved successfully", Duration = 2})
    end,
 })
 
 UITab:CreateButton({
-   Name = "โหลดค่าการตั้งค่าเดิม (Load Config)",
+   Name = "Load Config",
    Callback = function()
        Rayfield:LoadConfiguration()
-       Rayfield:Notify({Title = "Config System", Content = "โหลดค่าเดิมกลับมาแล้ว", Duration = 2})
+       Rayfield:Notify({Title = "Config", Content = "Loaded successfully", Duration = 2})
    end,
 })
