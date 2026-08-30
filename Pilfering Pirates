@@ -23,6 +23,7 @@ local UITab = Window:CreateTab("ปรับแต่ง UI & ตั้งค่
 local LocalPlayer = game.Players.LocalPlayer
 local Workspace = game:GetService("Workspace")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 local Camera = Workspace.CurrentCamera
 
 -- แจ้งเตือนเปิดใช้งาน
@@ -61,7 +62,7 @@ MainTab:CreateButton({
 })
 
 --------------------------------------------------
--- 2. ฟังก์ชันแท็บปั่น & ลดแลก + 2 ฟังก์ชันลับสุดยอด
+-- 2. ฟังก์ชันแท็บปั่น & ลดแลก
 --------------------------------------------------
 FunTab:CreateToggle({
    Name = "โหมดทะลุกำแพง (Noclip)",
@@ -78,46 +79,6 @@ FunTab:CreateToggle({
                end
            end
        end)
-   end,
-})
-
--- [ฟังก์ชันลับที่ 1]: ระบบจำลองแรงโน้มถ่วงศูนย์ (Zero Gravity Float)
-FunTab:CreateToggle({
-   Name = "โหมดตัวเบาหวิวไร้แรงโน้มถ่วง",
-   CurrentValue = false,
-   Flag = "SecretSkill1",
-   Callback = function(Value)
-       _G.ZeroG = Value
-       RunService.Stepped:Connect(function()
-           if _G.ZeroG and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-               LocalPlayer.Character.HumanoidRootPart.Velocity = Vector3.new(LocalPlayer.Character.HumanoidRootPart.Velocity.X, 2, LocalPlayer.Character.HumanoidRootPart.Velocity.Z)
-           end
-       end)
-       Rayfield:Notify({Title = "Secret Skill 01", Content = "ระบบตัวเบาทำงานแล้ว", Duration = 2})
-   end,
-})
-
--- [ฟังก์ชันลับที่ 2]: ระบบออร่ากระแทกวัตถรอบตัว (Aura Shockwave)
-FunTab:CreateToggle({
-   Name = "เปิดออร่าผลักวัตถุกระเด็นรอบตัว",
-   CurrentValue = false,
-   Flag = "SecretSkill2",
-   Callback = function(Value)
-       _G.ShockwaveAura = Value
-       task.spawn(function()
-           while _G.ShockwaveAura do
-               local char = LocalPlayer.Character
-               if char and char:FindFirstChild("HumanoidRootPart") then
-                   for _, obj in pairs(Workspace:GetPartsInPart(char.HumanoidRootPart)) do
-                       if obj.Parent ~= char and obj:IsA("BasePart") and not obj.Anchored then
-                           obj.Velocity = (obj.Position - char.HumanoidRootPart.Position).Unit * 50 + Vector3.new(0, 20, 0)
-                       end
-                   end
-               end
-               task.wait(0.2)
-           end
-       end)
-       Rayfield:Notify({Title = "Secret Skill 02", Content = "ออร่ากระแทกวัตถุเปิดใช้งาน", Duration = 2})
    end,
 })
 
@@ -173,7 +134,7 @@ FunTab:CreateButton({
 })
 
 --------------------------------------------------
--- 3. ฟังก์ชันแท็บ ESP & การมองเห็น (กรอบสี่เหลี่ยม + เส้น Tracer ทำงานจริง)
+-- 3. ฟังก์ชันแท็บ ESP & การมองเห็น
 --------------------------------------------------
 _G.ESPBoxEnabled = false
 _G.ESPTracerEnabled = false
@@ -260,35 +221,51 @@ RunService.RenderStepped:Connect(function()
 end)
 
 --------------------------------------------------
--- 4. แท็บเทเลพอร์ต
+-- 4. แท็บเทเลพอร์ตใหม่: ระบบคลิกวาร์ปอิสระ (Click to Teleport)
 --------------------------------------------------
-TeleportTab:CreateButton({
-   Name = "เทเลพอร์ตไปจุดฟาร์มหลัก",
-   Callback = function()
-       local char = LocalPlayer.Character
-       if char and char:FindFirstChild("HumanoidRootPart") then
-           char.HumanoidRootPart.CFrame = CFrame.new(0, 50, 0)
-           Rayfield:Notify({Title = "Teleport", Content = "วาร์ปสำเร็จ", Duration = 2})
-       end
+TeleportTab:CreateSection("ระบบวาร์ปอัจฉริยะ")
+
+_G.ClickTeleportEnabled = false
+
+TeleportTab:CreateToggle({
+   Name = "เปิดใช้งานคลิกวาร์ป (กดจอเพื่อวาร์ปไปจุดนั้น)",
+   CurrentValue = false,
+   Flag = "ClickTeleportToggle",
+   Callback = function(Value)
+       _G.ClickTeleportEnabled = Value
+       Rayfield:Notify({Title = "Click Teleport", Content = Value and "เปิดโหมดคลิกวาร์ปแล้ว" else "ปิดโหมดคลิกวาร์ปแล้ว", Duration = 2})
    end,
 })
 
---------------------------------------------------
--- 5. แท็บปรับแต่ง UI & ตั้งค่า
---------------------------------------------------
-UITab:CreateSection("ระบบปรับแต่งหน้าตา UI")
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+   if not gameProcessed and _G.ClickTeleportEnabled then
+       if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+           local mouse = LocalPlayer:GetMouse()
+           if mouse.Target and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+               LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(mouse.Hit.Position + Vector3.new(0, 3, 0))
+           end
+       end
+   end
+end)
 
-UITab:CreateColorPicker({
-   Name = "เปลี่ยนสีพื้นหลัง UI",
-   Color = Color3.fromRGB(40, 40, 40),
-   Flag = "UIBackgroundColor",
+--------------------------------------------------
+-- 5. แท็บปรับแต่ง UI & ตั้งค่า (เปลี่ยนจากสีพื้นหลัง เป็น สไลเดอร์ปรับขนาดฟอนต์)
+--------------------------------------------------
+UITab:CreateSection("ระบบปรับแต่งขนาดตัวอักษร UI")
+
+UITab:CreateSlider({
+   Name = "ปรับขนาดตัวอักษร (Font Size)",
+   Range = {12, 22},
+   Increment = 1,
+   CurrentValue = 14,
+   Flag = "FontSizeSlider",
    Callback = function(Value)
        local coreGui = game:GetService("CoreGui")
        local rayfieldGui = coreGui:FindFirstChild("Rayfield")
        if rayfieldGui then
            for _, descendant in pairs(rayfieldGui:GetDescendants()) do
-               if descendant:IsA("Frame") and descendant.BackgroundColor3 ~= Color3.fromRGB(0,0,0) then
-                   descendant.BackgroundColor3 = Value
+               if descendant:IsA("TextLabel") or descendant:IsA("TextButton") then
+                   descendant.TextSize = Value
                end
            end
        end
