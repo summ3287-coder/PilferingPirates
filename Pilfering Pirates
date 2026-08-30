@@ -12,6 +12,8 @@ local Window = Rayfield:CreateWindow({
 })
 
 local MainTab = Window:CreateTab("หลัก", 4483362458)
+local CharTab = Window:CreateTab("ตัวละคร", 4483362458)
+local FunTab = Window:CreateTab("ฟีเจอร์เสริม (Fun)", 4483362458)
 local EspTab = Window:CreateTab("มองทะลุ (ESP)", 4483362458)
 local TeleportTab = Window:CreateTab("วาร์ป", 4483362458)
 
@@ -19,11 +21,16 @@ local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
+local StarterGui = game:GetService("StarterGui")
 
--- ตัวแปรตั้งค่า
+-- ตัวแปรตั้งค่าฟีเจอร์หลัก
 local FastAttackEnabled = false
 local LockTargetEnabled = false
 local selectedLockPlayer = ""
+
+-- ตัวแปรตั้งค่าฟีเจอร์เสริม
+local NoclipEnabled = false
+local RainbowEnabled = false
 
 -- ตัวแปรตั้งค่า ESP
 local EspEnabled = false
@@ -125,7 +132,163 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- ----------------------------------------
--- 2. ระบบ ESP (มองทะลุ)
+-- 2. ฟังก์ชันแท็บตัวละคร: ขยายร่าง
+-- ----------------------------------------
+CharTab:CreateButton({
+   Name = "ขยายร่างใหญ่ยักษ์ (Giant Size)",
+   Callback = function()
+       pcall(function()
+           local char = LocalPlayer.Character
+           if char and char:FindFirstChild("Humanoid") then
+               local humanoid = char.Humanoid
+               if char:FindFirstChild("HumanoidDescription") then
+                   local desc = humanoid:GetAppliedDescription()
+                   desc.HeightScale = 2.5
+                   desc.WidthScale = 2.0
+                   desc.HeadScale = 2.0
+                   humanoid:ApplyDescriptionReset(desc)
+               else
+                   for _, part in pairs(char:GetChildren()) do
+                       if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                           part.Size = part.Size * 2
+                       end
+                   end
+               end
+               Rayfield:Notify({
+                  Title = "ขยายร่างสำเร็จ",
+                  Content = "แปลงร่างเป็นยักษ์เรียบร้อย!",
+                  Duration = 3,
+               })
+           end
+       end)
+   end,
+})
+
+CharTab:CreateButton({
+   Name = "รีเซ็ตขนาดตัวปกติ",
+   Callback = function()
+       pcall(function()
+           local char = LocalPlayer.Character
+           if char and char:FindFirstChild("Humanoid") then
+               local humanoid = char.Humanoid
+               if char:FindFirstChild("HumanoidDescription") then
+                   local desc = humanoid:GetAppliedDescription()
+                   desc.HeightScale = 1
+                   desc.WidthScale = 1
+                   desc.HeadScale = 1
+                   humanoid:ApplyDescriptionReset(desc)
+               end
+               Rayfield:Notify({
+                  Title = "รีเซ็ตขนาด",
+                  Content = "กลับสู่ร่างปกติแล้ว",
+                  Duration = 3,
+               })
+           end
+       end)
+   end,
+})
+
+-- ----------------------------------------
+-- 3. ฟังก์ชันแท็บเสริม (Fun): Noclip, ซูมกล้อง, แชทกวน, ตัวละครเรืองแสงสีรุ้ง
+-- ----------------------------------------
+FunTab:CreateToggle({
+   Name = "เดินทะลุกำแพง (Noclip)",
+   CurrentValue = false,
+   Flag = "NoclipToggle",
+   Callback = function(Value)
+       NoclipEnabled = Value
+       Rayfield:Notify({
+          Title = "Noclip",
+          Content = Value and "เปิดเดินทะลุกำแพงแล้ว!" or "ปิดเดินทะลุกำแพงแล้ว",
+          Duration = 2,
+       })
+   end,
+})
+
+RunService.Stepped:Connect(function()
+   if NoclipEnabled then
+       local char = LocalPlayer.Character
+       if char then
+           for _, part in pairs(char:GetDescendants()) do
+               if part:IsA("BasePart") then
+                   part.CanCollide = false
+               end
+           end
+       end
+   end
+end)
+
+FunTab:CreateToggle({
+   Name = "เปิดกล้องซูมไกลพิเศษ (Infinite Zoom / FOV)",
+   CurrentValue = false,
+   Flag = "ZoomToggle",
+   Callback = function(Value)
+       if Value then
+           LocalPlayer.CameraMaxZoomDistance = 9999
+           LocalPlayer.CameraMinZoomDistance = 0.5
+           Rayfield:Notify({
+              Title = "ซูมไกลพิเศษ",
+              Content = "เปิดใช้งานระยะซูมอิสระแล้ว!",
+              Duration = 2,
+           })
+       else
+           LocalPlayer.CameraMaxZoomDistance = 400
+       end
+   end,
+})
+
+FunTab:CreateButton({
+   Name = "ส่งข้อความป่วนแชท (Spam Fun Chat)",
+   Callback = function()
+       pcall(function()
+           local chatService = game:GetService("TextChatService")
+           if chatService.ChatVersion == Enum.ChatVersion.TextChatService then
+               local channel = chatService.TextChannels.RBXGeneral
+               if channel then
+                   channel:SendAsync("🏴‍☠️ Pilfering Pirates Hub ครองเซิร์ฟนี้แล้ว! 🏴‍☠️")
+               end
+           else
+               game:GetService("ReplicatedStorage"):FindFirstChild("DefaultChatSystemChatEvents"):FindFirstChild("SayMessageRequest"):FireServer("🏴‍☠️ Pilfering Pirates Hub ครองเซิร์ฟนี้แล้ว! 🏴‍☠️", "All")
+           end
+       end)
+       Rayfield:Notify({
+          Title = "ส่งข้อความแล้ว",
+          Content = "ส่งข้อความป่วนลงแชทเรียบร้อย!",
+          Duration = 2,
+       })
+   end,
+})
+
+FunTab:CreateToggle({
+   Name = "ตัวละครเรืองแสงวิบวับสีรุ้ง (Rainbow Color)",
+   CurrentValue = false,
+   Flag = "RainbowToggle",
+   Callback = function(Value)
+       RainbowEnabled = Value
+   end,
+})
+
+task.spawn(function()
+   while true do
+       if RainbowEnabled then
+           pcall(function()
+               local char = LocalPlayer.Character
+               if char then
+                   local tickColor = Color3.fromHSV(tick() % 5 / 5, 1, 1)
+                   for _, part in pairs(char:GetChildren()) do
+                       if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                           part.Color = tickColor
+                       end
+                   end
+               end
+           end)
+       end
+       task.wait(0.2)
+   end
+end)
+
+-- ----------------------------------------
+-- 4. ระบบ ESP (มองทะลุ)
 -- ----------------------------------------
 EspTab:CreateToggle({
    Name = "เปิด/ปิด ESP ทั้งหมด",
@@ -233,7 +396,7 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- ----------------------------------------
--- 3. ระบบวาร์ปไปหาผู้เล่น
+-- 5. ระบบวาร์ปไปหาผู้เล่น
 -- ----------------------------------------
 local selectedPlayerName = ""
 local playerList = {}
@@ -310,6 +473,6 @@ TeleportTab:CreateButton({
 
 Rayfield:Notify({
    Title = "Pilfering Pirates Hub",
-   Content = "รันสคริปต์สำเร็จแล้ว!",
+   Content = "อัปเดตฟีเจอร์ใหม่ครบถ้วนเรียบร้อย!",
    Duration = 5,
 })
