@@ -13,7 +13,6 @@ local Window = Rayfield:CreateWindow({
    KeySystem = false,
 })
 
--- สร้างแท็บหลักตามหมวดหมู่
 local MainTab = Window:CreateTab("หน้าแรก / ฟังก์ชันหลัก", 4483362458)
 local FunTab = Window:CreateTab("ฟังก์ชันปั่น & ลดแลก", 4483362458)
 local VisualTab = Window:CreateTab("ESP & การมองเห็น", 4483362458)
@@ -24,9 +23,7 @@ local LocalPlayer = game.Players.LocalPlayer
 local Workspace = game:GetService("Workspace")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local Camera = Workspace.CurrentCamera
 
--- แจ้งเตือนเปิดใช้งาน
 Rayfield:Notify({
    Title = "ยินดีต้อนรับสู่ Gemini Hub",
    Content = "ระบบพร้อมลุยในโหมด John Wick",
@@ -34,9 +31,6 @@ Rayfield:Notify({
    Image = 4483362458,
 })
 
---------------------------------------------------
--- 1. ฟังก์ชันแท็บหลัก: Fast Attack & Target Locking & Chat Spammer
---------------------------------------------------
 MainTab:CreateButton({
    Name = "เปิดระบบ Fast Attack",
    Callback = function()
@@ -61,9 +55,6 @@ MainTab:CreateButton({
    end,
 })
 
---------------------------------------------------
--- 2. ฟังก์ชันแท็บปั่น & ลดแลก
---------------------------------------------------
 FunTab:CreateToggle({
    Name = "โหมดทะลุกำแพง (Noclip)",
    CurrentValue = false,
@@ -133,11 +124,7 @@ FunTab:CreateButton({
    end,
 })
 
---------------------------------------------------
--- 3. ฟังก์ชันแท็บ ESP & การมองเห็น
---------------------------------------------------
 _G.ESPBoxEnabled = false
-_G.ESPTracerEnabled = false
 _G.ESPColor = Color3.fromRGB(255, 0, 0)
 
 VisualTab:CreateToggle({
@@ -149,17 +136,8 @@ VisualTab:CreateToggle({
    end,
 })
 
-VisualTab:CreateToggle({
-   Name = "เปิดใช้งาน ESP เส้นโยงหาเป้าหมาย (Tracer)",
-   CurrentValue = false,
-   Flag = "ESPTracerToggle",
-   Callback = function(Value)
-       _G.ESPTracerEnabled = Value
-   end,
-})
-
 VisualTab:CreateColorPicker({
-   Name = "เลือกสีเส้นและกรอบ ESP",
+   Name = "เลือกสีกรอบ ESP",
    Color = Color3.fromRGB(255, 0, 0),
    Flag = "ESPColorPicker",
    Callback = function(Value)
@@ -167,13 +145,10 @@ VisualTab:CreateColorPicker({
    end,
 })
 
-local tracers = {}
-
 RunService.RenderStepped:Connect(function()
    for _, player in pairs(game.Players:GetPlayers()) do
        if player ~= LocalPlayer and player.Character then
            local char = player.Character
-           local rootPart = char:FindFirstChild("HumanoidRootPart")
            local highlight = char:FindFirstChild("GeminiESPBox")
            
            if _G.ESPBoxEnabled then
@@ -192,37 +167,10 @@ RunService.RenderStepped:Connect(function()
                    highlight:Destroy()
                end
            end
-
-           if _G.ESPTracerEnabled and rootPart then
-               if not tracers[player] then
-                   local line = Drawing.new("Line")
-                   line.Thickness = 1.5
-                   line.Visible = false
-                   tracers[player] = line
-               end
-               
-               local vector, onScreen = Camera:WorldToViewportPoint(rootPart.Position)
-               local line = tracers[player]
-               if onScreen then
-                   line.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
-                   line.To = Vector2.new(vector.X, vector.Y)
-                   line.Color = _G.ESPColor
-                   line.Visible = true
-               else
-                   line.Visible = false
-               end
-           else
-               if tracers[player] then
-                   tracers[player].Visible = false
-               end
-           end
        end
    end
 end)
 
---------------------------------------------------
--- 4. แท็บเทเลพอร์ต: ระบบคลิกวาร์ปอิสระ (Click to Teleport)
---------------------------------------------------
 TeleportTab:CreateSection("ระบบวาร์ปอัจฉริยะ")
 
 _G.ClickTeleportEnabled = false
@@ -248,9 +196,6 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
    end
 end)
 
---------------------------------------------------
--- 5. แท็บปรับแต่ง UI & ตั้งค่า (สไลเดอร์ปรับขนาดฟอนต์)
---------------------------------------------------
 UITab:CreateSection("ระบบปรับแต่งขนาดตัวอักษร UI")
 
 UITab:CreateSlider({
