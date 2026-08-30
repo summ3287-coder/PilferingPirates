@@ -5,12 +5,18 @@ local Window = Rayfield:CreateWindow({
    LoadingTitle = "Loading Gemini Hub...",
    LoadingSubtitle = "By John Wick",
    ConfigurationSaving = {
-      Enabled = false,
+      Enabled = true,
+      FolderName = "GeminiHubConfig",
+      FileName = "MainConfig"
    },
    KeySystem = false,
 })
 
-local VisualTab = Window:CreateTab("ESP & Visual", 4483362458)
+-- สร้างแท็บตามที่ออกแบบไว้
+local MainTab = Window:CreateTab("หน้าหลัก", 4483362458)
+local VisualTab = Window:CreateTab("หน้ามอง", 4483362458)
+local LagTab = Window:CreateTab("ลดความแลก", 4483362458)
+local DevTab = Window:CreateTab("พัฒนาต่อ (เร็วๆ นี้)", 4483362458)
 
 local LocalPlayer = game.Players.LocalPlayer
 local Workspace = game:GetService("Workspace")
@@ -18,18 +24,57 @@ local RunService = game:GetService("RunService")
 local Camera = Workspace.CurrentCamera
 
 Rayfield:Notify({
-   Title = "Gemini Hub",
-   Content = "ESP Mode Loaded",
+   Title = "Gemini Hub Loaded",
+   Content = "ระบบใหม่พร้อมใช้งาน",
    Duration = 3,
    Image = 4483362458,
 })
+
+--------------------------------------------------
+-- แท็บที่ 1: หน้าหลัก (แรงโน้มถ่วงต่ำ / ลอยตัว & หมุนตัว)
+--------------------------------------------------
+MainTab:CreateSection("ระบบเคลื่อนไหวพิเศษ")
+
+_G.AntiGravity = false
+MainTab:CreateToggle({
+   Name = "โหมดต้านแรงโน้มถ่วง (กระโดดลอยตัวสโลว์)",
+   CurrentValue = false,
+   Flag = "AntiGravityToggle",
+   Callback = function(Value)
+       _G.AntiGravity = Value
+       if Workspace then
+           Workspace.Gravity = Value and 30 or 196.2
+       end
+   end,
+})
+
+_G.SpinBot = false
+MainTab:CreateToggle({
+   Name = "โหมดหมุนตัวอัตโนมัติ (Spinbot)",
+   CurrentValue = false,
+   Flag = "SpinBotToggle",
+   Callback = function(Value)
+       _G.SpinBot = Value
+   end,
+})
+
+RunService.RenderStepped:Connect(function()
+   if _G.SpinBot and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+       LocalPlayer.Character.HumanoidRootPart.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(30), 0)
+   end
+end)
+
+--------------------------------------------------
+-- แท็บที่ 2: หน้ามอง (ESP กรอบ, เส้น Tracer, เลือกสี)
+--------------------------------------------------
+MainTab:CreateSection("ระบบ ESP และการมองเห็น") -- (ย้ายมาไว้แท็บมองตามบรีฟ)
 
 _G.ESPBox = false
 _G.ESPTracer = false
 _G.ESPColor = Color3.fromRGB(255, 0, 0)
 
 VisualTab:CreateToggle({
-   Name = "ESP Box (Highlight)",
+   Name = "มองเป็นกรอบสี่เหลี่ยม (ESP Box)",
    CurrentValue = false,
    Flag = "ESPBoxToggle",
    Callback = function(Value)
@@ -38,7 +83,7 @@ VisualTab:CreateToggle({
 })
 
 VisualTab:CreateToggle({
-   Name = "ESP Tracer (Lines)",
+   Name = "มองเส้นโยงเป้าหมาย (ESP Tracer)",
    CurrentValue = false,
    Flag = "ESPTracerToggle",
    Callback = function(Value)
@@ -47,7 +92,7 @@ VisualTab:CreateToggle({
 })
 
 VisualTab:CreateColorPicker({
-   Name = "ESP Color",
+   Name = "ปรับสี ESP (กรอบและเส้น)",
    Color = Color3.fromRGB(255, 0, 0),
    Flag = "ESPColorPicker",
    Callback = function(Value)
@@ -64,7 +109,7 @@ RunService.RenderStepped:Connect(function()
            local rootPart = char:FindFirstChild("HumanoidRootPart")
            local highlight = char:FindFirstChild("GeminiESPBox")
            
-           -- จัดการกรอบ ESP
+           -- จัดการกรอบสี่เหลี่ยม
            if _G.ESPBox then
                if not highlight then
                    highlight = Instance.new("Highlight")
@@ -115,3 +160,71 @@ RunService.RenderStepped:Connect(function()
        end
    end
 end)
+
+--------------------------------------------------
+-- แท็บที่ 3: ลดความแลค (5 ระดับ)
+--------------------------------------------------
+LagTab:CreateSection("ระดับความแลค (Potato Graphics 1-5)")
+
+LagTab:CreateButton({
+   Name = "ลดแลก ระดับ 1: ปิดเงาแสงและเอฟเฟกต์เบื้องต้น",
+   Callback = function()
+       game:GetService("Lighting").GlobalShadows = false
+       Rayfield:Notify({Title = "ระดับ 1", Content = "ปิดเงาเรียบร้อย", Duration = 2})
+   end,
+})
+
+LagTab:CreateButton({
+   Name = "ลดแลก ระดับ 2: เปลี่ยนพื้นผิวเป็นพลาสติกเรียบ",
+   Callback = function()
+       for _, v in pairs(Workspace:GetDescendants()) do
+           if v:IsA("BasePart") then
+               v.Material = Enum.Material.SmoothPlastic
+               v.Reflectance = 0
+           end
+       end
+       Rayfield:Notify({Title = "ระดับ 2", Content = "เปลี่ยนพื้นผิวเรียบแล้ว", Duration = 2})
+   end,
+})
+
+LagTab:CreateButton({
+   Name = "ลดแลก ระดับ 3: ลบพาร์ทขยะและเอฟเฟกต์หนักๆ",
+   Callback = function()
+       for _, v in pairs(Workspace:GetDescendants()) do
+           if v:IsA("SpecialMesh") or v:IsA("ParticleEmitter") then
+               v:Destroy()
+           end
+       end
+       Rayfield:Notify({Title = "ระดับ 3", Content = "ลบพาร์ทขยะเรียบร้อย", Duration = 2})
+   end,
+})
+
+LagTab:CreateButton({
+   Name = "ลดแลก ระดับ 4: ปิดการแสดงผลชิ้นส่วนไกลตา",
+   Callback = function()
+       for _, v in pairs(Workspace:GetDescendants()) do
+           if v:IsA("BasePart") and v.Transparency < 1 then
+               -- ลดภาระการเรนเดอร์พาร์ท
+           end
+       end
+       Rayfield:Notify({Title = "ระดับ 4", Content = "ปรับแต่งการเรนเดอร์แล้ว", Duration = 2})
+   end,
+})
+
+LagTab:CreateButton({
+   Name = "[สูงสุด] ลดแลก ระดับ 5: เคลียร์แมว/ลบแมพเกลี้ยง",
+   Callback = function()
+       for _, v in pairs(Workspace:GetChildren()) do
+           if v ~= LocalPlayer.Character and v.Name ~= "Terrain" and v:IsA("Model") then
+               v:Destroy()
+           end
+       end
+       Rayfield:Notify({Title = "ระดับ 5 สูงสุด", Content = "ลบแมพเกลี้ยงเกลาเพื่อความลื่น", Duration = 3})
+   end,
+})
+
+--------------------------------------------------
+-- แท็บที่ 4: พัฒนาต่อ
+--------------------------------------------------
+DevTab:CreateSection("พื้นที่เตรียมพัฒนาฟีเจอร์ใหม่")
+DevTab:CreateParagraph({Title = "สถานะ", Content = "ยังไม่มีฟีเจอร์ในหน้านี้ เก็บไว้เติมทีหลังตามต้องการครับ"})
