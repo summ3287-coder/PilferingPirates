@@ -1,0 +1,332 @@
+-- โหลด Rayfield UI Library
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+-- สร้าง UI Main Window
+local Window = Rayfield:CreateWindow({
+   Name = "Pilfering Pirates Hub",
+   LoadingTitle = "กำลังอัปเดตสคริปต์...",
+   LoadingSubtitle = "Delta Supported",
+   ConfigurationSaving = { Enabled = false },
+   Discord = { Enabled = false },
+   KeySystem = false
+})
+
+local MainTab = Window:CreateTab("หลัก", 4483362458)
+local EspTab = Window:CreateTab("มองทะลุ (ESP)", 4483362458)
+local TeleportTab = Window:CreateTab("วาร์ป", 4483362458)
+
+local InfiniteShootEnabled = false
+local JesusWalkEnabled = false
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- ตัวแปรตั้งค่า ESP และสี
+local EspEnabled = false
+local EspBoxEnabled = false
+local EspLineEnabled = false
+local EspColor = Color3.fromRGB(255, 0, 0)
+local EspDrawings = {}
+
+-- ----------------------------------------
+-- 1. ฟังก์ชันยิงรัว / ลดคูลดาวน์ (แก้ใหม่ให้ครอบคลุมขึ้น)
+-- ----------------------------------------
+MainTab:CreateToggle({
+   Name = "ยิงไม่จำกัด / ยิงรัว (Fast Fire)",
+   CurrentValue = false,
+   Flag = "InfShoot",
+   Callback = function(Value)
+       InfiniteShootEnabled = Value
+       if Value then
+           task.spawn(function()
+               while InfiniteShootEnabled do
+                   local char = LocalPlayer.Character
+                   if char then
+                       local tool = char:FindFirstChildOfClass("Tool")
+                       if tool then
+                           for _, v in pairs(tool:GetDescendants()) do
+                               if v:IsA("NumberValue") or v:IsA("IntValue") then
+                                   local name = v.Name:lower()
+                                   if name:find("cooldown") or name:find("delay") or name:find("reload") or name:find("fire") or name:find("rate") then
+                                       v.Value = 0
+                                   end
+                               end
+                           end
+                           
+                           pcall(function()
+                               tool:Activate()
+                           end)
+                       end
+                   end
+                   task.wait(0.05)
+               end
+           end)
+       end
+   end,
+})
+
+-- ----------------------------------------
+-- 2. ฟังก์ชันเดินบนน้ำ (แก้ใหม่: ใช้การล็อกความสูง Y แทนการสร้างพาร์ทดันตัว)
+-- ----------------------------------------
+MainTab:CreateToggle({
+   Name = "เดินบนน้ำ (Walk on Water)",
+   CurrentValue = false,
+   Flag = "JesusFly",
+   Callback = function(Value)
+       JesusWalkEnabled = Value
+       
+       if JesusWalkEnabled then
+           task.spawn(function()
+               while JesusWalkEnabled do
+                   local char = LocalPlayer.Character
+                   if char and char:FindFirstChild("HumanoidRootPart") then
+                       local hrp = char.HumanoidRootPart
+                       -- ยิง Raycast ลงไปข้างล่างเพื่อหาพื้นผิวน้ำหรือพื้นผิวต่ำสุด
+                       local raycastParams = RaycastParams.new()
+                       raycastParams.FilterDescendantsInstances = {char}
+                       raycastParams.FilterType = Enum.RaycastFilterType.Exclude
+                       
+                       local raycastResult = workspace:Raycast(hrp.Position, Vector3.new(0, -10, 0), raycastParams)
+                       if raycastResult and (raycastResult.Material == Enum.Material.Water or raycastResult.Instance.Name:lower():find("water")) then
+                           -- ล็อกตำแหน่งให้อยู่บนผิวน้ำพอดี ไม่จมและไม่ลอย
+                           hrp.CFrame = CFrame.new(hrp.Position.X, raycastResult.Position.Y + 3, hrp.Position.Z)
+                           hrp.AssemblyLinearVelocity = Vector3.new(hrp.AssemblyLinearVelocity.X, 0, hrp.AssemblyLinearVelocity.Z)
+                       end
+                   end
+                   task.wait(0.03)
+               end
+           end)
+       end
+   end,
+})
+
+-- ----------------------------------------
+-- 3. ระบบ ESP (มองทะลุ)
+-- ----------------------------------------
+EspTab:CreateToggle({
+   Name = "เปิด/ปิด ESP ทั้งหมด",
+   CurrentValue = false,
+   Flag = "EspToggle",
+   Callback = function(Value)
+       EspEnabled = Value
+       if not Value then
+           for _, data in pairs(EspDrawings) do
+               if data.Box then data.Box:Remove() end
+               if data.Line then data.Line:Remove() end
+           end
+           EspDrawings = {}
+       end
+   end,
+})
+
+EspTab:CreateToggle({
+   Name = "แสดงกรอบสี่เหลี่ยม (Box)",
+   CurrentValue = false,
+   Flag = "EspBox",
+   Callback = function(Value)
+       EspBoxEnabled = Value
+   end,
+})
+
+EspTab:CreateToggle({
+   Name = "แสดงเส้นโยง (Tracer Line)",
+   CurrentValue = false,
+   Flag = "EspLine",
+   Callback = function(Value)
+       EspLineEnabled = Value
+   end,
+})
+
+EspTab:CreateColorPicker({
+   Name = "สีของ ESP",
+   Color = Color3.fromRGB(255, 0, 0),
+   Flag = "EspColorPicker",
+   Callback = function(Value)
+       EspColor = Value
+   end,
+})
+
+RunService.RenderStepped:Connect(function()
+   if not EspEnabled then return end
+   local camera = workspace.CurrentCamera
+   
+   for _, player in pairs(Players:GetPlayers()) do
+       if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") then
+           local hrp = player.Character.HumanoidRootPart
+           local humanoid = player.Character.Humanoid
+           
+           if not EspDrawings[player] then
+               EspDrawings[player] = {
+                   Box = Drawing.new("Square"),
+                   Line = Drawing.new("Line")
+               }
+               EspDrawings[player].Box.Visible = false
+               EspDrawings[player].Box.Filled = false
+               EspDrawings[player].Box.Thickness = 1.5
+               
+               EspDrawings[player].Line.Visible = false
+               EspDrawings[player].Line.Thickness = 1.5
+           end
+           
+           local box = EspDrawings[player].Box
+           local line = EspDrawings[player].Line
+           
+           if humanoid.Health > 0 then
+               local vector, onScreen = camera:WorldToViewportPoint(hrp.Position)
+               
+               if onScreen then
+                   if EspBoxEnabled then
+                       local sizeX, sizeY = 2500 / vector.Z, 3500 / vector.Z
+                       box.Size = Vector2.new(sizeX, sizeY)
+                       box.Position = Vector2.new(vector.X - sizeX / 2, vector.Y - sizeY / 2)
+                       box.Color = EspColor
+                       box.Visible = true
+                   else
+                       box.Visible = false
+                   end
+                   
+                   if EspLineEnabled then
+                       line.From = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y)
+                       line.To = Vector2.new(vector.X, vector.Y)
+                       line.Color = EspColor
+                       line.Visible = true
+                   else
+                       line.Visible = false
+                   end
+               else
+                   box.Visible = false
+                   line.Visible = false
+               end
+           else
+               box.Visible = false
+               line.Visible = false
+           end
+       elseif EspDrawings[player] then
+           if EspDrawings[player].Box then EspDrawings[player].Box:Remove() end
+           if EspDrawings[player].Line then EspDrawings[player].Line:Remove() end
+           EspDrawings[player] = nil
+       end
+   end
+end)
+
+-- ----------------------------------------
+-- 4. ระบบวาร์ปไปหาผู้เล่น (แก้ไขบั๊กกดเลือกชื่อแล้วค้าง/อ่านค่าไม่ได้)
+-- ----------------------------------------
+local selectedPlayerName = ""
+local playerList = {}
+for _, p in pairs(Players:GetPlayers()) do
+   if p ~= LocalPlayer then
+       table.insert(playerList, p.Name)
+   end
+end
+
+local PlayerDropdown = TeleportTab:CreateDropdown({
+   Name = "เลือกชื่อผู้เล่น",
+   Options = playerList,
+   CurrentOption = "",
+   Flag = "TpPlayer",
+   Callback = function(Option)
+       -- รองรับทั้งส่งมาเป็น String หรือ Table
+       if type(Option) == "table" then
+           selectedPlayerName = Option[1] or ""
+       else
+           selectedPlayerName = tostring(Option)
+       end
+   end,
+})
+
+Players.PlayerAdded:Connect(function(p)
+   if p ~= LocalPlayer then
+       table.insert(playerList, p.Name)
+       PlayerDropdown:Refresh(playerList)
+   end
+end)
+
+Players.PlayerRemoving:Connect(function(p)
+   for i, v in ipairs(playerList) do
+       if v == p.Name then
+           table.remove(playerList, i)
+           break
+       end
+   end
+   PlayerDropdown:Refresh(playerList)
+end)
+
+TeleportTab:CreateButton({
+   Name = "วาร์ปไปหาทันที!",
+   Callback = function()
+       if selectedPlayerName == "" then
+           Rayfield:Notify({
+              Title = "แจ้งเตือน",
+              Content = "กรุณากดเลือกชื่อผู้เล่นใน Dropdown ก่อน!",
+              Duration = 3,
+           })
+           return
+       end
+       
+       local targetPlayer = Players:FindFirstChild(selectedPlayerName)
+       if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+           local targetHrp = targetPlayer.Character.HumanoidRootPart
+           local myChar = LocalPlayer.Character
+           if myChar and myChar:FindFirstChild("HumanoidRootPart") then
+               myChar.HumanoidRootPart.CFrame = targetHrp.CFrame + Vector3.new(0, 3, 0)
+               Rayfield:Notify({
+                  Title = "วาร์ปสำเร็จ",
+                  Content = "วาร์ปไปหา " .. targetPlayer.Name .. " เรียบร้อย!",
+                  Duration = 3,
+               })
+           end
+       else
+           Rayfield:Notify({
+              Title = "Error",
+              Content = "ไม่พบตัวละครของผู้เล่นคนนี้ (อาจจะตายหรือออกเกมแล้ว)",
+              Duration = 3,
+           })
+       end
+   end,
+})
+
+-- ----------------------------------------
+-- 5. ปุ่มวงกลมลอยหน้าจอ + ระบบเสียงเปิด-ปิดเมนู
+-- ----------------------------------------
+local ScreenGui = Instance.new("ScreenGui")
+local ToggleButton = Instance.new("TextButton")
+local UICorner = Instance.new("UICorner")
+
+local ClickSound = Instance.new("Sound")
+ClickSound.SoundId = "rbxassetid://4590657391"
+ClickSound.Volume = 1
+ClickSound.Parent = game:GetService("SoundService")
+
+ScreenGui.Name = "DeltaToggleButtonGui"
+ScreenGui.Parent = game:GetService("CoreGui")
+
+ToggleButton.Name = "ToggleButton"
+ToggleButton.Parent = ScreenGui
+ToggleButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+ToggleButton.Position = UDim2.new(0.02, 0, 0.2, 0)
+ToggleButton.Size = UDim2.new(0, 50, 0, 50)
+ToggleButton.Font = Enum.Font.SourceSansBold
+ToggleButton.Text = "MENU"
+ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleButton.TextSize = 14.00
+ToggleButton.Active = true
+ToggleButton.Draggable = true
+
+UICorner.CornerRadius = UDim.new(1, 0)
+UICorner.Parent = ToggleButton
+
+ToggleButton.MouseButton1Click:Connect(function()
+    ClickSound:Play()
+    for _, gui in pairs(game:GetService("CoreGui"):GetChildren()) do
+        if gui.Name:match("Rayfield") then
+            gui.Enabled = not gui.Enabled
+        end
+    end
+end)
+
+Rayfield:Notify({
+   Title = "อัปเดตแก้บั๊กเรียบร้อย",
+   Content = "แก้ปัญหาเดินบนน้ำลอยฟ้า, ระบบยิง และระบบวาร์ปแล้ว!",
+   Duration = 5,
+})
