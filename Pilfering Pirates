@@ -13,92 +13,62 @@ local Window = Rayfield:CreateWindow({
    KeySystem = false,
 })
 
--- สร้างแท็บหลัก
-local MainTab = Window:CreateTab("🏠 หน้าแรก / ฟังก์ชันหลัก", 4483362458)
-local FunTab = Window:CreateTab("⚡ ฟังก์ชันปั่น & ลดแลก", 4483362458)
-local VisualTab = Window:CreateTab("👁️ ESP & การมองเห็น", 4483362458)
-local TeleportTab = Window:CreateTab("🚀 เทเลพอร์ต", 4483362458)
+-- สร้างแท็บหลักตามหมวดหมู่
+local MainTab = Window:CreateTab("หน้าแรก / ฟังก์ชันหลัก", 4483362458)
+local FunTab = Window:CreateTab("ฟังก์ชันปั่น & ลดแลก", 4483362458)
+local VisualTab = Window:CreateTab("ESP & การมองเห็น", 4483362458)
+local TeleportTab = Window:CreateTab("เทเลพอร์ต", 4483362458)
+local UITab = Window:CreateTab("ปรับแต่ง UI & ตั้งค่า", 4483362458)
 
 local LocalPlayer = game.Players.LocalPlayer
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
 
 -- แจ้งเตือนเปิดใช้งาน
 Rayfield:Notify({
    Title = "ยินดีต้อนรับสู่ Gemini Hub",
-   Content = "ระบบพร้อมลุยในโหมด John Wick!",
+   Content = "ระบบพร้อมลุยในโหมด John Wick",
    Duration = 4,
    Image = 4483362458,
 })
 
 --------------------------------------------------
--- 1. ฟังก์ชันเดิม: Fast Attack & Target Locking
+-- 1. ฟังก์ชันแท็บหลัก: Fast Attack & Target Locking & Chat Spammer
 --------------------------------------------------
 MainTab:CreateButton({
-   Name = "⚔️ เปิดระบบ Fast Attack",
+   Name = "เปิดระบบ Fast Attack",
    Callback = function()
        Rayfield:Notify({Title = "Fast Attack", Content = "เปิดการโจมตีเร็วเรียบร้อย", Duration = 2})
    end,
 })
 
 MainTab:CreateToggle({
-   Name = "🎯 ล็อกเป้าหมาย (Target Locking)",
+   Name = "ล็อกเป้าหมาย (Target Locking)",
    CurrentValue = false,
    Flag = "TargetLockToggle",
    Callback = function(Value)
-       -- โค้ด Target Locking เดิม
+       -- โค้ด Target Locking
+   end,
+})
+
+MainTab:CreateButton({
+   Name = "เปิดแชทสแปม (Chat Spammer)",
+   Callback = function()
+       local args = {[1] = "Gemini Hub On Top!", [2] = "All"}
+       game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(unpack(args))
    end,
 })
 
 --------------------------------------------------
--- 2. ฟังก์ชันเดิม: Giant Size & Rainbow Color ตัวละคร
+-- 2. ฟังก์ชันแท็บปั่น & ลดแลก (เรียงเลเวลดินน้ำมันถึงลบแมพ)
 --------------------------------------------------
 FunTab:CreateToggle({
-   Name = "🗿 โหมดตัวใหญ่ยักษ์ (Giant Size)",
-   CurrentValue = false,
-   Flag = "GiantToggle",
-   Callback = function(Value)
-       local char = LocalPlayer.Character
-       if char and char:FindFirstChild("Humanoid") then
-           for _, v in pairs(char:GetDescendants()) do
-               if v:IsA("BasePart") then
-                   v.Size = Value and v.Size * 2 or v.Size / 2
-               end
-           end
-       end
-   end,
-})
-
-FunTab:CreateToggle({
-   Name = "🌈 ตัวสีรุ้งวิบวับ (Rainbow Color)",
-   CurrentValue = false,
-   Flag = "RainbowToggle",
-   Callback = function(Value)
-       _G.RainbowEnabled = Value
-       task.spawn(function()
-           while _G.RainbowEnabled do
-               local char = LocalPlayer.Character
-               if char then
-                   for _, v in pairs(char:GetDescendants()) do
-                       if v:IsA("BasePart") then
-                           v.Color = Color3.fromHSV(tick() % 5 / 5, 1, 1)
-                       end
-                   end
-               end
-               task.wait(0.1)
-           end
-       end)
-   end,
-})
-
---------------------------------------------------
--- 3. ฟังก์ชันเดิม: Noclip & Infinite Camera Zoom & ล่องหน
---------------------------------------------------
-FunTab:CreateToggle({
-   Name = "👻 โหมดทะลุกำแพง (Noclip)",
+   Name = "โหมดทะลุกำแพง (Noclip)",
    CurrentValue = false,
    Flag = "NoclipToggle",
    Callback = function(Value)
        _G.Noclip = Value
-       game:GetService("RunService").Stepped:Connect(function()
+       RunService.Stepped:Connect(function()
            if _G.Noclip and LocalPlayer.Character then
                for _, v in pairs(LocalPlayer.Character:GetDescendants()) do
                    if v:IsA("BasePart") then
@@ -111,7 +81,7 @@ FunTab:CreateToggle({
 })
 
 FunTab:CreateToggle({
-   Name = "🔍 ซูมกล้องไร้ขีดจำกัด (Infinite Zoom)",
+   Name = "ซูมกล้องไร้ขีดจำกัด (Infinite Zoom)",
    CurrentValue = true,
    Flag = "ZoomToggle",
    Callback = function(Value)
@@ -123,131 +93,149 @@ FunTab:CreateToggle({
    end,
 })
 
-local InvisibilityEnabled = false
-local storedParts = {}
-FunTab:CreateToggle({
-   Name = "🥷 โหมดล่องหนไร้ร่องรอย (Invisibility)",
-   CurrentValue = false,
-   Flag = "InvisibilityToggle",
-   Callback = function(Value)
-       InvisibilityEnabled = Value
-       local char = LocalPlayer.Character
-       if not char then return end
-       if InvisibilityEnabled then
-           for _, v in pairs(char:GetDescendants()) do
-               if v:IsA("BasePart") or v:IsA("Decal") then
-                   storedParts[v] = v.Transparency
-                   v.Transparency = 1
-               elseif v:IsA("Accessory") then
-                   local handle = v:FindFirstChild("Handle")
-                   if handle then
-                       storedParts[handle] = handle.Transparency
-                       handle.Transparency = 1
-                   end
-               end
-           end
-           Rayfield:Notify({Title = "🥷 ล่องหนสำเร็จ", Content = "หายตัวจากสายตาคนอื่นแล้ว", Duration = 2})
-       else
-           for v, originalTransparency in pairs(storedParts) do
-               if v and v.Parent then
-                   v.Transparency = originalTransparency
-               end
-           end
-           storedParts = {}
-           Rayfield:Notify({Title = "🥷 คืนร่างเดิม", Content = "แสดงตัวตนปกติเรียบร้อย", Duration = 2})
-       end
-   end,
-})
-
---------------------------------------------------
--- 4. ฟังก์ชันใหม่: โหมด "ลดแลก" (Potato Graphics & V5 ลบแมพ)
---------------------------------------------------
-FunTab:CreateSection("🥔 โหมดลดแลก (Potato Graphics)")
+FunTab:CreateSection("โหมดลดแลก (Potato Graphics เลเวล)")
 
 FunTab:CreateButton({
-   Name = "📉 ลดแลก V1: ปิดเงาและเอฟเฟกต์",
+   Name = "ลดแลก เวล 1: ปิดเงาและเอฟเฟกต์เบื้องต้น",
    Callback = function()
        game:GetService("Lighting").GlobalShadows = false
-       Rayfield:Notify({Title = "ลดแลก V1", Content = "ปิดเงาเรียบร้อย เครื่องเริ่มลื่นขึ้น", Duration = 2})
+       Rayfield:Notify({Title = "ลดแลก เวล 1", Content = "ปิดเงาเรียบร้อย", Duration = 2})
    end,
 })
 
 FunTab:CreateButton({
-   Name = "📉 ลดแลก V2: ปรับกราฟิกเป็นขั้นต่ำ",
+   Name = "ลดแลก เวล 2: เปลี่ยนทุกอย่างเป็นพลาสติกเรียบ (ดินน้ำมัน)",
    Callback = function()
-       settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
-       Rayfield:Notify({Title = "ลดแลก V2", Content = "ปรับกราฟิกต่ำสุดแล้ว", Duration = 2})
-   end,
-})
-
-FunTab:CreateButton({
-   Name = "📉 ลดแลก V3: ลบวัตถุรายละเอียดสูง",
-   Callback = function()
-       for _, v in pairs(workspace:GetDescendants()) do
-           if v:IsA("SpecialMesh") or v:IsA("ParticleEmitter") then
-               v:Destroy()
-           end
-       end
-       Rayfield:Notify({Title = "ลดแลก V3", Content = "กวาดล้างพาร์ทขยะเรียบร้อย", Duration = 2})
-   end,
-})
-
-FunTab:CreateButton({
-   Name = "📉 ลดแลก V4: เปลี่ยนทุกอย่างเป็นพลาสติกเรียบ",
-   Callback = function()
-       for _, v in pairs(workspace:GetDescendants()) do
+       for _, v in pairs(Workspace:GetDescendants()) do
            if v:IsA("BasePart") then
                v.Material = Enum.Material.SmoothPlastic
                v.Reflectance = 0
            end
        end
-       Rayfield:Notify({Title = "ลดแลก V4", Content = "แปลงโฉมเป็นกราฟิกกากขั้นสุด", Duration = 2})
+       Rayfield:Notify({Title = "ลดแลก เวล 2", Content = "ปรับพื้นผิวเป็นพลาสติกเรียบหมดแล้ว", Duration = 2})
    end,
 })
 
 FunTab:CreateButton({
-   Name = "🔥 [อันตราย] ลดแลก V5: ลบหมดทุกอย่าง ไม่ มี ทาง แก้ ได้ ฮ่าๆ",
+   Name = "ลดแลก เวล 3: ลบพาร์ทขยะและเอฟเฟกต์หนักๆ",
    Callback = function()
-       for _, v in pairs(workspace:GetChildren()) do
+       for _, v in pairs(Workspace:GetDescendants()) do
+           if v:IsA("SpecialMesh") or v:IsA("ParticleEmitter") then
+               v:Destroy()
+           end
+       end
+       Rayfield:Notify({Title = "ลดแลก เวล 3", Content = "กวาดล้างพาร์ทขยะเรียบร้อย", Duration = 2})
+   end,
+})
+
+FunTab:CreateButton({
+   Name = "[สูงสุด] ลดแลก เวล 4: ลบแมพเกลี้ยงเกลา (ลบทุกสิ่ง)",
+   Callback = function()
+       for _, v in pairs(Workspace:GetChildren()) do
            if v ~= LocalPlayer.Character and v.Name ~= "Terrain" and v:IsA("Model") then
                v:Destroy()
            end
        end
        Rayfield:Notify({
-          Title = "💀 ลดแลก V5 ทำงานแล้ว!",
-          Content = "ลบแมพเกลี้ยงเกลา ไม่มีทางแก้แล้วโว้ย ฮ่าๆ!",
+          Title = "ลดแลกเวลสูงสุดทำงานแล้ว",
+          Content = "ลบแมพเกลี้ยงเกลา ไม่มีทางแก้แล้ว",
           Duration = 4,
        })
    end,
 })
 
 --------------------------------------------------
--- 5. ฟังก์ชันเดิม: Chat Spammer & ESP & Teleport
+-- 3. ฟังก์ชันแท็บ ESP & การมองเห็น (กรอบสี่เหลี่ยม + เส้น Tracer)
 --------------------------------------------------
-MainTab:CreateButton({
-   Name = "💬 เปิดแชทสแปม (Chat Spammer)",
-   Callback = function()
-       local args = {[1] = "Gemini Hub On Top!", [2] = "All"}
-       game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(unpack(args))
+_G.ESPBoxEnabled = false
+_G.ESPTracerEnabled = false
+_G.ESPColor = Color3.fromRGB(255, 0, 0)
+
+VisualTab:CreateToggle({
+   Name = "เปิดใช้งาน ESP กรอบสี่เหลี่ยมมองทะลุกำแพง",
+   CurrentValue = false,
+   Flag = "ESPBoxToggle",
+   Callback = function(Value)
+       _G.ESPBoxEnabled = Value
    end,
 })
 
 VisualTab:CreateToggle({
-   Name = "👀 เปิดใช้งาน ESP มองทะลุกำแพง",
+   Name = "เปิดใช้งาน ESP เส้นโยงหาเป้าหมาย (Tracer)",
    CurrentValue = false,
-   Flag = "ESPToggle",
+   Flag = "ESPTracerToggle",
    Callback = function(Value)
-       Rayfield:Notify({Title = "ESP System", Content = "สลับสถานะ ESP เรียบร้อย", Duration = 2})
+       _G.ESPTracerEnabled = Value
    end,
 })
 
+VisualTab:CreateColorPicker({
+   Name = "เลือกสีเส้นและกรอบ ESP",
+   Color = Color3.fromRGB(255, 0, 0),
+   Flag = "ESPColorPicker",
+   Callback = function(Value)
+       _G.ESPColor = Value
+   end,
+})
+
+-- ระบบรันลูป ESP กรอบและเส้น
+RunService.RenderStepped:Connect(function()
+   for _, player in pairs(game.Players:GetPlayers()) do
+       if player ~= LocalPlayer and player.Character then
+           local char = player.Character
+           local highlight = char:FindFirstChild("GeminiESPBox")
+           
+           if _G.ESPBoxEnabled then
+               if not highlight then
+                   highlight = Instance.new("Highlight")
+                   highlight.Name = "GeminiESPBox"
+                   highlight.Adornee = char
+                   highlight.Parent = char
+                   highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+               end
+               highlight.FillTransparency = 1
+               highlight.OutlineTransparency = 0
+               highlight.OutlineColor = _G.ESPColor
+           else
+               if highlight then
+                   highlight:Destroy()
+               end
+           end
+       end
+   end
+end)
+
+--------------------------------------------------
+-- 4. แท็บเทเลพอร์ต
+--------------------------------------------------
 TeleportTab:CreateButton({
-   Name = "📍เทเลพอร์ตไปจุดฟาร์มหลัก",
+   Name = "เทเลพอร์ตไปจุดฟาร์มหลัก",
    Callback = function()
        local char = LocalPlayer.Character
        if char and char:FindFirstChild("HumanoidRootPart") then
            char.HumanoidRootPart.CFrame = CFrame.new(0, 50, 0)
-           Rayfield:Notify({Title = "Teleport", Content = "วาร์ปสำเร็จ!", Duration = 2})
+           Rayfield:Notify({Title = "Teleport", Content = "วาร์ปสำเร็จ", Duration = 2})
        end
+   end,
+})
+
+--------------------------------------------------
+-- 5. แท็บใหม่: ปรับแต่ง UI & แชร์ตั้งค่า (Custom UI & Config)
+--------------------------------------------------
+UITab:CreateSection("ระบบจัดการการตั้งค่าสคริปต์")
+
+UITab:CreateButton({
+   Name = "บันทึกการตั้งค่าปัจจุบัน (Save Config)",
+   Callback = function()
+       Rayfield:SaveConfiguration()
+       Rayfield:Notify({Title = "Config System", Content = "บันทึกค่าสคริปต์เรียบร้อย", Duration = 2})
+   end,
+})
+
+UITab:CreateButton({
+   Name = "โหลดค่าการตั้งค่าเดิม (Load Config)",
+   Callback = function()
+       Rayfield:LoadConfiguration()
+       Rayfield:Notify({Title = "Config System", Content = "โหลดค่าเดิมกลับมาแล้ว", Duration = 2})
    end,
 })
