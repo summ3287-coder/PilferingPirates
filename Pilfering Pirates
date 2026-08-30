@@ -15,7 +15,7 @@ local Window = Rayfield:CreateWindow({
 
 -- สร้างแท็บหลัก
 local MainTab = Window:CreateTab("🏠 หน้าแรก / ฟังก์ชันหลัก", 4483362458)
-local FunTab = Window:CreateTab("⚡ ฟังก์ชันปั่น & ตัวละคร", 4483362458)
+local FunTab = Window:CreateTab("⚡ ฟังก์ชันปั่น & ลดแลก", 4483362458)
 local VisualTab = Window:CreateTab("👁️ ESP & การมองเห็น", 4483362458)
 local TeleportTab = Window:CreateTab("🚀 เทเลพอร์ต", 4483362458)
 
@@ -24,7 +24,7 @@ local LocalPlayer = game.Players.LocalPlayer
 -- แจ้งเตือนเปิดใช้งาน
 Rayfield:Notify({
    Title = "ยินดีต้อนรับสู่ Gemini Hub",
-   Content = "ระบบพร้อมใช้งานในโหมดดาร์กเรียบร้อย!",
+   Content = "ระบบพร้อมลุยในโหมด John Wick!",
    Duration = 4,
    Image = 4483362458,
 })
@@ -35,19 +35,14 @@ Rayfield:Notify({
 task.spawn(function()
    local CoreGui = game:GetService("CoreGui")
    local RunService = game:GetService("RunService")
-   
-   -- ค้นหาหน้าต่างหลักของ Rayfield เพื่อใส่เส้นขอบเรืองแสง
    local rayfieldGui = CoreGui:FindFirstChild("Rayfield")
    if rayfieldGui then
        local mainFrame = rayfieldGui:FindFirstChild("Main", true)
        if mainFrame then
-           -- สร้าง UIStroke สำหรับทำเส้นขอบรอบเมนู
            local uiStroke = mainFrame:FindFirstChild("RainbowBorder") or Instance.new("UIStroke")
            uiStroke.Name = "RainbowBorder"
-           uiStroke.Thickness = 3 -- ความหนาของเส้นขอบไฟ
+           uiStroke.Thickness = 3
            uiStroke.Parent = mainFrame
-           
-           -- ลูปเปลี่ยนสีรุ้งวิบวับตลอดเวลา
            RunService.RenderStepped:Connect(function()
                uiStroke.Color = Color3.fromHSV(tick() % 5 / 5, 1, 1)
            end)
@@ -116,7 +111,7 @@ FunTab:CreateToggle({
 })
 
 --------------------------------------------------
--- 3. ฟังก์ชันเดิม: Noclip & Infinite Camera Zoom
+-- 3. ฟังก์ชันเดิม: Noclip & Infinite Camera Zoom & ล่องหน
 --------------------------------------------------
 FunTab:CreateToggle({
    Name = "👻 โหมดทะลุกำแพง (Noclip)",
@@ -149,12 +144,8 @@ FunTab:CreateToggle({
    end,
 })
 
---------------------------------------------------
--- 4. ฟังก์ชันล่องหน (Invisibility)
---------------------------------------------------
 local InvisibilityEnabled = false
 local storedParts = {}
-
 FunTab:CreateToggle({
    Name = "🥷 โหมดล่องหนไร้ร่องรอย (Invisibility)",
    CurrentValue = false,
@@ -163,7 +154,6 @@ FunTab:CreateToggle({
        InvisibilityEnabled = Value
        local char = LocalPlayer.Character
        if not char then return end
-       
        if InvisibilityEnabled then
            for _, v in pairs(char:GetDescendants()) do
                if v:IsA("BasePart") or v:IsA("Decal") then
@@ -191,7 +181,70 @@ FunTab:CreateToggle({
 })
 
 --------------------------------------------------
--- 5. ฟังก์ชันเดิม: Chat Spammer & ESP
+-- 4. ฟังก์ชันใหม่: โหมด "ลดแลก" (Potato Graphics & V5 ลบแมพ)
+--------------------------------------------------
+FunTab:CreateSection("🥔 โหมดลดแลก (Potato Graphics)")
+
+FunTab:CreateButton({
+   Name = "📉 ลดแลก V1: ปิดเงาและเอฟเฟกต์",
+   Callback = function()
+       game:GetService("Lighting").GlobalShadows = false
+       Rayfield:Notify({Title = "ลดแลก V1", Content = "ปิดเงาเรียบร้อย เครื่องเริ่มลื่นขึ้น", Duration = 2})
+   end,
+})
+
+FunTab:CreateButton({
+   Name = "📉 ลดแลก V2: ปรับกราฟิกเป็นขั้นต่ำ",
+   Callback = function()
+       settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+       Rayfield:Notify({Title = "ลดแลก V2", Content = "ปรับกราฟิกต่ำสุดแล้ว", Duration = 2})
+   end,
+})
+
+FunTab:CreateButton({
+   Name = "📉 ลดแลก V3: ลบวัตถุรายละเอียดสูง",
+   Callback = function()
+       for _, v in pairs(workspace:GetDescendants()) do
+           if v:IsA("SpecialMesh") or v:IsA("ParticleEmitter") then
+               v:Destroy()
+           end
+       end
+       Rayfield:Notify({Title = "ลดแลก V3", Content = "กวาดล้างพาร์ทขยะเรียบร้อย", Duration = 2})
+   end,
+})
+
+FunTab:CreateButton({
+   Name = "📉 ลดแลก V4: เปลี่ยนทุกอย่างเป็นพลาสติกเรียบ",
+   Callback = function()
+       for _, v in pairs(workspace:GetDescendants()) do
+           if v:IsA("BasePart") then
+               v.Material = Enum.Material.SmoothPlastic
+               v.Reflectance = 0
+           end
+       end
+       Rayfield:Notify({Title = "ลดแลก V4", Content = "แปลงโฉมเป็นกราฟิกกากขั้นสุด", Duration = 2})
+   end,
+})
+
+FunTab:CreateButton({
+   Name = "🔥 [อันตราย] ลดแลก V5: ลบหมดทุกอย่าง ไม่ มี ทาง แก้ ได้ ฮ่าๆ",
+   Callback = function()
+       -- ทำลายล้างทุกสิ่งใน Workspace ยกเว้นผู้เล่น
+       for _, v in pairs(workspace:GetChildren()) do
+           if v ~= LocalPlayer.Character and v.Name ~= "Terrain" and v:IsA("Model") then
+               v:Destroy()
+           end
+       end
+       Rayfield:Notify({
+          Title = "💀 ลดแลก V5 ทำงานแล้ว!",
+          Content = "ลบแมพเกลี้ยงเกลา ไม่มีทางแก้แล้วโว้ย ฮ่าๆ!",
+          Duration = 4,
+       })
+   end,
+})
+
+--------------------------------------------------
+-- 5. ฟังก์ชันเดิม: Chat Spammer & ESP & Teleport
 --------------------------------------------------
 MainTab:CreateButton({
    Name = "💬 เปิดแชทสแปม (Chat Spammer)",
@@ -210,9 +263,6 @@ VisualTab:CreateToggle({
    end,
 })
 
---------------------------------------------------
--- 6. ฟังก์ชันเดิม: Teleportation
---------------------------------------------------
 TeleportTab:CreateButton({
    Name = "📍เทเลพอร์ตไปจุดฟาร์มหลัก",
    Callback = function()
