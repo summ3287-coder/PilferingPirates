@@ -3,12 +3,33 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 -- สร้าง UI Main Window
 local Window = Rayfield:CreateWindow({
-   Name = "Pilfering Pirates Hub",
-   LoadingTitle = "กำลังโหลดสคริปต์...",
-   LoadingSubtitle = "Delta Supported",
+   Name = "Gemini Hub | Pilfering Pirates",
+   LoadingTitle = "🚀 กำลังเริ่มต้นระบบ Gemini Hub...",
+   LoadingSubtitle = "By Developer (Delta Supported)",
    ConfigurationSaving = { Enabled = false },
    Discord = { Enabled = false },
    KeySystem = false
+})
+
+-- หน้าต่างจำลองหลอดโหลดสถานะ (Progress Bar Notifications)
+Rayfield:Notify({
+   Title = "⏳ กำลังโหลดสคริปต์...",
+   Content = "กำลังเชื่อมต่อระบบหลัก (0%)...",
+   Duration = 1.5,
+})
+
+task.wait(1.5)
+Rayfield:Notify({
+   Title = "⏳ กำลังโหลดสคริปต์...",
+   Content = "กำลังโหลดฟีเจอร์ตัวละครและ ESP (50%)...",
+   Duration = 1.5,
+})
+
+task.wait(1.5)
+Rayfield:Notify({
+   Title = "⚡ โหลดเสร็จสิ้น 100%!",
+   Content = "Gemini Hub พร้อมใช้งานแล้ว ขอให้สนุกกับการปล้น!",
+   Duration = 3,
 })
 
 local MainTab = Window:CreateTab("หลัก", 4483362458)
@@ -21,7 +42,6 @@ local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
-local StarterGui = game:GetService("StarterGui")
 
 -- ตัวแปรตั้งค่าฟีเจอร์หลัก
 local FastAttackEnabled = false
@@ -36,7 +56,7 @@ local RainbowEnabled = false
 local EspEnabled = false
 local EspBoxEnabled = false
 local EspLineEnabled = false
-local EspColor = Color3.fromRGB(255, 0, 0)
+local EspColor = Color3.fromRGB(0, 255, 255)
 local EspDrawings = {}
 
 -- ----------------------------------------
@@ -189,7 +209,7 @@ CharTab:CreateButton({
 })
 
 -- ----------------------------------------
--- 3. ฟังก์ชันแท็บเสริม (Fun): Noclip, ซูมกล้อง, แชทกวน, ตัวละครเรืองแสงสีรุ้ง
+-- 3. ฟังก์ชันแท็บเสริม (Fun)
 -- ----------------------------------------
 FunTab:CreateToggle({
    Name = "เดินทะลุกำแพง (Noclip)",
@@ -245,10 +265,10 @@ FunTab:CreateButton({
            if chatService.ChatVersion == Enum.ChatVersion.TextChatService then
                local channel = chatService.TextChannels.RBXGeneral
                if channel then
-                   channel:SendAsync("🏴‍☠️ Pilfering Pirates Hub ครองเซิร์ฟนี้แล้ว! 🏴‍☠️")
+                   channel:SendAsync("⚡ Gemini Hub ครองเซิร์ฟนี้แล้ว! ⚡")
                end
            else
-               game:GetService("ReplicatedStorage"):FindFirstChild("DefaultChatSystemChatEvents"):FindFirstChild("SayMessageRequest"):FireServer("🏴‍☠️ Pilfering Pirates Hub ครองเซิร์ฟนี้แล้ว! 🏴‍☠️", "All")
+               game:GetService("ReplicatedStorage"):FindFirstChild("DefaultChatSystemChatEvents"):FindFirstChild("SayMessageRequest"):FireServer("⚡ Gemini Hub ครองเซิร์ฟนี้แล้ว! ⚡", "All")
            end
        end)
        Rayfield:Notify({
@@ -326,7 +346,7 @@ EspTab:CreateToggle({
 
 EspTab:CreateColorPicker({
    Name = "สีของ ESP",
-   Color = Color3.fromRGB(255, 0, 0),
+   Color = Color3.fromRGB(0, 255, 255),
    Flag = "EspColorPicker",
    Callback = function(Value)
        EspColor = Value
@@ -469,10 +489,4 @@ TeleportTab:CreateButton({
            })
        end
    end,
-})
-
-Rayfield:Notify({
-   Title = "Pilfering Pirates Hub",
-   Content = "อัปเดตฟีเจอร์ใหม่ครบถ้วนเรียบร้อย!",
-   Duration = 5,
 })
