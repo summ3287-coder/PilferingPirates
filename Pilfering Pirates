@@ -1,4 +1,4 @@
--- Gemini Hub: Custom UI with Full-Screen Fast Matrix Rain Intro & Working Features
+-- Gemini Hub: Clean & Pro Edition (No Emojis)
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
@@ -15,269 +15,213 @@ ScreenGui.Name = "GeminiHubCustomUI"
 ScreenGui.Parent = CoreGui
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- 1. ส่วนหน้าจอโหลดและเอฟเฟกต์แฮกเกอร์แบบสายยาวเต็มจอ
-local IntroHolder = Instance.new("Folder")
-IntroHolder.Name = "IntroHolder"
-IntroHolder.Parent = ScreenGui
-
-local HackerRainContainer = Instance.new("Frame")
-HackerRainContainer.Size = UDim2.new(1, 0, 1, 0)
-HackerRainContainer.BackgroundTransparency = 1
-HackerRainContainer.Parent = IntroHolder
-
-local hackerChars = {"0", "1", "G", "E", "M", "I", "N", "I", "X", "Z", "#", "$", "&", "*", "A", "B", "C"}
-local activeRain = true
-
--- สร้างเอฟเฟกต์สายตัวอักษรตกแบบเต็มจอและรวดเร็ว
-task.spawn(function()
-    while activeRain do
-        task.spawn(function()
-            local streamCol = Instance.new("TextLabel")
-            streamCol.Size = UDim2.new(0, 20, 0, math.random(200, 400))
-            streamCol.Position = UDim2.new(math.random(), 0, -0.5, 0)
-            streamCol.BackgroundTransparency = 1
-            streamCol.TextSize = math.random(14, 20)
-            streamCol.Font = Enum.Font.Code
-            streamCol.TextColor3 = Color3.fromRGB(0, math.random(180, 255), 0)
-            streamCol.TextXAlignment = Enum.TextXAlignment.Center
-            streamCol.TextYAlignment = Enum.TextYAlignment.Top
-            
-            -- สุ่มข้อความเป็นสายยาวๆ
-            local textStr = ""
-            local length = math.random(10, 20)
-            for j = 1, length do
-                textStr = textStr .. hackerChars[math.random(1, #hackerChars)] .. "\n"
-            end
-            streamCol.Text = textStr
-            streamCol.Parent = HackerRainContainer
-
-            -- วิ่งลงมาด้วยความเร็วสูงจนพ้นจอ
-            local speed = math.random(3, 6)
-            local elapsed = 0
-            while elapsed < 1.5 and activeRain do
-                elapsed = elapsed + RunService.RenderStepped:Wait()
-                streamCol.Position = streamCol.Position + UDim2.new(0, 0, 0.03 * speed, 0)
-            end
-            streamCol:Destroy()
-        end)
-        task.wait(0.02) -- ปล่อยสายลงมาถี่ขึ้น
-    end
-end)
-
-local IntroFrame = Instance.new("Frame")
-IntroFrame.Size = UDim2.new(0, 360, 0, 190)
-IntroFrame.Position = UDim2.new(0.5, -180, 0.5, -95)
-IntroFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-IntroFrame.BorderSizePixel = 0
-IntroFrame.Parent = IntroHolder
-Instance.new("UICorner", IntroFrame).CornerRadius = UDim.new(0, 12)
-
-local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Size = UDim2.new(1, -40, 0, 40)
-TitleLabel.Position = UDim2.new(0, 20, 0, 14)
-TitleLabel.BackgroundTransparency = 1
-TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleLabel.TextSize = 16
-TitleLabel.Font = Enum.Font.GothamBold
-TitleLabel.Text = "ยินดีต้อนรับสู่ค่าย Gemini Hub"
-TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-TitleLabel.Parent = IntroFrame
-
-local SubLabel = Instance.new("TextLabel")
-SubLabel.Size = UDim2.new(1, -40, 0, 30)
-SubLabel.Position = UDim2.new(0, 20, 0, 60)
-SubLabel.BackgroundTransparency = 1
-SubLabel.TextColor3 = Color3.fromRGB(160, 160, 160)
-SubLabel.TextSize = 13
-SubLabel.Font = Enum.Font.Gotham
-SubLabel.Text = "Decrypting & Initializing System..."
-SubLabel.TextXAlignment = Enum.TextXAlignment.Left
-SubLabel.Parent = IntroFrame
-
-local BarBg = Instance.new("Frame")
-BarBg.Size = UDim2.new(0, 320, 0, 10)
-BarBg.Position = UDim2.new(0.5, -160, 0, 115)
-BarBg.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-BarBg.BorderSizePixel = 0
-BarBg.Parent = IntroFrame
-Instance.new("UICorner", BarBg).CornerRadius = UDim.new(1, 0)
-
-local BarFill = Instance.new("Frame")
-BarFill.Size = UDim2.new(0, 0, 1, 0)
-BarFill.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
-BarFill.BorderSizePixel = 0
-BarFill.Parent = BarBg
-Instance.new("UICorner", BarFill).CornerRadius = UDim.new(1, 0)
-
-local PercentLabel = Instance.new("TextLabel")
-PercentLabel.Size = UDim2.new(1, 0, 0, 25)
-PercentLabel.Position = UDim2.new(0, 0, 0, 140)
-PercentLabel.BackgroundTransparency = 1
-PercentLabel.TextColor3 = Color3.fromRGB(140, 140, 140)
-PercentLabel.TextSize = 12
-PercentLabel.Font = Enum.Font.Gotham
-PercentLabel.Text = "0%"
-PercentLabel.Parent = IntroFrame
-
--- 2. ปุ่มเปิด/ปิดลอยบนจอ
+-- 1. ปุ่มเปิด/ปิดลอยบนจอ
 local ToggleButton = Instance.new("TextButton")
 ToggleButton.Name = "GeminiToggleButton"
 ToggleButton.Size = UDim2.new(0, 50, 0, 50)
 ToggleButton.Position = UDim2.new(0, 30, 0, 150)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
 ToggleButton.BorderSizePixel = 0
-ToggleButton.Visible = false
-ToggleButton.Text = "Hub"
+ToggleButton.Text = "HUB"
 ToggleButton.TextColor3 = Color3.fromRGB(0, 162, 255)
-ToggleButton.TextSize, ToggleButton.Font = 14, Enum.Font.GothamBold
+ToggleButton.TextSize, ToggleButton.Font = 12, Enum.Font.GothamBold
 ToggleButton.Parent = ScreenGui
 Instance.new("UICorner", ToggleButton).CornerRadius = UDim.new(1, 0)
 
--- 3. แผงหลัก (Main Panel)
+-- 2. แผงหลัก
 local MainPanel = Instance.new("Frame")
-MainPanel.Size = UDim2.new(0, 480, 0, 320)
-MainPanel.Position = UDim2.new(0.5, -240, 0.5, -160)
-MainPanel.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainPanel.Name = "MainPanel"
+MainPanel.Size = UDim2.new(0, 500, 0, 340)
+MainPanel.Position = UDim2.new(0.5, -250, 0.5, -170)
+MainPanel.BackgroundColor3 = Color3.fromRGB(20, 20, 22)
 MainPanel.BorderSizePixel = 0
-MainPanel.Visible = false
 MainPanel.Parent = ScreenGui
-Instance.new("UICorner", MainPanel).CornerRadius = UDim.new(0, 10)
+Instance.new("UICorner", MainPanel).CornerRadius = UDim.new(0, 14)
+
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Color = Color3.fromRGB(45, 45, 50)
+MainStroke.Thickness = 1
+MainStroke.Parent = MainPanel
 
 local TopBar = Instance.new("Frame")
 TopBar.Size = UDim2.new(1, 0, 0, 45)
-TopBar.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
+TopBar.BackgroundColor3 = Color3.fromRGB(26, 26, 30)
 TopBar.BorderSizePixel = 0
 TopBar.Parent = MainPanel
-Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 10)
+Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 14)
 
 local FixTopBar = Instance.new("Frame")
 FixTopBar.Size = UDim2.new(1, 0, 0, 10)
 FixTopBar.Position = UDim2.new(0, 0, 1, -10)
-FixTopBar.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
+FixTopBar.BackgroundColor3 = Color3.fromRGB(26, 26, 30)
 FixTopBar.BorderSizePixel = 0
 FixTopBar.Parent = TopBar
 
 local HubTitle = Instance.new("TextLabel")
-HubTitle.Size = UDim2.new(1, -60, 1, 0)
-HubTitle.Position = UDim2.new(0, 15, 0, 0)
+HubTitle.Size = UDim2.new(1, -100, 1, 0)
+HubTitle.Position = UDim2.new(0, 16, 0, 0)
 HubTitle.BackgroundTransparency = 1
-HubTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-HubTitle.TextSize = 14
+HubTitle.TextColor3 = Color3.fromRGB(240, 240, 240)
+HubTitle.TextSize = 13
 HubTitle.Font = Enum.Font.GothamBold
-HubTitle.Text = "Gemini Hub | Custom UI"
+HubTitle.Text = "Gemini Hub | John Wick Edition"
 HubTitle.TextXAlignment = Enum.TextXAlignment.Left
 HubTitle.Parent = TopBar
 
 local CloseButton = Instance.new("TextButton")
-CloseButton.Size = UDim2.new(0, 35, 0, 35)
-CloseButton.Position = UDim2.new(1, -40, 0, 5)
-CloseButton.BackgroundTransparency = 1
+CloseButton.Size = UDim2.new(0, 30, 0, 30)
+CloseButton.Position = UDim2.new(1, -38, 0.5, -15)
+CloseButton.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
 CloseButton.Text = "X"
-CloseButton.TextColor3 = Color3.fromRGB(200, 200, 200)
-CloseButton.TextSize = 18
+CloseButton.TextColor3 = Color3.fromRGB(180, 180, 180)
+CloseButton.TextSize = 13
 CloseButton.Font = Enum.Font.GothamBold
 CloseButton.Parent = TopBar
+Instance.new("UICorner", CloseButton).CornerRadius = UDim.new(0, 8)
 
--- 4. ระบบแท็บเมนู
+-- 3. แถบแท็บเมนูด้านบน
 local TabBar = Instance.new("Frame")
-TabBar.Size = UDim2.new(1, -20, 0, 35)
-TabBar.Position = UDim2.new(0, 10, 0, 55)
-TabBar.BackgroundTransparency = 1
+TabBar.Size = UDim2.new(1, -24, 0, 42)
+TabBar.Position = UDim2.new(0, 12, 0, 55)
+TabBar.BackgroundColor3 = Color3.fromRGB(26, 26, 30)
+TabBar.BorderSizePixel = 0
 TabBar.Parent = MainPanel
+Instance.new("UICorner", TabBar).CornerRadius = UDim.new(0, 10)
 
 local Tab1Btn = Instance.new("TextButton")
-Tab1Btn.Size = UDim2.new(0.48, 0, 1, 0)
+Tab1Btn.Size = UDim2.new(0.48, 0, 1, -6)
+Tab1Btn.Position = UDim2.new(0, 3, 0, 3)
 Tab1Btn.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
-Tab1Btn.Text = "หน้าหลัก"
+Tab1Btn.Text = "Main / Movement"
 Tab1Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-Tab1Btn.TextSize, Tab1Btn.Font = 13, Enum.Font.GothamBold
+Tab1Btn.TextSize, Tab1Btn.Font = 12, Enum.Font.GothamBold
 Tab1Btn.Parent = TabBar
-Instance.new("UICorner", Tab1Btn).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", Tab1Btn).CornerRadius = UDim.new(0, 8)
 
 local Tab2Btn = Instance.new("TextButton")
-Tab2Btn.Size = UDim2.new(0.48, 0, 1, 0)
-Tab2Btn.Position = UDim2.new(0.52, 0, 0, 0)
-Tab2Btn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-Tab2Btn.Text = "การมองเห็น (ESP)"
-Tab2Btn.TextColor3 = Color3.fromRGB(180, 180, 180)
-Tab2Btn.TextSize, Tab2Btn.Font = 13, Enum.Font.GothamBold
+Tab2Btn.Size = UDim2.new(0.48, 0, 1, -6)
+Tab2Btn.Position = UDim2.new(0.5, 3, 0, 3)
+Tab2Btn.BackgroundColor3 = Color3.fromRGB(26, 26, 30)
+Tab2Btn.Text = "Visuals (ESP)"
+Tab2Btn.TextColor3 = Color3.fromRGB(160, 160, 160)
+Tab2Btn.TextSize, Tab2Btn.Font = 12, Enum.Font.GothamBold
 Tab2Btn.Parent = TabBar
-Instance.new("UICorner", Tab2Btn).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", Tab2Btn).CornerRadius = UDim.new(0, 8)
 
--- --- คอนเทนต์หน้าหลัก (Main Tab) ---
-local Content1 = Instance.new("ScrollingFrame")
-Content1.Size = UDim2.new(1, -20, 1, -105)
-Content1.Position = UDim2.new(0, 10, 0, 100)
-Content1.BackgroundTransparency = 1
-Content1.CanvasSize = UDim2.new(0, 0, 0, 160)
-Content1.ScrollBarThickness = 4
-Content1.Parent = MainPanel
-
-local function createToggleSlider(name, yPos, defaultVal, callback)
+-- ฟังก์ชันสร้าง Toggle สวิตช์
+local function createModernToggle(parent, name, yPos, initialActive, callback)
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, 0, 0, 65)
+    frame.Size = UDim2.new(1, 0, 0, 50)
     frame.Position = UDim2.new(0, 0, 0, yPos)
-    frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    frame.Parent = Content1
-    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 6)
+    frame.BackgroundColor3 = Color3.fromRGB(26, 26, 30)
+    frame.Parent = parent
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
 
     local lbl = Instance.new("TextLabel")
-    lbl.Size = UDim2.new(0.5, 0, 0, 35)
-    lbl.Position = UDim2.new(0, 12, 0, 0)
+    lbl.Size = UDim2.new(0.7, 0, 1, 0)
+    lbl.Position = UDim2.new(0, 16, 0, 0)
     lbl.BackgroundTransparency = 1
     lbl.Text = name
-    lbl.TextColor3 = Color3.fromRGB(240, 240, 240)
+    lbl.TextColor3 = Color3.fromRGB(230, 230, 230)
+    lbl.TextSize, lbl.Font, lbl.TextXAlignment = 13, Enum.Font.GothamMedium, Enum.TextXAlignment.Left
+    lbl.Parent = frame
+
+    local switchBg = Instance.new("TextButton")
+    switchBg.Size = UDim2.new(0, 48, 0, 26)
+    switchBg.Position = UDim2.new(1, -60, 0.5, -13)
+    switchBg.BackgroundColor3 = initialActive and Color3.fromRGB(0, 162, 255) or Color3.fromRGB(45, 45, 50)
+    switchBg.Text = ""
+    switchBg.AutoButtonColor = false
+    switchBg.Parent = frame
+    Instance.new("UICorner", switchBg).CornerRadius = UDim.new(1, 0)
+
+    local switchDot = Instance.new("Frame")
+    switchDot.Size = UDim2.new(0, 20, 0, 20)
+    switchDot.Position = initialActive and UDim2.new(1, -23, 0.5, -10) or UDim2.new(0, 3, 0.5, -10)
+    switchDot.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    switchDot.Parent = switchBg
+    Instance.new("UICorner", switchDot).CornerRadius = UDim.new(1, 0)
+
+    local active = initialActive
+    switchBg.MouseButton1Click:Connect(function()
+        active = not active
+        if active then
+            switchBg.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
+            switchDot:TweenPosition(UDim2.new(1, -23, 0.5, -10), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
+        else
+            switchBg.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+            switchDot:TweenPosition(UDim2.new(0, 3, 0.5, -10), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
+        end
+        callback(active)
+    end)
+end
+
+-- ฟังก์ชัน Toggle พร้อมช่องกรอกตัวเลข
+local function createToggleSliderModern(parent, name, yPos, defaultVal, callback)
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1, 0, 0, 75)
+    frame.Position = UDim2.new(0, 0, 0, yPos)
+    frame.BackgroundColor3 = Color3.fromRGB(26, 26, 30)
+    frame.Parent = parent
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
+
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(0.6, 0, 0, 35)
+    lbl.Position = UDim2.new(0, 16, 0, 5)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = name
+    lbl.TextColor3 = Color3.fromRGB(230, 230, 230)
     lbl.TextSize, lbl.Font, lbl.TextXAlignment = 13, Enum.Font.GothamBold, Enum.TextXAlignment.Left
     lbl.Parent = frame
 
-    local toggleBtn = Instance.new("TextButton")
-    toggleBtn.Size = UDim2.new(0, 60, 0, 28)
-    toggleBtn.Position = UDim2.new(1, -70, 0, 6)
-    toggleBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    toggleBtn.Text = "ปิด"
-    toggleBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-    toggleBtn.TextSize, toggleBtn.Font = 12, Enum.Font.GothamBold
-    toggleBtn.Parent = frame
-    Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0, 4)
+    local switchBg = Instance.new("TextButton")
+    switchBg.Size = UDim2.new(0, 48, 0, 26)
+    switchBg.Position = UDim2.new(1, -60, 0, 8)
+    switchBg.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+    switchBg.Text = ""
+    switchBg.AutoButtonColor = false
+    switchBg.Parent = frame
+    Instance.new("UICorner", switchBg).CornerRadius = UDim.new(1, 0)
+
+    local switchDot = Instance.new("Frame")
+    switchDot.Size = UDim2.new(0, 20, 0, 20)
+    switchDot.Position = UDim2.new(0, 3, 0.5, -10)
+    switchDot.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    switchDot.Parent = switchBg
+    Instance.new("UICorner", switchDot).CornerRadius = UDim.new(1, 0)
 
     local boxLbl = Instance.new("TextLabel")
-    boxLbl.Size = UDim2.new(0, 80, 0, 20)
-    boxLbl.Position = UDim2.new(0, 12, 0, 38)
+    boxLbl.Size = UDim2.new(0, 110, 0, 24)
+    boxLbl.Position = UDim2.new(0, 16, 0, 42)
     boxLbl.BackgroundTransparency = 1
-    boxLbl.Text = "ค่าความแรง (1-100):"
-    boxLbl.TextColor3 = Color3.fromRGB(160, 160, 160)
-    boxLbl.TextSize, boxLbl.Font, boxLbl.TextXAlignment = 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
+    boxLbl.Text = "Value (1-100):"
+    boxLbl.TextColor3 = Color3.fromRGB(150, 150, 150)
+    boxLbl.TextSize, boxLbl.Font, boxLbl.TextXAlignment = 12, Enum.Font.Gotham, Enum.TextXAlignment.Left
     boxLbl.Parent = frame
 
     local box = Instance.new("TextBox")
-    box.Size = UDim2.new(0, 50, 0, 24)
-    box.Position = UDim2.new(0, 125, 0, 36)
-    box.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    box.Size = UDim2.new(0, 60, 0, 26)
+    box.Position = UDim2.new(0, 130, 0, 41)
+    box.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
     box.Text = tostring(defaultVal)
     box.TextColor3 = Color3.fromRGB(255, 255, 255)
     box.TextSize, box.Font = 12, Enum.Font.GothamBold
     box.Parent = frame
-    Instance.new("UICorner", box).CornerRadius = UDim.new(0, 4)
+    Instance.new("UICorner", box).CornerRadius = UDim.new(0, 6)
 
     local active = false
     local currentVal = defaultVal
 
-    local function updateState()
+    switchBg.MouseButton1Click:Connect(function()
+        active = not active
         if active then
-            toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
-            toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-            toggleBtn.Text = "เปิด"
+            switchBg.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
+            switchDot:TweenPosition(UDim2.new(1, -23, 0.5, -10), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
         else
-            toggleBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-            toggleBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-            toggleBtn.Text = "ปิด"
+            switchBg.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+            switchDot:TweenPosition(UDim2.new(0, 3, 0.5, -10), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
         end
         callback(active, currentVal)
-    end
-
-    toggleBtn.MouseButton1Click:Connect(function()
-        active = not active
-        updateState()
     end)
 
     box.FocusLost:Connect(function()
@@ -294,15 +238,23 @@ local function createToggleSlider(name, yPos, defaultVal, callback)
     end)
 end
 
--- ตั้งค่าเริ่มต้นเป็น 50 ทั้งกระโดดสูงและวิ่งเร็ว
-createToggleSlider("กระโดดสูง (JumpPower)", 0, 50, function(state, val)
+-- --- หน้าหลัก (Tab 1) ---
+local Content1 = Instance.new("ScrollingFrame")
+Content1.Size = UDim2.new(1, -24, 1, -115)
+Content1.Position = UDim2.new(0, 12, 0, 105)
+Content1.BackgroundTransparency = 1
+Content1.CanvasSize = UDim2.new(0, 0, 0, 175)
+Content1.ScrollBarThickness = 3
+Content1.Parent = MainPanel
+
+createToggleSliderModern(Content1, "JumpPower Modifier", 0, 50, function(state, val)
     local char = localPlayer.Character
     if char and char:FindFirstChild("Humanoid") then
         if state then char.Humanoid.JumpPower = val * 2 else char.Humanoid.JumpPower = 50 end
     end
 end)
 
-createToggleSlider("วิ่งเร็ว (WalkSpeed)", 75, 50, function(state, val)
+createToggleSliderModern(Content1, "WalkSpeed Modifier", 85, 50, function(state, val)
     local char = localPlayer.Character
     if char and char:FindFirstChild("Humanoid") then
         if state then char.Humanoid.WalkSpeed = val else char.Humanoid.WalkSpeed = 16 end
@@ -310,90 +262,54 @@ createToggleSlider("วิ่งเร็ว (WalkSpeed)", 75, 50, function(stat
 end)
 
 
--- --- คอนเทนต์หน้าการมองเห็น (ESP Tab) ---
+-- --- หน้าการมองเห็น ESP (Tab 2) ---
 local Content2 = Instance.new("ScrollingFrame")
-Content2.Size = UDim2.new(1, -20, 1, -105)
-Content2.Position = UDim2.new(0, 10, 0, 100)
+Content2.Size = UDim2.new(1, -24, 1, -115)
+Content2.Position = UDim2.new(0, 12, 0, 105)
 Content2.BackgroundTransparency = 1
 Content2.Visible = false
-Content2.CanvasSize = UDim2.new(0, 0, 0, 230)
-Content2.ScrollBarThickness = 4
+Content2.CanvasSize = UDim2.new(0, 0, 0, 250)
+Content2.ScrollBarThickness = 3
 Content2.Parent = MainPanel
 
-local function createToggle(name, yPos, callback)
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, 0, 0, 45)
-    frame.Position = UDim2.new(0, 0, 0, yPos)
-    frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    frame.Parent = Content2
-    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 6)
-
-    local lbl = Instance.new("TextLabel")
-    lbl.Size = UDim2.new(0.7, 0, 1, 0)
-    lbl.Position = UDim2.new(0, 12, 0, 0)
-    lbl.BackgroundTransparency = 1
-    lbl.Text = name
-    lbl.TextColor3 = Color3.fromRGB(240, 240, 240)
-    lbl.TextSize, lbl.Font, lbl.TextXAlignment = 13, Enum.Font.Gotham, Enum.TextXAlignment.Left
-    lbl.Parent = frame
-
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 60, 0, 28)
-    btn.Position = UDim2.new(1, -70, 0.5, -14)
-    btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    btn.Text = "ปิด"
-    btn.TextColor3 = Color3.fromRGB(200, 200, 200)
-    btn.TextSize, btn.Font = 12, Enum.Font.GothamBold
-    btn.Parent = frame
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 4)
-
-    local active = false
-    btn.MouseButton1Click:Connect(function()
-        active = not active
-        if active then
-            btn.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
-            btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-            btn.Text = "เปิด"
-        else
-            btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-            btn.TextColor3 = Color3.fromRGB(200, 200, 200)
-            btn.Text = "ปิด"
-        end
-        callback(active)
-    end)
-end
-
--- ระบบปรับสีเส้น Tracer
+local espBoxEnabled = false
+local espTracerEnabled = false
+local espRadarEnabled = false
 local tracerColorIndex = 1
 local tracerColors = {Color3.fromRGB(0, 255, 0), Color3.fromRGB(255, 0, 0), Color3.fromRGB(0, 162, 255), Color3.fromRGB(255, 255, 0)}
-local colorNames = {"เขียว", "แดง", "ฟ้า", "เหลือง"}
+local colorNames = {"Green", "Red", "Blue", "Yellow"}
 
-local function createColorPicker(yPos)
+createModernToggle(Content2, "Box ESP", 0, false, function(state) espBoxEnabled = state end)
+createModernToggle(Content2, "Tracer Lines", 60, false, function(state) espTracerEnabled = state end)
+createModernToggle(Content2, "Distance Radar", 120, false, function(state) espRadarEnabled = state end)
+
+-- ปุ่มปรับสีเส้น Tracer อยู่ด้านล่างสุด
+local function createColorPickerModernBottom(parent, yPos)
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, 0, 0, 45)
+    frame.Size = UDim2.new(1, 0, 0, 50)
     frame.Position = UDim2.new(0, 0, 0, yPos)
-    frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    frame.Parent = Content2
-    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 6)
+    frame.BackgroundColor3 = Color3.fromRGB(26, 26, 30)
+    frame.Parent = parent
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
 
     local lbl = Instance.new("TextLabel")
     lbl.Size = UDim2.new(0.6, 0, 1, 0)
-    lbl.Position = UDim2.new(0, 12, 0, 0)
+    lbl.Position = UDim2.new(0, 16, 0, 0)
     lbl.BackgroundTransparency = 1
-    lbl.Text = "ปรับสีการมองเส้น (Tracer Color)"
-    lbl.TextColor3 = Color3.fromRGB(240, 240, 240)
-    lbl.TextSize, lbl.Font, lbl.TextXAlignment = 12, Enum.Font.Gotham, Enum.TextXAlignment.Left
+    lbl.Text = "Tracer Color"
+    lbl.TextColor3 = Color3.fromRGB(230, 230, 230)
+    lbl.TextSize, lbl.Font, lbl.TextXAlignment = 13, Enum.Font.GothamMedium, Enum.TextXAlignment.Left
     lbl.Parent = frame
 
     local colorBtn = Instance.new("TextButton")
-    colorBtn.Size = UDim2.new(0, 80, 0, 28)
-    colorBtn.Position = UDim2.new(1, -90, 0.5, -14)
+    colorBtn.Size = UDim2.new(0, 90, 0, 30)
+    colorBtn.Position = UDim2.new(1, -102, 0.5, -15)
     colorBtn.BackgroundColor3 = tracerColors[tracerColorIndex]
     colorBtn.Text = colorNames[tracerColorIndex]
     colorBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     colorBtn.TextSize, colorBtn.Font = 12, Enum.Font.GothamBold
     colorBtn.Parent = frame
-    Instance.new("UICorner", colorBtn).CornerRadius = UDim.new(0, 4)
+    Instance.new("UICorner", colorBtn).CornerRadius = UDim.new(0, 8)
 
     colorBtn.MouseButton1Click:Connect(function()
         tracerColorIndex = tracerColorIndex + 1
@@ -403,38 +319,108 @@ local function createColorPicker(yPos)
     end)
 end
 
-local espBoxEnabled = false
-local espTracerEnabled = false
-local espRadarEnabled = false
+createColorPickerModernBottom(Content2, 180)
 
-createToggle("สร้างกรอบสี่เหลี่ยมล้อมรอบตัว (Box ESP)", 0, function(state) espBoxEnabled = state end)
-createToggle("เส้นโยงหาศัตรู (Tracer Lines)", 55, function(state) espTracerEnabled = state end)
-createColorPicker(110)
-createToggle("วงกลมบอกระยะรอบตัว (Distance Radar)", 165, function(state) espRadarEnabled = state end)
 
+-- --- ระบบประมวลผล ESP (Render Loop) ---
+local espObjects = {}
+
+local function removeESP(plr)
+    if espObjects[plr] then
+        if espObjects[plr].box then espObjects[plr].box:Remove() end
+        if espObjects[plr].tracer then espObjects[plr].tracer:Remove() end
+        espObjects[plr] = nil
+    end
+end
+
+RunService.RenderStepped:Connect(function()
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= localPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and plr.Character:FindFirstChild("Humanoid") and plr.Character.Humanoid.Health > 0 then
+            if not espObjects[plr] then
+                local box = Drawing.new("Square")
+                box.Visible = false
+                box.Filled = false
+                box.Thickness = 1.5
+
+                local tracer = Drawing.new("Line")
+                tracer.Visible = false
+                tracer.Thickness = 1.5
+
+                espObjects[plr] = {box = box, tracer = tracer}
+            end
+
+            local char = plr.Character
+            local hrp = char.HumanoidRootPart
+            local head = char:FindFirstChild("Head")
+            local data = espObjects[plr]
+
+            local vector, onScreen = camera:WorldToViewportPoint(hrp.Position)
+
+            -- 1. Box ESP
+            if espBoxEnabled and onScreen and head then
+                local headPos = camera:WorldToViewportPoint(head.Position + Vector3.new(0, 0.5, 0))
+                local legPos = camera:WorldToViewportPoint(hrp.Position - Vector3.new(0, 3, 0))
+                local height = math.abs(headPos.Y - legPos.Y)
+                local width = height / 2
+
+                data.box.Size = Vector2.new(width, height)
+                data.box.Position = Vector2.new(vector.X - width / 2, headPos.Y)
+                data.box.Color = tracerColors[tracerColorIndex]
+                data.box.Visible = true
+            else
+                data.box.Visible = false
+            end
+
+            -- 2. Tracer Lines
+            if espTracerEnabled and onScreen then
+                data.tracer.From = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y)
+                data.tracer.To = Vector2.new(vector.X, vector.Y)
+                data.tracer.Color = tracerColors[tracerColorIndex]
+                data.tracer.Visible = true
+            else
+                data.tracer.Visible = false
+            end
+        else
+            removeESP(plr)
+        end
+    end
+end)
+
+Players.PlayerRemoving:Connect(function(plr)
+    removeESP(plr)
+end)
+
+
+-- --- วงกลมเรดาร์ (Radar Circle) ---
+local RadarCircle = Drawing.new("Circle")
+RadarCircle.Visible = false
+RadarCircle.Filled = false
+RadarCircle.Thickness = 2
+RadarCircle.Color = Color3.fromRGB(0, 162, 255)
+RadarCircle.NumSides = 64
+RadarCircle.Radius = 120
+
+RunService.RenderStepped:Connect(function()
+    if espRadarEnabled then
+        RadarCircle.Visible = true
+        RadarCircle.Position = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
+    else
+        RadarCircle.Visible = false
+    end
+end)
+
+
+-- สลับหน้าแท็บ
 Tab1Btn.MouseButton1Click:Connect(function()
     Content1.Visible = true; Content2.Visible = false
     Tab1Btn.BackgroundColor3 = Color3.fromRGB(0, 162, 255); Tab1Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Tab2Btn.BackgroundColor3 = Color3.fromRGB(45, 45, 45); Tab2Btn.TextColor3 = Color3.fromRGB(180, 180, 180)
+    Tab2Btn.BackgroundColor3 = Color3.fromRGB(26, 26, 30); Tab2Btn.TextColor3 = Color3.fromRGB(160, 160, 160)
 end)
 
 Tab2Btn.MouseButton1Click:Connect(function()
     Content1.Visible = false; Content2.Visible = true
     Tab2Btn.BackgroundColor3 = Color3.fromRGB(0, 162, 255); Tab2Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Tab1Btn.BackgroundColor3 = Color3.fromRGB(45, 45, 45); Tab1Btn.TextColor3 = Color3.fromRGB(180, 180, 180)
-end)
-
--- รันหน้าจอโหลด + เอฟเฟกต์แฮกเกอร์สายยาวเต็มจอ
-task.spawn(function()
-    for i = 1, 100 do
-        BarFill.Size = UDim2.new(i / 100, 0, 1, 0)
-        PercentLabel.Text = i .. "%"
-        task.wait(0.012)
-    end
-    activeRain = false
-    IntroHolder:Destroy()
-    MainPanel.Visible = true
-    ToggleButton.Visible = true
+    Tab1Btn.BackgroundColor3 = Color3.fromRGB(26, 26, 30); Tab1Btn.TextColor3 = Color3.fromRGB(160, 160, 160)
 end)
 
 CloseButton.MouseButton1Click:Connect(function()
@@ -447,6 +433,7 @@ ToggleButton.MouseButton1Click:Connect(function()
     ToggleButton.Visible = false
 end)
 
+-- ระบบลากหน้าต่าง
 local dragging, dragInput, dragStart, startPos
 TopBar.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
