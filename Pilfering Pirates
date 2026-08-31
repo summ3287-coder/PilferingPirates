@@ -24,13 +24,13 @@ local Camera = Workspace.CurrentCamera
 
 Rayfield:Notify({
    Title = "Gemini Hub Loaded",
-   Content = "เพิ่มโหมดเดินชนปลิวเรียบร้อย!",
+   Content = "โหมดเสถียรสูงสุด พร้อมใช้งาน!",
    Duration = 3,
    Image = 4483362458,
 })
 
 --------------------------------------------------
--- แท็บที่ 1: หน้าหลัก (ต้านแรงโน้มถ่วง, หมุนตัว, ทะลุกำแพง, บังคับมุมมองที่ 3, เดินชนปลิว)
+-- แท็บที่ 1: หน้าหลัก (ต้านแรงโน้มถ่วง, หมุนตัว, ทะลุกำแพง, บังคับมุมมองที่ 3)
 --------------------------------------------------
 MainTab:CreateSection("ระบบเคลื่อนไหว & ป่วนพิเศษ")
 
@@ -82,25 +82,11 @@ MainTab:CreateToggle({
    end,
 })
 
-_G.TouchFling = false
-MainTab:CreateToggle({
-   Name = "โหมดเดินชนปลิว (Touch Fling)",
-   CurrentValue = false,
-   Flag = "TouchFlingToggle",
-   Callback = function(Value)
-       _G.TouchFling = Value
-       Rayfield:Notify({Title = "Touch Fling", Content = Value and "เปิดใช้งานแล้ว (เดินชนใคร คนนั้นปลิว)" else "ปิดใช้งานแล้ว", Duration = 2})
-   end,
-})
-
--- ลูปการทำงานของฟีเจอร์หน้าหลัก (รวม Fling)
 RunService.RenderStepped:Connect(function()
-   -- Spinbot
    if _G.SpinBot and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
        LocalPlayer.Character.HumanoidRootPart.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(30), 0)
    end
 
-   -- Noclip
    if _G.Noclip and LocalPlayer.Character then
        for _, v in pairs(LocalPlayer.Character:GetDescendants()) do
            if v:IsA("BasePart") then
@@ -109,18 +95,8 @@ RunService.RenderStepped:Connect(function()
        end
    end
 
-   -- Force Third Person
    if _G.ForceThirdPerson then
        LocalPlayer.CameraMode = Enum.CameraMode.Classic
-   end
-
-   -- Touch Fling (ระบบเดินชนปลิวปลอดภัย)
-   if _G.TouchFling and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-       local rootPart = LocalPlayer.Character.HumanoidRootPart
-       local vel = rootPart.Velocity
-       rootPart.Velocity = vel * 10000 + Vector3.new(0, 10000, 0)
-       RunService.RenderStepped:Wait()
-       rootPart.Velocity = vel
    end
 end)
 
