@@ -24,13 +24,13 @@ local Camera = Workspace.CurrentCamera
 
 Rayfield:Notify({
    Title = "Gemini Hub Loaded",
-   Content = "โหมดปลอดภัย ทำงานเสถียรแล้ว",
+   Content = "เพิ่มโหมดเดินชนปลิวเรียบร้อย!",
    Duration = 3,
    Image = 4483362458,
 })
 
 --------------------------------------------------
--- แท็บที่ 1: หน้าหลัก (ต้านแรงโน้มถ่วง, หมุนตัว, ทะลุกำแพง, บังคับมุมมองที่ 3)
+-- แท็บที่ 1: หน้าหลัก (ต้านแรงโน้มถ่วง, หมุนตัว, ทะลุกำแพง, บังคับมุมมองที่ 3, เดินชนปลิว)
 --------------------------------------------------
 MainTab:CreateSection("ระบบเคลื่อนไหว & ป่วนพิเศษ")
 
@@ -82,7 +82,18 @@ MainTab:CreateToggle({
    end,
 })
 
--- ลูปการทำงานของฟีเจอร์หน้าหลัก (ปลอดภัย ไม่เด้ง)
+_G.TouchFling = false
+MainTab:CreateToggle({
+   Name = "โหมดเดินชนปลิว (Touch Fling)",
+   CurrentValue = false,
+   Flag = "TouchFlingToggle",
+   Callback = function(Value)
+       _G.TouchFling = Value
+       Rayfield:Notify({Title = "Touch Fling", Content = Value and "เปิดใช้งานแล้ว (เดินชนใคร คนนั้นปลิว)" else "ปิดใช้งานแล้ว", Duration = 2})
+   end,
+})
+
+-- ลูปการทำงานของฟีเจอร์หน้าหลัก (รวม Fling)
 RunService.RenderStepped:Connect(function()
    -- Spinbot
    if _G.SpinBot and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
@@ -102,13 +113,23 @@ RunService.RenderStepped:Connect(function()
    if _G.ForceThirdPerson then
        LocalPlayer.CameraMode = Enum.CameraMode.Classic
    end
+
+   -- Touch Fling (ระบบเดินชนปลิวปลอดภัย)
+   if _G.TouchFling and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+       local rootPart = LocalPlayer.Character.HumanoidRootPart
+       local vel = rootPart.Velocity
+       rootPart.Velocity = vel * 10000 + Vector3.new(0, 10000, 0)
+       RunService.RenderStepped:Wait()
+       rootPart.Velocity = vel
+   end
 end)
 
 --------------------------------------------------
--- แท็บที่ 2: หน้ามอง (ESP กรอบ, เส้น Tracer, เลือกสี)
+-- แท็บที่ 2: หน้ามอง (ESP กรอบ, เส้น Tracer, วงกลมกลางจอ, เลือกสี)
 --------------------------------------------------
 _G.ESPBox = false
 _G.ESPTracer = false
+_G.FOVCircle = false
 _G.ESPColor = Color3.fromRGB(255, 0, 0)
 
 VisualTab:CreateToggle({
@@ -129,8 +150,17 @@ VisualTab:CreateToggle({
    end,
 })
 
+VisualTab:CreateToggle({
+   Name = "วงกลมกลางจอ (FOV Circle)",
+   CurrentValue = false,
+   Flag = "FOVCircleToggle",
+   Callback = function(Value)
+       _G.FOVCircle = Value
+   end,
+})
+
 VisualTab:CreateColorPicker({
-   Name = "ปรับสี ESP (กรอบและเส้น)",
+   Name = "ปรับสี ESP & วงกลม",
    Color = Color3.fromRGB(255, 0, 0),
    Flag = "ESPColorPicker",
    Callback = function(Value)
@@ -138,16 +168,35 @@ VisualTab:CreateColorPicker({
    end,
 })
 
+local successCircle, fovCircle = pcall(function()
+   local circle = Drawing.new("Circle")
+   circle.Visible = false
+   circle.Radius = 120
+   circle.Thickness = 1.5
+   circle.Filled = false
+   circle.NumSides = 60
+   return circle
+end)
+
 local tracers = {}
 
 RunService.RenderStepped:Connect(function()
+   if successCircle and fovCircle then
+       if _G.FOVCircle then
+           fovCircle.Visible = true
+           fovCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+           fovCircle.Color = _G.ESPColor
+       else
+           fovCircle.Visible = false
+       end
+   end
+
    for _, player in pairs(game.Players:GetPlayers()) do
        if player ~= LocalPlayer and player.Character then
            local char = player.Character
            local rootPart = char:FindFirstChild("HumanoidRootPart")
            local highlight = char:FindFirstChild("GeminiESPBox")
            
-           -- จัดการกรอบสี่เหลี่ยม
            if _G.ESPBox then
                if not highlight then
                    highlight = Instance.new("Highlight")
@@ -165,7 +214,6 @@ RunService.RenderStepped:Connect(function()
                end
            end
 
-           -- จัดการเส้น Tracer
            if _G.ESPTracer and rootPart then
                if not tracers[player] then
                    local success, line = pcall(function()
