@@ -1,15 +1,15 @@
--- Gemini Hub: Custom Intro & Empty Panel (Test Version)
+-- Gemini Hub: Full Custom UI with Intro, Toggle Button, and Draggable Panel
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 local localPlayer = Players.LocalPlayer
 
--- ลบ UI เก่าทิ้งก่อนกันบั๊กซ้อนทับ
+-- ลบ UI เก่าทิ้งกันบั๊กซ้อนทับ
 if CoreGui:FindFirstChild("GeminiHubCustomUI") then
     CoreGui.GeminiHubCustomUI:Destroy()
 end
 
--- สร้าง ScreenGui หลัก
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "GeminiHubCustomUI"
 ScreenGui.Parent = CoreGui
@@ -18,41 +18,55 @@ ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 -- 1. ส่วนหน้าจอโหลด (Loading Intro)
 local IntroFrame = Instance.new("Frame")
 IntroFrame.Name = "IntroFrame"
-IntroFrame.Size = UDim2.new(0, 350, 0, 180)
-IntroFrame.Position = UDim2.new(0.5, -175, 0.5, -90)
-IntroFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+IntroFrame.Size = UDim2.new(0, 360, 0, 190)
+IntroFrame.Position = UDim2.new(0.5, -180, 0.5, -95)
+IntroFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
 IntroFrame.BorderSizePixel = 0
 IntroFrame.Parent = ScreenGui
 
 local IntroCorner = Instance.new("UICorner")
-IntroCorner.CornerRadius = UDim.new(0, 10)
+IntroCorner.CornerRadius = UDim.new(0, 12)
 IntroCorner.Parent = IntroFrame
 
+-- โลโก้จำลองรูป Gemini (วงกลมตรงกลางหัวข้อ)
+local LogoIcon = Instance.new("Frame")
+LogoIcon.Size = UDim2.new(0, 32, 0, 32)
+LogoIcon.Position = UDim2.new(0, 20, 0, 18)
+LogoIcon.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
+LogoIcon.BorderSizePixel = 0
+LogoIcon.Parent = IntroFrame
+
+local LogoCorner = Instance.new("UICorner")
+LogoCorner.CornerRadius = UDim.new(1, 0)
+LogoCorner.Parent = LogoIcon
+
 local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Size = UDim2.new(1, 0, 0, 50)
-TitleLabel.Position = UDim2.new(0, 0, 0, 20)
+TitleLabel.Size = UDim2.new(1, -70, 0, 40)
+TitleLabel.Position = UDim2.new(0, 62, 0, 14)
 TitleLabel.BackgroundTransparency = 1
 TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleLabel.TextSize = 18
+TitleLabel.TextSize = 16
 TitleLabel.Font = Enum.Font.GothamBold
 TitleLabel.Text = "ยินดีต้อนรับสู่ค่าย Gemini Hub"
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
 TitleLabel.Parent = IntroFrame
 
 local SubLabel = Instance.new("TextLabel")
-SubLabel.Size = UDim2.new(1, 0, 0, 30)
-SubLabel.Position = UDim2.new(0, 0, 0, 60)
+SubLabel.Size = UDim2.new(1, -40, 0, 30)
+SubLabel.Position = UDim2.new(0, 20, 0, 60)
 SubLabel.BackgroundTransparency = 1
-SubLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
-SubLabel.TextSize = 14
+SubLabel.TextColor3 = Color3.fromRGB(160, 160, 160)
+SubLabel.TextSize = 13
 SubLabel.Font = Enum.Font.Gotham
 SubLabel.Text = "Gemini System Initializing..."
+SubLabel.TextXAlignment = Enum.TextXAlignment.Left
 SubLabel.Parent = IntroFrame
 
--- หลอดดาวน์โหลด (Loading Bar Background)
+-- หลอดดาวน์โหลด
 local BarBg = Instance.new("Frame")
-BarBg.Size = UDim2.new(0, 300, 0, 10)
-BarBg.Position = UDim2.new(0.5, -150, 0, 115)
-BarBg.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+BarBg.Size = UDim2.new(0, 320, 0, 10)
+BarBg.Position = UDim2.new(0.5, -160, 0, 115)
+BarBg.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 BarBg.BorderSizePixel = 0
 BarBg.Parent = IntroFrame
 
@@ -60,10 +74,9 @@ local BarBgCorner = Instance.new("UICorner")
 BarBgCorner.CornerRadius = UDim.new(1, 0)
 BarBgCorner.Parent = BarBg
 
--- ตัวหลอดวิ่งด้านใน
 local BarFill = Instance.new("Frame")
 BarFill.Size = UDim2.new(0, 0, 1, 0)
-BarFill.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+BarFill.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
 BarFill.BorderSizePixel = 0
 BarFill.Parent = BarBg
 
@@ -73,58 +86,138 @@ BarFillCorner.Parent = BarFill
 
 local PercentLabel = Instance.new("TextLabel")
 PercentLabel.Size = UDim2.new(1, 0, 0, 25)
-PercentLabel.Position = UDim2.new(0, 0, 0, 135)
+PercentLabel.Position = UDim2.new(0, 0, 0, 140)
 PercentLabel.BackgroundTransparency = 1
-PercentLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+PercentLabel.TextColor3 = Color3.fromRGB(140, 140, 140)
 PercentLabel.TextSize = 12
 PercentLabel.Font = Enum.Font.Gotham
 PercentLabel.Text = "0%"
 PercentLabel.Parent = IntroFrame
 
--- 2. ส่วนของแผงหลัก (Main Panel เปล่าๆ รอใส่ฟีเจอร์)
+-- 2. ปุ่มไอคอนลอยรูป Gemini (สำหรับกดเปิด/ปิดแผงหลักหลังจากปิดด้วยกากบาท)
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Name = "GeminiToggleButton"
+ToggleButton.Size = UDim2.new(0, 50, 0, 50)
+ToggleButton.Position = UDim2.new(0, 30, 0, 150)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+ToggleButton.BorderSizePixel = 0
+ToggleButton.AutoButtonColor = true
+ToggleButton.Visible = false -- ซ่อนไว้ตอนกำลังโหลดอินโทร
+ToggleButton.Text = "G"
+ToggleButton.TextColor3 = Color3.fromRGB(0, 162, 255)
+ToggleButton.TextSize = 22
+ToggleButton.Font = Enum.Font.GothamBold
+ToggleButton.Parent = ScreenGui
+
+local ToggleCorner = Instance.new("UICorner")
+ToggleCorner.CornerRadius = UDim.new(1, 0)
+ToggleCorner.Parent = ToggleButton
+
+-- 3. ส่วนของแผงหลัก (Main Panel)
 local MainPanel = Instance.new("Frame")
 MainPanel.Name = "MainPanel"
 MainPanel.Size = UDim2.new(0, 450, 0, 300)
 MainPanel.Position = UDim2.new(0.5, -225, 0.5, -150)
 MainPanel.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 MainPanel.BorderSizePixel = 0
-MainPanel.Visible = false -- ซ่อนไว้ก่อนจนกว่าจะโหลดเสร็จ
+MainPanel.Visible = false
 MainPanel.Parent = ScreenGui
 
 local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 8)
+MainCorner.CornerRadius = UDim.new(0, 10)
 MainCorner.Parent = MainPanel
 
+-- แถบหัวข้อแผงหลัก (ใช้สำหรับจับลากขยับหน้าต่าง)
 local TopBar = Instance.new("Frame")
-TopBar.Size = UDim2.new(1, 0, 0, 40)
-TopBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+TopBar.Size = UDim2.new(1, 0, 0, 45)
+TopBar.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
 TopBar.BorderSizePixel = 0
 TopBar.Parent = MainPanel
 
 local TopBarCorner = Instance.new("UICorner")
-TopBarCorner.CornerRadius = UDim.new(0, 8)
+TopBarCorner.CornerRadius = UDim.new(0, 10)
 TopBarCorner.Parent = TopBar
 
+-- ป้องกันมุมล่างของ TopBar ไม่ให้โค้งมนผิดรูป
+local FixTopBar = Instance.new("Frame")
+FixTopBar.Size = UDim2.new(1, 0, 0, 10)
+FixTopBar.Position = UDim2.new(0, 0, 1, -10)
+FixTopBar.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
+FixTopBar.BorderSizePixel = 0
+FixTopBar.Parent = TopBar
+
 local HubTitle = Instance.new("TextLabel")
-HubTitle.Size = UDim2.new(1, -20, 1, 0)
+HubTitle.Size = UDim2.new(1, -60, 1, 0)
 HubTitle.Position = UDim2.new(0, 15, 0, 0)
 HubTitle.BackgroundTransparency = 1
 HubTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
 HubTitle.TextSize = 14
 HubTitle.Font = Enum.Font.GothamBold
-HubTitle.Text = "Gemini Hub | John Wick Edition (Blank Test)"
+HubTitle.Text = "Gemini Hub | Blank Panel"
 HubTitle.TextXAlignment = Enum.TextXAlignment.Left
 HubTitle.Parent = TopBar
 
--- ฟังก์ชันรันหลอดโหลดจำลอง แล้วเปิดแผงหลัก
+-- ปุ่มกากบาท (Close Button)
+local CloseButton = Instance.new("TextButton")
+CloseButton.Size = UDim2.new(0, 35, 0, 35)
+CloseButton.Position = UDim2.new(1, -40, 0, 5)
+CloseButton.BackgroundTransparency = 1
+CloseButton.Text = "X"
+CloseButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+CloseButton.TextSize = 18
+CloseButton.Font = Enum.Font.GothamBold
+CloseButton.Parent = TopBar
+
+-- ฟังก์ชันรันหน้าจอโหลด
 task.spawn(function()
     for i = 1, 100 do
         BarFill.Size = UDim2.new(i / 100, 0, 1, 0)
         PercentLabel.Text = i .. "%"
-        task.wait(0.015) -- ปรับความเร็วในการโหลดตรงนี้ได้ครับ
+        task.wait(0.012)
     end
     
-    -- โหลดเสร็จ เฟดอิน/เอาอินโทรออก แล้วเปิดแผงเปล่า
     IntroFrame:Destroy()
     MainPanel.Visible = true
+    ToggleButton.Visible = true
+end)
+
+-- ระบบกดปุ่มกากบาทเพื่อปิดแผงหลัก แล้วแสดงปุ่มไอคอน Gemini
+CloseButton.MouseButton1Click:Connect(function()
+    MainPanel.Visible = false
+    ToggleButton.Visible = true
+end)
+
+-- ระบบกดปุ่มไอคอน Gemini เพื่อเปิดแผงหลักกลับมา
+ToggleButton.MouseButton1Click:Connect(function()
+    MainPanel.Visible = true
+    ToggleButton.Visible = false
+end)
+
+-- ระบบทำให้แผงหลักลากขยับไปมาได้บนมือถือ
+local dragging, dragInput, dragStart, startPos
+TopBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainPanel.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+TopBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        MainPanel.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
 end)
