@@ -1,511 +1,199 @@
--- Gemini Hub: Ultimate Dropdown Edition (ESP Stable + 10 Sound Menu + Stop Button)
+-- Gemini Sound: Floating Minimalist Edition
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
-local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local localPlayer = Players.LocalPlayer
 
-if CoreGui:FindFirstChild("GeminiHubDropdown") then
-    CoreGui.GeminiHubDropdown:Destroy()
+if CoreGui:FindFirstChild("GeminiFloatSound") then
+    CoreGui.GeminiFloatSound:Destroy()
 end
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "GeminiHubDropdown"
+ScreenGui.Name = "GeminiFloatSound"
 ScreenGui.Parent = CoreGui
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- 1. ปุ่มเปิด/ปิดลอย
+-- 1. ปุ่มเปิด/ปิดลอย (รูปตัว G)
 local ToggleButton = Instance.new("TextButton")
-ToggleButton.Name = "GeminiToggleButton"
-ToggleButton.Size = UDim2.new(0, 50, 0, 50)
+ToggleButton.Size = UDim2.new(0, 45, 0, 45)
 ToggleButton.Position = UDim2.new(0, 30, 0, 150)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(20, 20, 24)
 ToggleButton.BorderSizePixel = 0
-ToggleButton.Text = "HUB"
+ToggleButton.Text = "G"
 ToggleButton.TextColor3 = Color3.fromRGB(0, 162, 255)
-ToggleButton.TextSize, ToggleButton.Font = 12, Enum.Font.GothamBold
+ToggleButton.TextSize = 20
+ToggleButton.Font = Enum.Font.GothamBold
 ToggleButton.Parent = ScreenGui
 Instance.new("UICorner", ToggleButton).CornerRadius = UDim.new(1, 0)
 
--- 2. แผงหลัก
+local ToggleStroke = Instance.new("UIStroke")
+ToggleStroke.Color = Color3.fromRGB(45, 45, 55)
+ToggleStroke.Thickness = 1
+ToggleStroke.Parent = ToggleButton
+
+-- 2. หน้าต่างหลักสี่เหลี่ยมผืนผ้าขอบโค้งมน (ไร้เหลี่ยม)
 local MainPanel = Instance.new("Frame")
-MainPanel.Name = "MainPanel"
-MainPanel.Size = UDim2.new(0, 520, 0, 420)
-MainPanel.Position = UDim2.new(0.5, -260, 0.5, -210)
-MainPanel.BackgroundColor3 = Color3.fromRGB(20, 20, 22)
+MainPanel.Size = UDim2.new(0, 320, 0, 175)
+MainPanel.Position = UDim2.new(0.5, -160, 0.5, -87)
+MainPanel.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
 MainPanel.BorderSizePixel = 0
 MainPanel.Parent = ScreenGui
-Instance.new("UICorner", MainPanel).CornerRadius = UDim.new(0, 14)
+Instance.new("UICorner", MainPanel).CornerRadius = UDim.new(0, 16)
 
 local MainStroke = Instance.new("UIStroke")
-MainStroke.Color = Color3.fromRGB(45, 45, 50)
+MainStroke.Color = Color3.fromRGB(45, 45, 55)
 MainStroke.Thickness = 1
 MainStroke.Parent = MainPanel
 
+-- แถบบน (TopBar สำหรับลาก)
 local TopBar = Instance.new("Frame")
-TopBar.Size = UDim2.new(1, 0, 0, 45)
-TopBar.BackgroundColor3 = Color3.fromRGB(26, 26, 30)
+TopBar.Size = UDim2.new(1, 0, 0, 36)
+TopBar.BackgroundColor3 = Color3.fromRGB(24, 24, 30)
 TopBar.BorderSizePixel = 0
 TopBar.Parent = MainPanel
-Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 14)
+Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 16)
 
 local FixTopBar = Instance.new("Frame")
-FixTopBar.Size = UDim2.new(1, 0, 0, 10)
-FixTopBar.Position = UDim2.new(0, 0, 1, -10)
-FixTopBar.BackgroundColor3 = Color3.fromRGB(26, 26, 30)
+FixTopBar.Size = UDim2.new(1, 0, 0, 8)
+FixTopBar.Position = UDim2.new(0, 0, 1, -8)
+FixTopBar.BackgroundColor3 = Color3.fromRGB(24, 24, 30)
 FixTopBar.BorderSizePixel = 0
 FixTopBar.Parent = TopBar
 
-local HubTitle = Instance.new("TextLabel")
-HubTitle.Size = UDim2.new(1, -100, 1, 0)
-HubTitle.Position = UDim2.new(0, 16, 0, 0)
-HubTitle.BackgroundTransparency = 1
-HubTitle.TextColor3 = Color3.fromRGB(240, 240, 240)
-HubTitle.TextSize = 13
-HubTitle.Font = Enum.Font.GothamBold
-HubTitle.Text = "เจมิไน ฮับ | เมนูเสียงดรอปดาวน์ 10 เพลง + ปุ่มหยุด"
-HubTitle.TextXAlignment = Enum.TextXAlignment.Left
-HubTitle.Parent = TopBar
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, -50, 1, 0)
+Title.Position = UDim2.new(0, 14, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "Gemini Sound Player"
+Title.TextColor3 = Color3.fromRGB(230, 230, 235)
+Title.TextSize = 12
+Title.Font = Enum.Font.GothamBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = TopBar
 
+-- ปุ่มปิด (X)
 local CloseButton = Instance.new("TextButton")
-CloseButton.Size = UDim2.new(0, 30, 0, 30)
-CloseButton.Position = UDim2.new(1, -38, 0.5, -15)
-CloseButton.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
-CloseButton.Text = "X"
+CloseButton.Size = UDim2.new(0, 24, 0, 24)
+CloseButton.Position = UDim2.new(1, -30, 0.5, -12)
+CloseButton.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+CloseButton.Text = "✕"
 CloseButton.TextColor3 = Color3.fromRGB(180, 180, 180)
-CloseButton.TextSize = 13
+CloseButton.TextSize = 11
 CloseButton.Font = Enum.Font.GothamBold
 CloseButton.Parent = TopBar
-Instance.new("UICorner", CloseButton).CornerRadius = UDim.new(0, 8)
+Instance.new("UICorner", CloseButton).CornerRadius = UDim.new(0, 6)
 
--- 3. แท็บเมนู (3 แท็บ)
-local TabBar = Instance.new("Frame")
-TabBar.Size = UDim2.new(1, -24, 0, 42)
-TabBar.Position = UDim2.new(0, 12, 0, 55)
-TabBar.BackgroundColor3 = Color3.fromRGB(26, 26, 30)
-TabBar.BorderSizePixel = 0
-TabBar.Parent = MainPanel
-Instance.new("UICorner", TabBar).CornerRadius = UDim.new(0, 10)
-
-local Tab1Btn = Instance.new("TextButton")
-Tab1Btn.Size = UDim2.new(0.32, 0, 1, -6)
-Tab1Btn.Position = UDim2.new(0, 3, 0, 3)
-Tab1Btn.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
-Tab1Btn.Text = "การเคลื่อนไหว"
-Tab1Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-Tab1Btn.TextSize, Tab1Btn.Font = 12, Enum.Font.GothamBold
-Tab1Btn.Parent = TabBar
-Instance.new("UICorner", Tab1Btn).CornerRadius = UDim.new(0, 8)
-
-local Tab2Btn = Instance.new("TextButton")
-Tab2Btn.Size = UDim2.new(0.32, 0, 1, -6)
-Tab2Btn.Position = UDim2.new(0.34, 3, 0, 3)
-Tab2Btn.BackgroundColor3 = Color3.fromRGB(26, 26, 30)
-Tab2Btn.Text = "ระบบมอง (ESP)"
-Tab2Btn.TextColor3 = Color3.fromRGB(160, 160, 160)
-Tab2Btn.TextSize, Tab2Btn.Font = 12, Enum.Font.GothamBold
-Tab2Btn.Parent = TabBar
-Instance.new("UICorner", Tab2Btn).CornerRadius = UDim.new(0, 8)
-
-local Tab3Btn = Instance.new("TextButton")
-Tab3Btn.Size = UDim2.new(0.32, 0, 1, -6)
-Tab3Btn.Position = UDim2.new(0.68, 3, 0, 3)
-Tab3Btn.BackgroundColor3 = Color3.fromRGB(26, 26, 30)
-Tab3Btn.Text = "เสียงปั่น (Sound)"
-Tab3Btn.TextColor3 = Color3.fromRGB(160, 160, 160)
-Tab3Btn.TextSize, Tab3Btn.Font = 12, Enum.Font.GothamBold
-Tab3Btn.Parent = TabBar
-Instance.new("UICorner", Tab3Btn).CornerRadius = UDim.new(0, 8)
-
-local function createModernToggle(parent, titleText, yPos, initialActive, callback)
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, 0, 0, 50)
-    frame.Position = UDim2.new(0, 0, 0, yPos)
-    frame.BackgroundColor3 = Color3.fromRGB(26, 26, 30)
-    frame.Parent = parent
-    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
-
-    local lbl = Instance.new("TextLabel")
-    lbl.Size = UDim2.new(0.7, 0, 1, 0)
-    lbl.Position = UDim2.new(0, 16, 0, 0)
-    lbl.BackgroundTransparency = 1
-    lbl.Text = titleText
-    lbl.TextColor3 = Color3.fromRGB(230, 230, 230)
-    lbl.TextSize, lbl.Font, lbl.TextXAlignment = 13, Enum.Font.GothamMedium, Enum.TextXAlignment.Left
-    lbl.Parent = frame
-
-    local switchBg = Instance.new("TextButton")
-    switchBg.Size = UDim2.new(0, 48, 0, 26)
-    switchBg.Position = UDim2.new(1, -60, 0.5, -13)
-    switchBg.BackgroundColor3 = initialActive and Color3.fromRGB(0, 162, 255) or Color3.fromRGB(45, 45, 50)
-    switchBg.Text = ""
-    switchBg.AutoButtonColor = false
-    switchBg.Parent = frame
-    Instance.new("UICorner", switchBg).CornerRadius = UDim.new(1, 0)
-
-    local switchDot = Instance.new("Frame")
-    switchDot.Size = UDim2.new(0, 20, 0, 20)
-    switchDot.Position = initialActive and UDim2.new(1, -23, 0.5, -10) or UDim2.new(0, 3, 0.5, -10)
-    switchDot.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    switchDot.Parent = switchBg
-    Instance.new("UICorner", switchDot).CornerRadius = UDim.new(1, 0)
-
-    local active = initialActive
-    switchBg.MouseButton1Click:Connect(function()
-        active = not active
-        if active then
-            switchBg.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
-            switchDot:TweenPosition(UDim2.new(1, -23, 0.5, -10), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
-        else
-            switchBg.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
-            switchDot:TweenPosition(UDim2.new(0, 3, 0.5, -10), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
-        end
-        callback(active)
-    end)
-end
-
-local function createToggleSliderModern(parent, titleText, yPos, defaultVal, callback)
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, 0, 0, 75)
-    frame.Position = UDim2.new(0, 0, 0, yPos)
-    frame.BackgroundColor3 = Color3.fromRGB(26, 26, 30)
-    frame.Parent = parent
-    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
-
-    local lbl = Instance.new("TextLabel")
-    lbl.Size = UDim2.new(0.6, 0, 0, 35)
-    lbl.Position = UDim2.new(0, 16, 0, 5)
-    lbl.BackgroundTransparency = 1
-    lbl.Text = titleText
-    lbl.TextColor3 = Color3.fromRGB(230, 230, 230)
-    lbl.TextSize, lbl.Font, lbl.TextXAlignment = 13, Enum.Font.GothamBold, Enum.TextXAlignment.Left
-    lbl.Parent = frame
-
-    local switchBg = Instance.new("TextButton")
-    switchBg.Size = UDim2.new(0, 48, 0, 26)
-    switchBg.Position = UDim2.new(1, -60, 0, 8)
-    switchBg.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
-    switchBg.Text = ""
-    switchBg.AutoButtonColor = false
-    switchBg.Parent = frame
-    Instance.new("UICorner", switchBg).CornerRadius = UDim.new(1, 0)
-
-    local switchDot = Instance.new("Frame")
-    switchDot.Size = UDim2.new(0, 20, 0, 20)
-    switchDot.Position = UDim2.new(0, 3, 0.5, -10)
-    switchDot.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    switchDot.Parent = switchBg
-    Instance.new("UICorner", switchDot).CornerRadius = UDim.new(1, 0)
-
-    local boxLbl = Instance.new("TextLabel")
-    boxLbl.Size = UDim2.new(0, 120, 0, 24)
-    boxLbl.Position = UDim2.new(0, 16, 0, 42)
-    boxLbl.BackgroundTransparency = 1
-    boxLbl.Text = "ค่าตัวเลข (1-100):"
-    boxLbl.TextColor3 = Color3.fromRGB(150, 150, 150)
-    boxLbl.TextSize, boxLbl.Font, boxLbl.TextXAlignment = 12, Enum.Font.Gotham, Enum.TextXAlignment.Left
-    boxLbl.Parent = frame
-
-    local box = Instance.new("TextBox")
-    box.Size = UDim2.new(0, 60, 0, 26)
-    box.Position = UDim2.new(0, 130, 0, 41)
-    box.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
-    box.Text = tostring(defaultVal)
-    box.TextColor3 = Color3.fromRGB(255, 255, 255)
-    box.TextSize, box.Font = 12, Enum.Font.GothamBold
-    box.Parent = frame
-    Instance.new("UICorner", box).CornerRadius = UDim.new(0, 6)
-
-    local active = false
-    local currentVal = defaultVal
-
-    switchBg.MouseButton1Click:Connect(function()
-        active = not active
-        if active then
-            switchBg.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
-            switchDot:TweenPosition(UDim2.new(1, -23, 0.5, -10), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
-        else
-            switchBg.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
-            switchDot:TweenPosition(UDim2.new(0, 3, 0.5, -10), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
-        end
-        callback(active, currentVal)
-    end)
-
-    box.FocusLost:Connect(function()
-        local val = tonumber(box.Text)
-        if val then
-            if val < 1 then val = 1 elseif val > 100 then val = 100 end
-            box.Text = tostring(val)
-            currentVal = val
-        else
-            box.Text = tostring(defaultVal)
-            currentVal = defaultVal
-        end
-        if active then callback(true, currentVal) end
-    end)
-end
-
--- --- หน้าที่ 1: การเคลื่อนไหว (Tab 1) ---
-local Content1 = Instance.new("ScrollingFrame")
-Content1.Size = UDim2.new(1, -24, 1, -125)
-Content1.Position = UDim2.new(0, 12, 0, 110)
-Content1.BackgroundTransparency = 1
-Content1.CanvasSize = UDim2.new(0, 0, 0, 240)
-Content1.ScrollBarThickness = 3
-Content1.Parent = MainPanel
-
-createToggleSliderModern(Content1, "ปรับพลังกระโดด (JumpPower)", 0, 50, function(state, val)
-    local char = localPlayer.Character
-    if char and char:FindFirstChild("Humanoid") then
-        if state then char.Humanoid.JumpPower = val * 2 else char.Humanoid.JumpPower = 50 end
-    end
-end)
-
-createToggleSliderModern(Content1, "ปรับความเร็วเดิน (WalkSpeed)", 85, 50, function(state, val)
-    local char = localPlayer.Character
-    if char and char:FindFirstChild("Humanoid") then
-        if state then char.Humanoid.WalkSpeed = val else char.Humanoid.WalkSpeed = 16 end
-    end
-end)
-
-local noclipConnection = nil
-createModernToggle(Content1, "เดินทะลุกำแพง (Noclip)", 170, false, function(state)
-    if state then
-        noclipConnection = RunService.Stepped:Connect(function()
-            local char = localPlayer.Character
-            if char then
-                for _, part in ipairs(char:GetDescendants()) do
-                    if part:IsA("BasePart") and part.CanCollide then
-                        part.CanCollide = false
-                    end
-                end
-            end
-        end)
-    else
-        if noclipConnection then
-            noclipConnection:Disconnect()
-            noclipConnection = nil
-        end
-    end
-end)
-
--- --- หน้าที่ 2: ระบบมอง Stable ESP (Tab 2) ---
-local Content2 = Instance.new("ScrollingFrame")
-Content2.Size = UDim2.new(1, -24, 1, -125)
-Content2.Position = UDim2.new(0, 12, 0, 110)
-Content2.BackgroundTransparency = 1
-Content2.Visible = false
-Content2.CanvasSize = UDim2.new(0, 0, 0, 120)
-Content2.ScrollBarThickness = 3
-Content2.Parent = MainPanel
-
-local espActive = false
-local function applyESPToCharacter(char)
-    if not char then return end
-    task.wait(0.5)
-    if char:FindFirstChild("GeminiESPBox") then
-        char.GeminiESPBox:Destroy()
-    end
-    if espActive then
-        local highlight = Instance.new("Highlight")
-        highlight.Name = "GeminiESPBox"
-        highlight.Adornee = char
-        highlight.FillColor = Color3.fromRGB(0, 162, 255)
-        highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-        highlight.FillTransparency = 0.5
-        highlight.Parent = char
-    end
-end
-
-createModernToggle(Content2, "เปิดระบบมองตัวผู้เล่น (Stable ESP)", 0, false, function(state)
-    espActive = state
-    if state then
-        for _, p in ipairs(Players:GetPlayers()) do
-            if p ~= localPlayer then
-                if p.Character then applyESPToCharacter(p.Character) end
-                p.CharacterAdded:Connect(function(newChar)
-                    applyESPToCharacter(newChar)
-                end)
-            end
-        end
-    else
-        for _, p in ipairs(Players:GetPlayers()) do
-            if p.Character and p.Character:FindFirstChild("GeminiESPBox") then
-                p.Character.GeminiESPBox:Destroy()
-            end
-        end
-    end
-end)
-
-Players.PlayerAdded:Connect(function(p)
-    p.CharacterAdded:Connect(function(newChar)
-        if espActive and p ~= localPlayer then
-            applyESPToCharacter(newChar)
-        end
-    end)
-end)
-
--- --- หน้าที่ 3: ระบบเสียง (Dropdown เมนู 10 เสียง + ปุ่มหยุดเพลง) (Tab 3) ---
-local Content3 = Instance.new("ScrollingFrame")
-Content3.Size = UDim2.new(1, -24, 1, -125)
-Content3.Position = UDim2.new(0, 12, 0, 110)
-Content3.BackgroundTransparency = 1
-Content3.Visible = false
-Content3.CanvasSize = UDim2.new(0, 0, 0, 140)
-Content3.ScrollBarThickness = 3
-Content3.Parent = MainPanel
+-- 3. ช่องใส่เสียง และปุ่มรัน
+local Content = Instance.new("Frame")
+Content.Size = UDim2.new(1, -28, 1, -48)
+Content.Position = UDim2.new(0, 14, 0, 42)
+Content.BackgroundTransparency = 1
+Content.Parent = MainPanel
 
 local soundBox = Instance.new("TextBox")
-soundBox.Size = UDim2.new(1, -100, 0, 40)
-soundBox.Position = UDim2.new(0, 0, 0, 0)
-soundBox.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
+soundBox.Size = UDim2.new(1, 0, 0, 36)
+soundBox.Position = UDim2.new(0, 0, 0, 8)
+soundBox.BackgroundColor3 = Color3.fromRGB(26, 26, 32)
 soundBox.Text = "5410086218"
-soundBox.PlaceholderText = "รหัสเสียง (Sound ID)..."
+soundBox.PlaceholderText = "ใส่รหัสเสียง (Sound ID)..."
 soundBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-soundBox.TextSize, soundBox.Font = 13, Enum.Font.Gotham
-soundBox.Parent = Content3
+soundBox.TextSize = 12
+soundBox.Font = Enum.Font.Gotham
+soundBox.Parent = Content
 Instance.new("UICorner", soundBox).CornerRadius = UDim.new(0, 8)
 
--- ปุ่มดรอปดาวน์เลือกเสียง
-local dropdownToggleBtn = Instance.new("TextButton")
-dropdownToggleBtn.Size = UDim2.new(0, 90, 0, 40)
-dropdownToggleBtn.Position = UDim2.new(1, -90, 0, 0)
-dropdownToggleBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
-dropdownToggleBtn.Text = "เลือกเพลง 🔽"
-dropdownToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-dropdownToggleBtn.TextSize, dropdownToggleBtn.Font = 12, Enum.Font.GothamBold
-dropdownToggleBtn.Parent = Content3
-Instance.new("UICorner", dropdownToggleBtn).CornerRadius = UDim.new(0, 8)
+local BoxStroke = Instance.new("UIStroke")
+BoxStroke.Color = Color3.fromRGB(45, 45, 55)
+BoxStroke.Thickness = 1
+BoxStroke.Parent = soundBox
 
--- กรอบรายชื่อ 10 เพลง (ซ่อนไว้ก่อน กดแล้วเปิด)
-local dropdownList = Instance.new("ScrollingFrame")
-dropdownList.Size = UDim2.new(1, 0, 0, 160)
-dropdownList.Position = UDim2.new(0, 0, 0, 45)
-dropdownList.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
-dropdownList.BorderSizePixel = 0
-dropdownList.CanvasSize = UDim2.new(0, 0, 0, 300)
-dropdownList.ScrollBarThickness = 4
-dropdownList.Visible = false
-dropdownList.ZIndex = 5
-dropdownList.Parent = Content3
-Instance.new("UICorner", dropdownList).CornerRadius = UDim.new(0, 8)
+local playBtn = Instance.new("TextButton")
+playBtn.Size = UDim2.new(0.48, 0, 0, 38)
+playBtn.Position = UDim2.new(0, 0, 0, 54)
+playBtn.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
+playBtn.Text = "▶ รันเพลง"
+playBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+playBtn.TextSize = 12
+playBtn.Font = Enum.Font.GothamBold
+playBtn.Parent = Content
+Instance.new("UICorner", playBtn).CornerRadius = UDim.new(0, 8)
 
-local soundList = {
-    {name = "1. เพลง Crab Rave แดนซ์สะใจ", id = "5410086218"},
-    {name = "2. เสียงระเบิด ตูมสนั่น", id = "142244342"},
-    {name = "3. เสียงแตรลม Airhorn", id = "130761555"},
-    {name = "4. เสียงหัวเราะมีมสุดปั่น", id = "9069609284"},
-    {name = "5. เสียงเหล็กหล่นใส่พื้น LOUD", id = "139668725303708"},
-    {name = "6. เสียงซาวด์ตลก (Ba-Dum-Tss)", id = "9114223173"},
-    {name = "7. เสียงไก่ร้องกุ๊กๆ", id = "131961793"},
-    {name = "8. เสียงแมวร้องเหมียว", id = "156329431"},
-    {name = "9. เพลงม้าโยกฮิตๆ", id = "6023426915"},
-    {name = "10. ซาวด์สะดุ้ง / โจנס์", id = "4590657391"}
-}
+local stopBtn = Instance.new("TextButton")
+stopBtn.Size = UDim2.new(0.48, 0, 0, 38)
+stopBtn.Position = UDim2.new(0.52, 0, 0, 54)
+stopBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+stopBtn.Text = "⏹ หยุดเพลง"
+stopBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+stopBtn.TextSize = 12
+stopBtn.Font = Enum.Font.GothamBold
+stopBtn.Parent = Content
+Instance.new("UICorner", stopBtn).CornerRadius = UDim.new(0, 8)
 
-for i, data in ipairs(soundList) do
-    local itemBtn = Instance.new("TextButton")
-    itemBtn.Size = UDim2.new(1, -10, 0, 26)
-    itemBtn.Position = UDim2.new(0, 5, 0, (i - 1) * 30 + 5)
-    itemBtn.BackgroundColor3 = Color3.fromRGB(38, 38, 45)
-    itemBtn.Text = data.name
-    itemBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
-    itemBtn.TextSize, itemBtn.Font, itemBtn.TextXAlignment = 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
-    itemBtn.ZIndex = 6
-    itemBtn.Parent = dropdownList
-    Instance.new("UICorner", itemBtn).CornerRadius = UDim.new(0, 6)
-    
-    itemBtn.MouseButton1Click:Connect(function()
-        soundBox.Text = data.id
-        dropdownList.Visible = false
-        dropdownToggleBtn.Text = "เลือกเพลง 🔽"
-    end)
-end
+-- ระบบเล่น/หยุดเสียง
+local currentSound = nil
 
-dropdownToggleBtn.MouseButton1Click:Connect(function()
-    dropdownList.Visible = not dropdownList.Visible
-    if dropdownList.Visible then
-        dropdownToggleBtn.Text = "ปิดรายชื่อ 🔼"
-    else
-        dropdownToggleBtn.Text = "เลือกเพลง 🔽"
-    end
-end)
-
-local playSoundBtn = Instance.new("TextButton")
-playSoundBtn.Size = UDim2.new(0.48, 0, 0, 45)
-playSoundBtn.Position = UDim2.new(0, 0, 0, 50)
-playSoundBtn.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
-playSoundBtn.Text = "🎵 เล่นเสียง"
-playSoundBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-playSoundBtn.TextSize, playSoundBtn.Font = 13, Enum.Font.GothamBold
-playSoundBtn.Parent = Content3
-Instance.new("UICorner", playSoundBtn).CornerRadius = UDim.new(0, 8)
-
--- ปุ่มหยุดเพลง
-local stopSoundBtn = Instance.new("TextButton")
-stopSoundBtn.Size = UDim2.new(0.48, 0, 0, 45)
-stopSoundBtn.Position = UDim2.new(0.52, 0, 0, 50)
-stopSoundBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-stopSoundBtn.Text = "⏹️ หยุดเพลง"
-stopSoundBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-stopSoundBtn.TextSize, stopSoundBtn.Font = 13, Enum.Font.GothamBold
-stopSoundBtn.Parent = Content3
-Instance.new("UICorner", stopSoundBtn).CornerRadius = UDim.new(0, 8)
-
-local currentPlayingSound = nil
-
-playSoundBtn.MouseButton1Click:Connect(function()
-    local soundIdNum = tonumber(soundBox.Text)
+playBtn.MouseButton1Click:Connect(function()
+    local idNum = tonumber(soundBox.Text)
     local char = localPlayer.Character
-    if soundIdNum and char and char:FindFirstChild("HumanoidRootPart") then
-        -- ถ้ามีเสียงเก่าเล่นอยู่ ให้หยุดและลบทิ้งก่อน
-        if currentPlayingSound and currentPlayingSound.Parent then
-            currentPlayingSound:Stop()
-            currentPlayingSound:Destroy()
+    if idNum and char and char:FindFirstChild("HumanoidRootPart") then
+        if currentSound and currentSound.Parent then
+            currentSound:Stop()
+            currentSound:Destroy()
         end
         
         local sound = Instance.new("Sound")
-        sound.SoundId = "rbxassetid://" .. tostring(soundIdNum)
+        sound.SoundId = "rbxassetid://" .. tostring(idNum)
         sound.Volume = 15
         sound.RollOffMaxDistance = 1000
         sound.RollOffMinDistance = 10
         sound.Parent = char.HumanoidRootPart
         
-        currentPlayingSound = sound
+        currentSound = sound
         sound:Play()
         
         sound.Ended:Connect(function()
-            if currentPlayingSound == sound then
-                currentPlayingSound = nil
-            end
+            if currentSound == sound then currentSound = nil end
             sound:Destroy()
         end)
     end
 end)
 
-stopSoundBtn.MouseButton1Click:Connect(function()
-    if currentPlayingSound and currentPlayingSound.Parent then
-        currentPlayingSound:Stop()
-        currentPlayingSound:Destroy()
-        currentPlayingSound = nil
+stopBtn.MouseButton1Click:Connect(function()
+    if currentSound and currentSound.Parent then
+        currentSound:Stop()
+        currentSound:Destroy()
+        currentSound = nil
     end
 end)
 
--- --- ระบบสลับหน้าแท็บ ---
-Tab1Btn.MouseButton1Click:Connect(function()
-    Content1.Visible = true; Content2.Visible = false; Content3.Visible = false
-    Tab1Btn.BackgroundColor3 = Color3.fromRGB(0, 162, 255); Tab1Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Tab2Btn.BackgroundColor3 = Color3.fromRGB(26, 26, 30); Tab2Btn.TextColor3 = Color3.fromRGB(160, 160, 160)
-    Tab3Btn.BackgroundColor3 = Color3.fromRGB(26, 26, 30); Tab3Btn.TextColor3 = Color3.fromRGB(160, 160, 160)
+-- กดปุ่ม X เพื่อปิดเมนู, กดตัว G เพื่อเปิดเมนูคืน
+CloseButton.MouseButton1Click:Connect(function()
+    MainPanel.Visible = false
+    ToggleButton.Visible = true
 end)
 
-Tab2Btn.MouseButton1Click:Connect(function()
-    Content1.Visible = false; Content2.Visible = true; Content3.Visible = false
-    Tab2Btn.BackgroundColor3 = Color3.fromRGB(0, 162, 255); Tab2Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Tab1Btn.BackgroundColor3 = Color3.fromRGB(26, 26, 30); Tab1Btn.TextColor3 = Color3.fromRGB(160, 160, 160)
-    Tab3Btn.BackgroundColor3 = Color3.fromRGB(26, 26, 30); Tab3Btn.TextColor3 = Color3.fromRGB(160, 160, 160)
+ToggleButton.MouseButton1Click:Connect(function()
+    MainPanel.Visible = true
+    ToggleButton.Visible = false
 end)
 
-Tab3Btn.MouseButton1Click:Connect(function()
-    Content1.Visible = false; Content2.Visible = false; Content3.Visible = true
-    Tab3Btn.BackgroundColor3 = 
+-- ระบบลากหน้าต่างอิสระ
+local dragging, dragInput, dragStart, startPos
+TopBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true; dragStart = input.Position; startPos = MainPanel.Position
+    end
+end)
+
+TopBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        MainPanel.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
