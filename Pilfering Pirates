@@ -1,16 +1,16 @@
--- Gemini Hub: Ultimate Complete Edition (UI + Movement + ESP + Sound)
+-- Gemini Hub: Ultimate Dropdown Edition (ESP Stable + 10 Sound Menu + Stop Button)
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local localPlayer = Players.LocalPlayer
 
-if CoreGui:FindFirstChild("GeminiHubUltimate") then
-    CoreGui.GeminiHubUltimate:Destroy()
+if CoreGui:FindFirstChild("GeminiHubDropdown") then
+    CoreGui.GeminiHubDropdown:Destroy()
 end
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "GeminiHubUltimate"
+ScreenGui.Name = "GeminiHubDropdown"
 ScreenGui.Parent = CoreGui
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
@@ -30,8 +30,8 @@ Instance.new("UICorner", ToggleButton).CornerRadius = UDim.new(1, 0)
 -- 2. แผงหลัก
 local MainPanel = Instance.new("Frame")
 MainPanel.Name = "MainPanel"
-MainPanel.Size = UDim2.new(0, 520, 0, 380)
-MainPanel.Position = UDim2.new(0.5, -260, 0.5, -190)
+MainPanel.Size = UDim2.new(0, 520, 0, 420)
+MainPanel.Position = UDim2.new(0.5, -260, 0.5, -210)
 MainPanel.BackgroundColor3 = Color3.fromRGB(20, 20, 22)
 MainPanel.BorderSizePixel = 0
 MainPanel.Parent = ScreenGui
@@ -63,7 +63,7 @@ HubTitle.BackgroundTransparency = 1
 HubTitle.TextColor3 = Color3.fromRGB(240, 240, 240)
 HubTitle.TextSize = 13
 HubTitle.Font = Enum.Font.GothamBold
-HubTitle.Text = "เจมิไน ฮับ | ตัวเต็มครบทุกฟีเจอร์"
+HubTitle.Text = "เจมิไน ฮับ | เมนูเสียงดรอปดาวน์ 10 เพลง + ปุ่มหยุด"
 HubTitle.TextXAlignment = Enum.TextXAlignment.Left
 HubTitle.Parent = TopBar
 
@@ -289,7 +289,7 @@ createModernToggle(Content1, "เดินทะลุกำแพง (Noclip)",
     end
 end)
 
--- --- หน้าที่ 2: ระบบมอง (Tab 2: ESP) ---
+-- --- หน้าที่ 2: ระบบมอง Stable ESP (Tab 2) ---
 local Content2 = Instance.new("ScrollingFrame")
 Content2.Size = UDim2.new(1, -24, 1, -125)
 Content2.Position = UDim2.new(0, 12, 0, 110)
@@ -299,42 +299,36 @@ Content2.CanvasSize = UDim2.new(0, 0, 0, 120)
 Content2.ScrollBarThickness = 3
 Content2.Parent = MainPanel
 
-local espConnections = {}
-createModernToggle(Content2, "เปิดระบบมองตัวผู้เล่น (Player ESP)", 0, false, function(state)
+local espActive = false
+local function applyESPToCharacter(char)
+    if not char then return end
+    task.wait(0.5)
+    if char:FindFirstChild("GeminiESPBox") then
+        char.GeminiESPBox:Destroy()
+    end
+    if espActive then
+        local highlight = Instance.new("Highlight")
+        highlight.Name = "GeminiESPBox"
+        highlight.Adornee = char
+        highlight.FillColor = Color3.fromRGB(0, 162, 255)
+        highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+        highlight.FillTransparency = 0.5
+        highlight.Parent = char
+    end
+end
+
+createModernToggle(Content2, "เปิดระบบมองตัวผู้เล่น (Stable ESP)", 0, false, function(state)
+    espActive = state
     if state then
         for _, p in ipairs(Players:GetPlayers()) do
             if p ~= localPlayer then
-                local function addBox(char)
-                    if char and not char:FindFirstChild("GeminiESPBox") then
-                        local highlight = Instance.new("Highlight")
-                        highlight.Name = "GeminiESPBox"
-                        highlight.Adornee = char
-                        highlight.FillColor = Color3.fromRGB(0, 162, 255)
-                        highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-                        highlight.FillTransparency = 0.5
-                        highlight.Parent = char
-                    end
-                end
-                if p.Character then addBox(p.Character) end
-                table.insert(espConnections, p.CharacterAdded:Connect(addBox))
+                if p.Character then applyESPToCharacter(p.Character) end
+                p.CharacterAdded:Connect(function(newChar)
+                    applyESPToCharacter(newChar)
+                end)
             end
         end
-        table.insert(espConnections, Players.PlayerAdded:Connect(function(p)
-            p.CharacterAdded:Connect(function(char)
-                if Content2.Visible then
-                    local highlight = Instance.new("Highlight")
-                    highlight.Name = "GeminiESPBox"
-                    highlight.Adornee = char
-                    highlight.FillColor = Color3.fromRGB(0, 162, 255)
-                    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-                    highlight.FillTransparency = 0.5
-                    highlight.Parent = char
-                end
-            end)
-        end))
     else
-        for _, conn in ipairs(espConnections) do conn:Disconnect() end
-        espConnections = {}
         for _, p in ipairs(Players:GetPlayers()) do
             if p.Character and p.Character:FindFirstChild("GeminiESPBox") then
                 p.Character.GeminiESPBox:Destroy()
@@ -343,41 +337,133 @@ createModernToggle(Content2, "เปิดระบบมองตัวผู�
     end
 end)
 
--- --- หน้าที่ 3: ระบบเสียง (Tab 3: Sound) ---
+Players.PlayerAdded:Connect(function(p)
+    p.CharacterAdded:Connect(function(newChar)
+        if espActive and p ~= localPlayer then
+            applyESPToCharacter(newChar)
+        end
+    end)
+end)
+
+-- --- หน้าที่ 3: ระบบเสียง (Dropdown เมนู 10 เสียง + ปุ่มหยุดเพลง) (Tab 3) ---
 local Content3 = Instance.new("ScrollingFrame")
 Content3.Size = UDim2.new(1, -24, 1, -125)
 Content3.Position = UDim2.new(0, 12, 0, 110)
 Content3.BackgroundTransparency = 1
 Content3.Visible = false
-Content3.CanvasSize = UDim2.new(0, 0, 0, 120)
+Content3.CanvasSize = UDim2.new(0, 0, 0, 140)
 Content3.ScrollBarThickness = 3
 Content3.Parent = MainPanel
 
 local soundBox = Instance.new("TextBox")
-soundBox.Size = UDim2.new(1, 0, 0, 40)
+soundBox.Size = UDim2.new(1, -100, 0, 40)
 soundBox.Position = UDim2.new(0, 0, 0, 0)
 soundBox.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
 soundBox.Text = "5410086218"
-soundBox.PlaceholderText = "ใส่รหัสเสียง (Sound ID)..."
+soundBox.PlaceholderText = "รหัสเสียง (Sound ID)..."
 soundBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 soundBox.TextSize, soundBox.Font = 13, Enum.Font.Gotham
 soundBox.Parent = Content3
 Instance.new("UICorner", soundBox).CornerRadius = UDim.new(0, 8)
 
+-- ปุ่มดรอปดาวน์เลือกเสียง
+local dropdownToggleBtn = Instance.new("TextButton")
+dropdownToggleBtn.Size = UDim2.new(0, 90, 0, 40)
+dropdownToggleBtn.Position = UDim2.new(1, -90, 0, 0)
+dropdownToggleBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
+dropdownToggleBtn.Text = "เลือกเพลง 🔽"
+dropdownToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+dropdownToggleBtn.TextSize, dropdownToggleBtn.Font = 12, Enum.Font.GothamBold
+dropdownToggleBtn.Parent = Content3
+Instance.new("UICorner", dropdownToggleBtn).CornerRadius = UDim.new(0, 8)
+
+-- กรอบรายชื่อ 10 เพลง (ซ่อนไว้ก่อน กดแล้วเปิด)
+local dropdownList = Instance.new("ScrollingFrame")
+dropdownList.Size = UDim2.new(1, 0, 0, 160)
+dropdownList.Position = UDim2.new(0, 0, 0, 45)
+dropdownList.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
+dropdownList.BorderSizePixel = 0
+dropdownList.CanvasSize = UDim2.new(0, 0, 0, 300)
+dropdownList.ScrollBarThickness = 4
+dropdownList.Visible = false
+dropdownList.ZIndex = 5
+dropdownList.Parent = Content3
+Instance.new("UICorner", dropdownList).CornerRadius = UDim.new(0, 8)
+
+local soundList = {
+    {name = "1. เพลง Crab Rave แดนซ์สะใจ", id = "5410086218"},
+    {name = "2. เสียงระเบิด ตูมสนั่น", id = "142244342"},
+    {name = "3. เสียงแตรลม Airhorn", id = "130761555"},
+    {name = "4. เสียงหัวเราะมีมสุดปั่น", id = "9069609284"},
+    {name = "5. เสียงเหล็กหล่นใส่พื้น LOUD", id = "139668725303708"},
+    {name = "6. เสียงซาวด์ตลก (Ba-Dum-Tss)", id = "9114223173"},
+    {name = "7. เสียงไก่ร้องกุ๊กๆ", id = "131961793"},
+    {name = "8. เสียงแมวร้องเหมียว", id = "156329431"},
+    {name = "9. เพลงม้าโยกฮิตๆ", id = "6023426915"},
+    {name = "10. ซาวด์สะดุ้ง / โจנס์", id = "4590657391"}
+}
+
+for i, data in ipairs(soundList) do
+    local itemBtn = Instance.new("TextButton")
+    itemBtn.Size = UDim2.new(1, -10, 0, 26)
+    itemBtn.Position = UDim2.new(0, 5, 0, (i - 1) * 30 + 5)
+    itemBtn.BackgroundColor3 = Color3.fromRGB(38, 38, 45)
+    itemBtn.Text = data.name
+    itemBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
+    itemBtn.TextSize, itemBtn.Font, itemBtn.TextXAlignment = 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
+    itemBtn.ZIndex = 6
+    itemBtn.Parent = dropdownList
+    Instance.new("UICorner", itemBtn).CornerRadius = UDim.new(0, 6)
+    
+    itemBtn.MouseButton1Click:Connect(function()
+        soundBox.Text = data.id
+        dropdownList.Visible = false
+        dropdownToggleBtn.Text = "เลือกเพลง 🔽"
+    end)
+end
+
+dropdownToggleBtn.MouseButton1Click:Connect(function()
+    dropdownList.Visible = not dropdownList.Visible
+    if dropdownList.Visible then
+        dropdownToggleBtn.Text = "ปิดรายชื่อ 🔼"
+    else
+        dropdownToggleBtn.Text = "เลือกเพลง 🔽"
+    end
+end)
+
 local playSoundBtn = Instance.new("TextButton")
-playSoundBtn.Size = UDim2.new(1, 0, 0, 45)
+playSoundBtn.Size = UDim2.new(0.48, 0, 0, 45)
 playSoundBtn.Position = UDim2.new(0, 0, 0, 50)
 playSoundBtn.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
-playSoundBtn.Text = "🎵 เล่นเสียงปั่น (จบแล้วจบเลย)"
+playSoundBtn.Text = "🎵 เล่นเสียง"
 playSoundBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 playSoundBtn.TextSize, playSoundBtn.Font = 13, Enum.Font.GothamBold
 playSoundBtn.Parent = Content3
 Instance.new("UICorner", playSoundBtn).CornerRadius = UDim.new(0, 8)
 
+-- ปุ่มหยุดเพลง
+local stopSoundBtn = Instance.new("TextButton")
+stopSoundBtn.Size = UDim2.new(0.48, 0, 0, 45)
+stopSoundBtn.Position = UDim2.new(0.52, 0, 0, 50)
+stopSoundBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+stopSoundBtn.Text = "⏹️ หยุดเพลง"
+stopSoundBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+stopSoundBtn.TextSize, stopSoundBtn.Font = 13, Enum.Font.GothamBold
+stopSoundBtn.Parent = Content3
+Instance.new("UICorner", stopSoundBtn).CornerRadius = UDim.new(0, 8)
+
+local currentPlayingSound = nil
+
 playSoundBtn.MouseButton1Click:Connect(function()
     local soundIdNum = tonumber(soundBox.Text)
     local char = localPlayer.Character
     if soundIdNum and char and char:FindFirstChild("HumanoidRootPart") then
+        -- ถ้ามีเสียงเก่าเล่นอยู่ ให้หยุดและลบทิ้งก่อน
+        if currentPlayingSound and currentPlayingSound.Parent then
+            currentPlayingSound:Stop()
+            currentPlayingSound:Destroy()
+        end
+        
         local sound = Instance.new("Sound")
         sound.SoundId = "rbxassetid://" .. tostring(soundIdNum)
         sound.Volume = 15
@@ -385,11 +471,23 @@ playSoundBtn.MouseButton1Click:Connect(function()
         sound.RollOffMinDistance = 10
         sound.Parent = char.HumanoidRootPart
         
+        currentPlayingSound = sound
         sound:Play()
         
         sound.Ended:Connect(function()
+            if currentPlayingSound == sound then
+                currentPlayingSound = nil
+            end
             sound:Destroy()
         end)
+    end
+end)
+
+stopSoundBtn.MouseButton1Click:Connect(function()
+    if currentPlayingSound and currentPlayingSound.Parent then
+        currentPlayingSound:Stop()
+        currentPlayingSound:Destroy()
+        currentPlayingSound = nil
     end
 end)
 
@@ -410,38 +508,4 @@ end)
 
 Tab3Btn.MouseButton1Click:Connect(function()
     Content1.Visible = false; Content2.Visible = false; Content3.Visible = true
-    Tab3Btn.BackgroundColor3 = Color3.fromRGB(0, 162, 255); Tab3Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Tab1Btn.BackgroundColor3 = Color3.fromRGB(26, 26, 30); Tab1Btn.TextColor3 = Color3.fromRGB(160, 160, 160)
-    Tab2Btn.BackgroundColor3 = Color3.fromRGB(26, 26, 30); Tab2Btn.TextColor3 = Color3.fromRGB(160, 160, 160)
-end)
-
-CloseButton.MouseButton1Click:Connect(function()
-    MainPanel.Visible = false
-    ToggleButton.Visible = true
-end)
-
-ToggleButton.MouseButton1Click:Connect(function()
-    MainPanel.Visible = true
-    ToggleButton.Visible = false
-end)
-
--- --- ระบบลากหน้าต่าง Hub อิสระ ---
-local dragging, dragInput, dragStart, startPos
-TopBar.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true; dragStart = input.Position; startPos = MainPanel.Position
-    end
-end)
-
-TopBar.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-        dragInput = input
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
-        local delta = input.Position - dragStart
-        MainPanel.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
+    Tab3Btn.BackgroundColor3 = 
