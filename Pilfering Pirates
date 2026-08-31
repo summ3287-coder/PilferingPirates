@@ -1,90 +1,130 @@
--- Gemini Hub | John Wick Edition (No Emoji Version)
-local repo = 'https://raw.githubusercontent.com/shlexware/Rayfield/main/'
-local Rayfield = loadstring(game:HttpGet(repo .. 'Rayfield.lua'))()
+-- Gemini Hub: Custom Intro & Empty Panel (Test Version)
+local Players = game:GetService("Players")
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+local localPlayer = Players.LocalPlayer
 
-local Window = Rayfield:CreateWindow({
-   Name = "Gemini Hub | John Wick Edition",
-   LoadingTitle = "Gemini Hub Loading...",
-   LoadingSubtitle = "by You",
-   ConfigurationSaving = {
-      Enabled = false,
-   },
-   KeySystem = false,
-})
+-- ลบ UI เก่าทิ้งก่อนกันบั๊กซ้อนทับ
+if CoreGui:FindFirstChild("GeminiHubCustomUI") then
+    CoreGui.GeminiHubCustomUI:Destroy()
+end
 
--- 1. แท็บ ESP และการมองเห็น
-local ESPTab = Window:CreateTab("ESP และการมองเห็น", 4483362458)
+-- สร้าง ScreenGui หลัก
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "GeminiHubCustomUI"
+ScreenGui.Parent = CoreGui
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-ESPTab:CreateToggle({
-   Name = "มองทะลุกำแพง",
-   CurrentValue = false,
-   Flag = "ESPFlag",
-   Callback = function(Value)
-      local Players = game:GetService("Players")
-      local localPlayer = Players.LocalPlayer
-      for _, player in ipairs(Players:GetPlayers()) do
-         if player ~= localPlayer and player.Character then
-            local highlight = player.Character:FindFirstChild("GeminiESP")
-            if Value and not highlight then
-               local hl = Instance.new("Highlight")
-               hl.Name = "GeminiESP"
-               hl.Adornee = player.Character
-               hl.FillColor = Color3.fromRGB(255, 0, 0)
-               hl.Parent = player.Character
-            elseif not Value and highlight then
-               highlight:Destroy()
-            end
-         end
-      end
-   end,
-})
+-- 1. ส่วนหน้าจอโหลด (Loading Intro)
+local IntroFrame = Instance.new("Frame")
+IntroFrame.Name = "IntroFrame"
+IntroFrame.Size = UDim2.new(0, 350, 0, 180)
+IntroFrame.Position = UDim2.new(0.5, -175, 0.5, -90)
+IntroFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+IntroFrame.BorderSizePixel = 0
+IntroFrame.Parent = ScreenGui
 
-ESPTab:CreateToggle({
-   Name = "เดินทะลุกำแพง",
-   CurrentValue = false,
-   Flag = "NoclipFlag",
-   Callback = function(Value)
-      -- Noclip logic
-   end,
-})
+local IntroCorner = Instance.new("UICorner")
+IntroCorner.CornerRadius = UDim.new(0, 10)
+IntroCorner.Parent = IntroFrame
 
-ESPTab:CreateToggle({
-   Name = "หมุนตัวป่วน",
-   CurrentValue = false,
-   Flag = "SpinFlag",
-   Callback = function(Value)
-      -- Spinbot logic
-   end,
-})
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Size = UDim2.new(1, 0, 0, 50)
+TitleLabel.Position = UDim2.new(0, 0, 0, 20)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.TextSize = 18
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.Text = "ยินดีต้อนรับสู่ค่าย Gemini Hub"
+TitleLabel.Parent = IntroFrame
 
--- 2. แท็บ เทเลพอร์ต
-local TP_Tab = Window:CreateTab("เทเลพอร์ต", 4483362458)
+local SubLabel = Instance.new("TextLabel")
+SubLabel.Size = UDim2.new(1, 0, 0, 30)
+SubLabel.Position = UDim2.new(0, 0, 0, 60)
+SubLabel.BackgroundTransparency = 1
+SubLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+SubLabel.TextSize = 14
+SubLabel.Font = Enum.Font.Gotham
+SubLabel.Text = "Gemini System Initializing..."
+SubLabel.Parent = IntroFrame
 
-TP_Tab:CreateButton({
-   Name = "เทเลพอร์ตไปหาเพื่อนร่วมทีม",
-   Callback = function()
-      local Players = game:GetService("Players")
-      local localPlayer = Players.LocalPlayer
-      for _, p in ipairs(Players:GetPlayers()) do
-         if p ~= localPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-            localPlayer.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
-            break
-         end
-      end
-   end,
-})
+-- หลอดดาวน์โหลด (Loading Bar Background)
+local BarBg = Instance.new("Frame")
+BarBg.Size = UDim2.new(0, 300, 0, 10)
+BarBg.Position = UDim2.new(0.5, -150, 0, 115)
+BarBg.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+BarBg.BorderSizePixel = 0
+BarBg.Parent = IntroFrame
 
--- 3. แท็บ ปรับแต่ง UI และตั้งค่า
-local SettingsTab = Window:CreateTab("ปรับแต่ง UI และตั้งค่า", 4483362458)
+local BarBgCorner = Instance.new("UICorner")
+BarBgCorner.CornerRadius = UDim.new(1, 0)
+BarBgCorner.Parent = BarBg
 
-SettingsTab:CreateButton({
-   Name = "รีเซ็ตตัวละคร",
-   Callback = function()
-      local Players = game:GetService("Players")
-      if Players.LocalPlayer.Character then
-         Players.LocalPlayer.Character:BreakJoints()
-      end
-   end,
-})
+-- ตัวหลอดวิ่งด้านใน
+local BarFill = Instance.new("Frame")
+BarFill.Size = UDim2.new(0, 0, 1, 0)
+BarFill.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+BarFill.BorderSizePixel = 0
+BarFill.Parent = BarBg
 
-Rayfield:LoadConfiguration()
+local BarFillCorner = Instance.new("UICorner")
+BarFillCorner.CornerRadius = UDim.new(1, 0)
+BarFillCorner.Parent = BarFill
+
+local PercentLabel = Instance.new("TextLabel")
+PercentLabel.Size = UDim2.new(1, 0, 0, 25)
+PercentLabel.Position = UDim2.new(0, 0, 0, 135)
+PercentLabel.BackgroundTransparency = 1
+PercentLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+PercentLabel.TextSize = 12
+PercentLabel.Font = Enum.Font.Gotham
+PercentLabel.Text = "0%"
+PercentLabel.Parent = IntroFrame
+
+-- 2. ส่วนของแผงหลัก (Main Panel เปล่าๆ รอใส่ฟีเจอร์)
+local MainPanel = Instance.new("Frame")
+MainPanel.Name = "MainPanel"
+MainPanel.Size = UDim2.new(0, 450, 0, 300)
+MainPanel.Position = UDim2.new(0.5, -225, 0.5, -150)
+MainPanel.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainPanel.BorderSizePixel = 0
+MainPanel.Visible = false -- ซ่อนไว้ก่อนจนกว่าจะโหลดเสร็จ
+MainPanel.Parent = ScreenGui
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 8)
+MainCorner.Parent = MainPanel
+
+local TopBar = Instance.new("Frame")
+TopBar.Size = UDim2.new(1, 0, 0, 40)
+TopBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+TopBar.BorderSizePixel = 0
+TopBar.Parent = MainPanel
+
+local TopBarCorner = Instance.new("UICorner")
+TopBarCorner.CornerRadius = UDim.new(0, 8)
+TopBarCorner.Parent = TopBar
+
+local HubTitle = Instance.new("TextLabel")
+HubTitle.Size = UDim2.new(1, -20, 1, 0)
+HubTitle.Position = UDim2.new(0, 15, 0, 0)
+HubTitle.BackgroundTransparency = 1
+HubTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+HubTitle.TextSize = 14
+HubTitle.Font = Enum.Font.GothamBold
+HubTitle.Text = "Gemini Hub | John Wick Edition (Blank Test)"
+HubTitle.TextXAlignment = Enum.TextXAlignment.Left
+HubTitle.Parent = TopBar
+
+-- ฟังก์ชันรันหลอดโหลดจำลอง แล้วเปิดแผงหลัก
+task.spawn(function()
+    for i = 1, 100 do
+        BarFill.Size = UDim2.new(i / 100, 0, 1, 0)
+        PercentLabel.Text = i .. "%"
+        task.wait(0.015) -- ปรับความเร็วในการโหลดตรงนี้ได้ครับ
+    end
+    
+    -- โหลดเสร็จ เฟดอิน/เอาอินโทรออก แล้วเปิดแผงเปล่า
+    IntroFrame:Destroy()
+    MainPanel.Visible = true
+end)
