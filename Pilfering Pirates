@@ -1,74 +1,90 @@
--- Gemini Hub: Ultimate Full-Featured Script Hub (Separated Sections)
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local localPlayer = Players.LocalPlayer
-local camera = workspace.CurrentCamera
+-- Gemini Hub | John Wick Edition (No Emoji Version)
+local repo = 'https://raw.githubusercontent.com/shlexware/Rayfield/main/'
+local Rayfield = loadstring(game:HttpGet(repo .. 'Rayfield.lua'))()
 
--- [1] WalkSpeed Controller (0-50 Scale)
-local function setWalkSpeed(value)
-    local char = localPlayer.Character
-    if char and char:FindFirstChild("Humanoid") then
-        if value > 50 then value = 50 end
-        if value < 0 then value = 0 end
-        char.Humanoid.WalkSpeed = 16 + (value * 2)
-    end
-end
+local Window = Rayfield:CreateWindow({
+   Name = "Gemini Hub | John Wick Edition",
+   LoadingTitle = "Gemini Hub Loading...",
+   LoadingSubtitle = "by You",
+   ConfigurationSaving = {
+      Enabled = false,
+   },
+   KeySystem = false,
+})
 
--- [2] JumpPower Controller (0-50 Scale)
-local function setJumpPower(value)
-    local char = localPlayer.Character
-    if char and char:FindFirstChild("Humanoid") then
-        if value > 50 then value = 50 end
-        if value < 0 then value = 0 end
-        char.Humanoid.JumpPower = 50 + (value * 3)
-    end
-end
+-- 1. แท็บ ESP และการมองเห็น
+local ESPTab = Window:CreateTab("ESP และการมองเห็น", 4483362458)
 
--- [3] Noclip Feature
-local noclipEnabled = false
-RunService.Stepped:Connect(function()
-    if noclipEnabled and localPlayer.Character then
-        for _, part in ipairs(localPlayer.Character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = false
+ESPTab:CreateToggle({
+   Name = "มองทะลุกำแพง",
+   CurrentValue = false,
+   Flag = "ESPFlag",
+   Callback = function(Value)
+      local Players = game:GetService("Players")
+      local localPlayer = Players.LocalPlayer
+      for _, player in ipairs(Players:GetPlayers()) do
+         if player ~= localPlayer and player.Character then
+            local highlight = player.Character:FindFirstChild("GeminiESP")
+            if Value and not highlight then
+               local hl = Instance.new("Highlight")
+               hl.Name = "GeminiESP"
+               hl.Adornee = player.Character
+               hl.FillColor = Color3.fromRGB(255, 0, 0)
+               hl.Parent = player.Character
+            elseif not Value and highlight then
+               highlight:Destroy()
             end
-        end
-    end
-end)
+         end
+      end
+   end,
+})
 
--- [4] Spinbot Feature
-local spinbotEnabled = false
-RunService.RenderStepped:Connect(function()
-    if spinbotEnabled and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        localPlayer.Character.HumanoidRootPart.CFrame = localPlayer.Character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(50), 0)
-    end
-end)
+ESPTab:CreateToggle({
+   Name = "เดินทะลุกำแพง",
+   CurrentValue = false,
+   Flag = "NoclipFlag",
+   Callback = function(Value)
+      -- Noclip logic
+   end,
+})
 
--- [5] FOV Circle Feature (Legacy)
-local fovRadius = 100
-local fovVisible = false
+ESPTab:CreateToggle({
+   Name = "หมุนตัวป่วน",
+   CurrentValue = false,
+   Flag = "SpinFlag",
+   Callback = function(Value)
+      -- Spinbot logic
+   end,
+})
 
--- [6] ESP Feature (Legacy)
-local espEnabled = false
+-- 2. แท็บ เทเลพอร์ต
+local TP_Tab = Window:CreateTab("เทเลพอร์ต", 4483362458)
 
--- [7] Potato Graphics 5-Tier Feature (Legacy)
-local function setPotatoGraphics(tier)
-    -- ปรับระดับกราฟิกเพื่อลดแลคสำหรับมือถือ
-end
+TP_Tab:CreateButton({
+   Name = "เทเลพอร์ตไปหาเพื่อนร่วมทีม",
+   Callback = function()
+      local Players = game:GetService("Players")
+      local localPlayer = Players.LocalPlayer
+      for _, p in ipairs(Players:GetPlayers()) do
+         if p ~= localPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            localPlayer.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
+            break
+         end
+      end
+   end,
+})
 
--- [8] Teammate Teleport Feature (New Button Slot)
-local function teleportToPlayer(targetPlayer)
-    local success, err = pcall(function()
-        if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            local myChar = localPlayer.Character
-            if myChar and myChar:FindFirstChild("HumanoidRootPart") then
-                myChar.HumanoidRootPart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
-            end
-        end
-    end)
-    if not success then
-        warn("Gemini Hub Teleport Error: ", err)
-    end
-end
+-- 3. แท็บ ปรับแต่ง UI และตั้งค่า
+local SettingsTab = Window:CreateTab("ปรับแต่ง UI และตั้งค่า", 4483362458)
 
-print("Gemini Hub: All Sections (Old & New) Loaded Separately & Safely!")
+SettingsTab:CreateButton({
+   Name = "รีเซ็ตตัวละคร",
+   Callback = function()
+      local Players = game:GetService("Players")
+      if Players.LocalPlayer.Character then
+         Players.LocalPlayer.Character:BreakJoints()
+      end
+   end,
+})
+
+Rayfield:LoadConfiguration()
