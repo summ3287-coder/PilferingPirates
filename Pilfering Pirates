@@ -1,60 +1,20 @@
--- Gemini Hub: Ultimate Edition (Range ESP + Radar + Language + Noclip + Troll Sound)
+-- Gemini Hub: Clean UI Edition (No Language Switching, No ESP, Clean Structure)
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local localPlayer = Players.LocalPlayer
-local camera = workspace.CurrentCamera
 
-if CoreGui:FindFirstChild("GeminiHubCustomUI") then
-    CoreGui.GeminiHubCustomUI:Destroy()
+if CoreGui:FindFirstChild("GeminiHubCleanUI") then
+    CoreGui.GeminiHubCleanUI:Destroy()
 end
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "GeminiHubCustomUI"
+ScreenGui.Name = "GeminiHubCleanUI"
 ScreenGui.Parent = CoreGui
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-local ESP_MAX_DISTANCE = 300 
-local currentLang = "TH" -- เริ่มต้นเป็นภาษาไทย
-
--- พจนานุกรมแปลภาษา (Language Dictionary) รวมทุกฟีเจอร์
-local texts = {
-    EN = {
-        title = "Gemini Hub | Ultimate Edition",
-        tab1 = "Main / Movement",
-        tab2 = "Visuals (ESP & Radar)",
-        tab3 = "Troll / Fun",
-        jump = "JumpPower Modifier",
-        walk = "WalkSpeed Modifier",
-        noclip = "Noclip (Walk Through Walls)",
-        boxEsp = "Box ESP (Range Limited)",
-        tracer = "Tracer Lines (Range Limited)",
-        radar = "Directional Radar",
-        colorLbl = "Tracer Color",
-        valueLbl = "Value (1-100):",
-        soundLbl = "Sound ID (Audio Spammer):",
-        playBtn = "Play Sound"
-    },
-    TH = {
-        title = "เจมิไน ฮับ | ฉบับสมบูรณ์",
-        tab1 = "หลัก / การเคลื่อนไหว",
-        tab2 = "การมองเห็น (ESP & เรดาร์)",
-        tab3 = "ฟีเจอร์ป่วน (Troll)",
-        jump = "ปรับพลังกระโดด (JumpPower)",
-        walk = "ปรับความเร็วเดิน (WalkSpeed)",
-        noclip = "เดินทะลุกำแพง (Noclip)",
-        boxEsp = "กรอบมองทะลุ (จำกัดระยะ)",
-        tracer = "เส้นนำทาง (จำกัดระยะ)",
-        radar = "เรดาร์บอกทิศทางรอบตัว",
-        colorLbl = "สีเส้นนำทาง",
-        valueLbl = "ค่าตัวเลข (1-100):",
-        soundLbl = "ใส่รหัสเสียง (Sound ID):",
-        playBtn = "เปิดเสียงปั่น"
-    }
-}
-
--- 1. ปุ่มเปิด/ปิดลอยบนจอ
+-- 1. ปุ่มเปิด/ปิดลอย
 local ToggleButton = Instance.new("TextButton")
 ToggleButton.Name = "GeminiToggleButton"
 ToggleButton.Size = UDim2.new(0, 50, 0, 50)
@@ -70,8 +30,8 @@ Instance.new("UICorner", ToggleButton).CornerRadius = UDim.new(1, 0)
 -- 2. แผงหลัก
 local MainPanel = Instance.new("Frame")
 MainPanel.Name = "MainPanel"
-MainPanel.Size = UDim2.new(0, 520, 0, 360)
-MainPanel.Position = UDim2.new(0.5, -260, 0.5, -180)
+MainPanel.Size = UDim2.new(0, 520, 0, 340)
+MainPanel.Position = UDim2.new(0.5, -260, 0.5, -170)
 MainPanel.BackgroundColor3 = Color3.fromRGB(20, 20, 22)
 MainPanel.BorderSizePixel = 0
 MainPanel.Parent = ScreenGui
@@ -97,17 +57,16 @@ FixTopBar.BorderSizePixel = 0
 FixTopBar.Parent = TopBar
 
 local HubTitle = Instance.new("TextLabel")
-HubTitle.Size = UDim2.new(1, -140, 1, 0)
+HubTitle.Size = UDim2.new(1, -100, 1, 0)
 HubTitle.Position = UDim2.new(0, 16, 0, 0)
 HubTitle.BackgroundTransparency = 1
 HubTitle.TextColor3 = Color3.fromRGB(240, 240, 240)
 HubTitle.TextSize = 13
 HubTitle.Font = Enum.Font.GothamBold
-HubTitle.Text = texts[currentLang].title
+HubTitle.Text = "เจมิไน ฮับ | โครงสร้าง UI หลัก"
 HubTitle.TextXAlignment = Enum.TextXAlignment.Left
 HubTitle.Parent = TopBar
 
--- ปุ่มปิด (X)
 local CloseButton = Instance.new("TextButton")
 CloseButton.Size = UDim2.new(0, 30, 0, 30)
 CloseButton.Position = UDim2.new(1, -38, 0.5, -15)
@@ -119,18 +78,7 @@ CloseButton.Font = Enum.Font.GothamBold
 CloseButton.Parent = TopBar
 Instance.new("UICorner", CloseButton).CornerRadius = UDim.new(0, 8)
 
--- ปุ่มเปลี่ยนภาษา (TH / EN)
-local LangButton = Instance.new("TextButton")
-LangButton.Size = UDim2.new(0, 35, 0, 30)
-LangButton.Position = UDim2.new(1, -78, 0.5, -15)
-LangButton.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
-LangButton.Text = currentLang
-LangButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-LangButton.TextSize, LangButton.Font = 12, Enum.Font.GothamBold
-LangButton.Parent = TopBar
-Instance.new("UICorner", LangButton).CornerRadius = UDim.new(0, 8)
-
--- 3. แถบแท็บเมนูด้านบน (3 แท็บ: หลัก, มองเห็น, ป่วน)
+-- 3. แท็บเมนู (2 แท็บหลัก)
 local TabBar = Instance.new("Frame")
 TabBar.Size = UDim2.new(1, -24, 0, 42)
 TabBar.Position = UDim2.new(0, 12, 0, 55)
@@ -140,39 +88,26 @@ TabBar.Parent = MainPanel
 Instance.new("UICorner", TabBar).CornerRadius = UDim.new(0, 10)
 
 local Tab1Btn = Instance.new("TextButton")
-Tab1Btn.Size = UDim2.new(0.32, 0, 1, -6)
+Tab1Btn.Size = UDim2.new(0.48, 0, 1, -6)
 Tab1Btn.Position = UDim2.new(0, 3, 0, 3)
 Tab1Btn.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
-Tab1Btn.Text = texts[currentLang].tab1
+Tab1Btn.Text = "หลัก / การเคลื่อนไหว"
 Tab1Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-Tab1Btn.TextSize, Tab1Btn.Font = 11, Enum.Font.GothamBold
+Tab1Btn.TextSize, Tab1Btn.Font = 12, Enum.Font.GothamBold
 Tab1Btn.Parent = TabBar
 Instance.new("UICorner", Tab1Btn).CornerRadius = UDim.new(0, 8)
 
 local Tab2Btn = Instance.new("TextButton")
-Tab2Btn.Size = UDim2.new(0.32, 0, 1, -6)
-Tab2Btn.Position = UDim2.new(0.34, 3, 0, 3)
+Tab2Btn.Size = UDim2.new(0.48, 0, 1, -6)
+Tab2Btn.Position = UDim2.new(0.50, 3, 0, 3)
 Tab2Btn.BackgroundColor3 = Color3.fromRGB(26, 26, 30)
-Tab2Btn.Text = texts[currentLang].tab2
+Tab2Btn.Text = "ฟีเจอร์ป่วน (Troll)"
 Tab2Btn.TextColor3 = Color3.fromRGB(160, 160, 160)
-Tab2Btn.TextSize, Tab2Btn.Font = 11, Enum.Font.GothamBold
+Tab2Btn.TextSize, Tab2Btn.Font = 12, Enum.Font.GothamBold
 Tab2Btn.Parent = TabBar
 Instance.new("UICorner", Tab2Btn).CornerRadius = UDim.new(0, 8)
 
-local Tab3Btn = Instance.new("TextButton")
-Tab3Btn.Size = UDim2.new(0.32, 0, 1, -6)
-Tab3Btn.Position = UDim2.new(0.68, 3, 0, 3)
-Tab3Btn.BackgroundColor3 = Color3.fromRGB(26, 26, 30)
-Tab3Btn.Text = texts[currentLang].tab3
-Tab3Btn.TextColor3 = Color3.fromRGB(160, 160, 160)
-Tab3Btn.TextSize, Tab3Btn.Font = 11, Enum.Font.GothamBold
-Tab3Btn.Parent = TabBar
-Instance.new("UICorner", Tab3Btn).CornerRadius = UDim.new(0, 8)
-
-local uiElementsToTranslate = {}
-
--- ฟังก์ชันสร้าง Toggle สวิตช์ทั่วไป
-local function createModernToggle(parent, langKey, yPos, initialActive, callback)
+local function createModernToggle(parent, titleText, yPos, initialActive, callback)
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, 0, 0, 50)
     frame.Position = UDim2.new(0, 0, 0, yPos)
@@ -184,12 +119,10 @@ local function createModernToggle(parent, langKey, yPos, initialActive, callback
     lbl.Size = UDim2.new(0.7, 0, 1, 0)
     lbl.Position = UDim2.new(0, 16, 0, 0)
     lbl.BackgroundTransparency = 1
-    lbl.Text = texts[currentLang][langKey]
+    lbl.Text = titleText
     lbl.TextColor3 = Color3.fromRGB(230, 230, 230)
     lbl.TextSize, lbl.Font, lbl.TextXAlignment = 13, Enum.Font.GothamMedium, Enum.TextXAlignment.Left
     lbl.Parent = frame
-
-    table.insert(uiElementsToTranslate, {obj = lbl, key = langKey, type = "text"})
 
     local switchBg = Instance.new("TextButton")
     switchBg.Size = UDim2.new(0, 48, 0, 26)
@@ -221,8 +154,7 @@ local function createModernToggle(parent, langKey, yPos, initialActive, callback
     end)
 end
 
--- ฟังก์ชัน Toggle พร้อมช่องกรอกตัวเลข
-local function createToggleSliderModern(parent, langKey, yPos, defaultVal, callback)
+local function createToggleSliderModern(parent, titleText, yPos, defaultVal, callback)
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, 0, 0, 75)
     frame.Position = UDim2.new(0, 0, 0, yPos)
@@ -234,12 +166,10 @@ local function createToggleSliderModern(parent, langKey, yPos, defaultVal, callb
     lbl.Size = UDim2.new(0.6, 0, 0, 35)
     lbl.Position = UDim2.new(0, 16, 0, 5)
     lbl.BackgroundTransparency = 1
-    lbl.Text = texts[currentLang][langKey]
+    lbl.Text = titleText
     lbl.TextColor3 = Color3.fromRGB(230, 230, 230)
     lbl.TextSize, lbl.Font, lbl.TextXAlignment = 13, Enum.Font.GothamBold, Enum.TextXAlignment.Left
     lbl.Parent = frame
-
-    table.insert(uiElementsToTranslate, {obj = lbl, key = langKey, type = "text"})
 
     local switchBg = Instance.new("TextButton")
     switchBg.Size = UDim2.new(0, 48, 0, 26)
@@ -261,12 +191,10 @@ local function createToggleSliderModern(parent, langKey, yPos, defaultVal, callb
     boxLbl.Size = UDim2.new(0, 120, 0, 24)
     boxLbl.Position = UDim2.new(0, 16, 0, 42)
     boxLbl.BackgroundTransparency = 1
-    boxLbl.Text = texts[currentLang].valueLbl
+    boxLbl.Text = "ค่าตัวเลข (1-100):"
     boxLbl.TextColor3 = Color3.fromRGB(150, 150, 150)
     boxLbl.TextSize, boxLbl.Font, boxLbl.TextXAlignment = 12, Enum.Font.Gotham, Enum.TextXAlignment.Left
     boxLbl.Parent = frame
-
-    table.insert(uiElementsToTranslate, {obj = boxLbl, key = "valueLbl", type = "text"})
 
     local box = Instance.new("TextBox")
     box.Size = UDim2.new(0, 60, 0, 26)
@@ -307,8 +235,7 @@ local function createToggleSliderModern(parent, langKey, yPos, defaultVal, callb
     end)
 end
 
-
--- --- หน้าหลัก (Tab 1): รวม Jump, Walk และฟีเจอร์เดินทะลุกำแพง (Noclip) ---
+-- --- หน้าหลัก (Tab 1) ---
 local Content1 = Instance.new("ScrollingFrame")
 Content1.Size = UDim2.new(1, -24, 1, -115)
 Content1.Position = UDim2.new(0, 12, 0, 105)
@@ -317,23 +244,22 @@ Content1.CanvasSize = UDim2.new(0, 0, 0, 240)
 Content1.ScrollBarThickness = 3
 Content1.Parent = MainPanel
 
-createToggleSliderModern(Content1, "jump", 0, 50, function(state, val)
+createToggleSliderModern(Content1, "ปรับพลังกระโดด (JumpPower)", 0, 50, function(state, val)
     local char = localPlayer.Character
     if char and char:FindFirstChild("Humanoid") then
         if state then char.Humanoid.JumpPower = val * 2 else char.Humanoid.JumpPower = 50 end
     end
 end)
 
-createToggleSliderModern(Content1, "walk", 85, 50, function(state, val)
+createToggleSliderModern(Content1, "ปรับความเร็วเดิน (WalkSpeed)", 85, 50, function(state, val)
     local char = localPlayer.Character
     if char and char:FindFirstChild("Humanoid") then
         if state then char.Humanoid.WalkSpeed = val else char.Humanoid.WalkSpeed = 16 end
     end
 end)
 
--- เพิ่มฟีเจอร์เดินทะลุกำแพง (Noclip) ไว้ในหน้าหลักตามที่พี่เลือก
 local noclipConnection = nil
-createModernToggle(Content1, "noclip", 170, false, function(state)
+createModernToggle(Content1, "เดินทะลุกำแพง (Noclip)", 170, false, function(state)
     if state then
         noclipConnection = RunService.Stepped:Connect(function()
             local char = localPlayer.Character
@@ -353,102 +279,38 @@ createModernToggle(Content1, "noclip", 170, false, function(state)
     end
 end)
 
-
--- --- หน้าการมองเห็น ESP & Radar (Tab 2) ---
+-- --- หน้าฟีเจอร์ป่วน (Tab 2) ---
 local Content2 = Instance.new("ScrollingFrame")
 Content2.Size = UDim2.new(1, -24, 1, -115)
 Content2.Position = UDim2.new(0, 12, 0, 105)
 Content2.BackgroundTransparency = 1
 Content2.Visible = false
-Content2.CanvasSize = UDim2.new(0, 0, 0, 250)
+Content2.CanvasSize = UDim2.new(0, 0, 0, 120)
 Content2.ScrollBarThickness = 3
 Content2.Parent = MainPanel
-
-local espBoxEnabled = false
-local espTracerEnabled = false
-local espRadarEnabled = false
-local tracerColorIndex = 1
-local tracerColors = {Color3.fromRGB(0, 255, 0), Color3.fromRGB(255, 0, 0), Color3.fromRGB(0, 162, 255), Color3.fromRGB(255, 255, 0)}
-local colorNames = {"Green", "Red", "Blue", "Yellow"}
-
-createModernToggle(Content2, "boxEsp", 0, false, function(state) espBoxEnabled = state end)
-createModernToggle(Content2, "tracer", 60, false, function(state) espTracerEnabled = state end)
-createModernToggle(Content2, "radar", 120, false, function(state) espRadarEnabled = state end)
-
-local function createColorPickerModernBottom(parent, yPos, langKey)
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, 0, 0, 50)
-    frame.Position = UDim2.new(0, 0, 0, yPos)
-    frame.BackgroundColor3 = Color3.fromRGB(26, 26, 30)
-    frame.Parent = parent
-    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
-
-    local lbl = Instance.new("TextLabel")
-    lbl.Size = UDim2.new(0.6, 0, 1, 0)
-    lbl.Position = UDim2.new(0, 16, 0, 0)
-    lbl.BackgroundTransparency = 1
-    lbl.Text = texts[currentLang][langKey]
-    lbl.TextColor3 = Color3.fromRGB(230, 230, 230)
-    lbl.TextSize, lbl.Font, lbl.TextXAlignment = 13, Enum.Font.GothamMedium, Enum.TextXAlignment.Left
-    lbl.Parent = frame
-
-    table.insert(uiElementsToTranslate, {obj = lbl, key = langKey, type = "text"})
-
-    local colorBtn = Instance.new("TextButton")
-    colorBtn.Size = UDim2.new(0, 90, 0, 30)
-    colorBtn.Position = UDim2.new(1, -102, 0.5, -15)
-    colorBtn.BackgroundColor3 = tracerColors[tracerColorIndex]
-    colorBtn.Text = colorNames[tracerColorIndex]
-    colorBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    colorBtn.TextSize, colorBtn.Font = 12, Enum.Font.GothamBold
-    colorBtn.Parent = frame
-    Instance.new("UICorner", colorBtn).CornerRadius = UDim.new(0, 8)
-
-    colorBtn.MouseButton1Click:Connect(function()
-        tracerColorIndex = tracerColorIndex + 1
-        if tracerColorIndex > #tracerColors then tracerColorIndex = 1 end
-        colorBtn.BackgroundColor3 = tracerColors[tracerColorIndex]
-        colorBtn.Text = colorNames[tracerColorIndex]
-    end)
-end
-
-createColorPickerModernBottom(Content2, 180, "colorLbl")
-
-
--- --- หมวดฟีเจอร์ป่วน (Tab 3): ระบบกรอก Sound ID และปุ่มรันเสียง ---
-local Content3 = Instance.new("ScrollingFrame")
-Content3.Size = UDim2.new(1, -24, 1, -115)
-Content3.Position = UDim2.new(0, 12, 0, 105)
-Content3.BackgroundTransparency = 1
-Content3.Visible = false
-Content3.CanvasSize = UDim2.new(0, 0, 0, 120)
-Content3.ScrollBarThickness = 3
-Content3.Parent = MainPanel
 
 local trollFrame = Instance.new("Frame")
 trollFrame.Size = UDim2.new(1, 0, 0, 90)
 trollFrame.Position = UDim2.new(0, 0, 0, 0)
 trollFrame.BackgroundColor3 = Color3.fromRGB(26, 26, 30)
-trollFrame.Parent = Content3
+trollFrame.Parent = Content2
 Instance.new("UICorner", trollFrame).CornerRadius = UDim.new(0, 10)
 
 local trollLbl = Instance.new("TextLabel")
 trollLbl.Size = UDim2.new(1, -20, 0, 30)
 trollLbl.Position = UDim2.new(0, 16, 0, 8)
 trollLbl.BackgroundTransparency = 1
-trollLbl.Text = texts[currentLang].soundLbl
+trollLbl.Text = "ใส่รหัสเสียง (Sound ID):"
 trollLbl.TextColor3 = Color3.fromRGB(230, 230, 230)
 trollLbl.TextSize, trollLbl.Font, trollLbl.TextXAlignment = 13, Enum.Font.GothamBold, Enum.TextXAlignment.Left
 trollLbl.Parent = trollFrame
-
-table.insert(uiElementsToTranslate, {obj = trollLbl, key = "soundLbl", type = "text"})
 
 local soundBox = Instance.new("TextBox")
 soundBox.Size = UDim2.new(0, 240, 0, 32)
 soundBox.Position = UDim2.new(0, 16, 0, 46)
 soundBox.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
 soundBox.Text = ""
-soundBox.PlaceholderText = "รหัสเสียง (เช่น 184140056)"
+soundBox.PlaceholderText = "รหัสเสียง (เช่น 5410086218)"
 soundBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 soundBox.TextSize, soundBox.Font = 12, Enum.Font.Gotham
 soundBox.Parent = trollFrame
@@ -458,13 +320,11 @@ local playSoundBtn = Instance.new("TextButton")
 playSoundBtn.Size = UDim2.new(0, 130, 0, 32)
 playSoundBtn.Position = UDim2.new(1, -146, 0, 46)
 playSoundBtn.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
-playSoundBtn.Text = texts[currentLang].playBtn
+playSoundBtn.Text = "เปิดเสียงปั่น"
 playSoundBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 playSoundBtn.TextSize, playSoundBtn.Font = 12, Enum.Font.GothamBold
 playSoundBtn.Parent = trollFrame
 Instance.new("UICorner", playSoundBtn).CornerRadius = UDim.new(0, 8)
-
-table.insert(uiElementsToTranslate, {obj = playSoundBtn, key = "playBtn", type = "text"})
 
 playSoundBtn.MouseButton1Click:Connect(function()
     local soundIdNum = tonumber(soundBox.Text)
@@ -480,40 +340,46 @@ playSoundBtn.MouseButton1Click:Connect(function()
     end
 end)
 
+-- --- ระบบสลับหน้าแท็บ UI ---
+Tab1Btn.MouseButton1Click:Connect(function()
+    Content1.Visible = true; Content2.Visible = false
+    Tab1Btn.BackgroundColor3 = Color3.fromRGB(0, 162, 255); Tab1Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Tab2Btn.BackgroundColor3 = Color3.fromRGB(26, 26, 30); Tab2Btn.TextColor3 = Color3.fromRGB(160, 160, 160)
+end)
 
--- --- ฟังก์ชันกดสลับภาษา ---
-LangButton.MouseButton1Click:Connect(function()
-    if currentLang == "TH" then
-        currentLang = "EN"
-    else
-        currentLang = "TH"
-    end
-    
-    LangButton.Text = currentLang
-    HubTitle.Text = texts[currentLang].title
-    Tab1Btn.Text = texts[currentLang].tab1
-    Tab2Btn.Text = texts[currentLang].tab2
-    Tab3Btn.Text = texts[currentLang].tab3
-    
-    for _, item in ipairs(uiElementsToTranslate) do
-        if texts[currentLang][item.key] then
-            item.obj.Text = texts[currentLang][item.key]
-        end
+Tab2Btn.MouseButton1Click:Connect(function()
+    Content1.Visible = false; Content2.Visible = true
+    Tab2Btn.BackgroundColor3 = Color3.fromRGB(0, 162, 255); Tab2Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Tab1Btn.BackgroundColor3 = Color3.fromRGB(26, 26, 30); Tab1Btn.TextColor3 = Color3.fromRGB(160, 160, 160)
+end)
+
+CloseButton.MouseButton1Click:Connect(function()
+    MainPanel.Visible = false
+    ToggleButton.Visible = true
+end)
+
+ToggleButton.MouseButton1Click:Connect(function()
+    MainPanel.Visible = true
+    ToggleButton.Visible = false
+end)
+
+-- --- ระบบลากหน้าต่าง Hub อิสระ ---
+local dragging, dragInput, dragStart, startPos
+TopBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true; dragStart = input.Position; startPos = MainPanel.Position
     end
 end)
 
-
--- --- ระบบประมวลผล ESP พร้อมระบบกรองระยะทาง ---
-local espObjects = {}
-
-local function removeESP(plr)
-    if espObjects[plr] then
-        if espObjects[plr].box then espObjects[plr].box:Remove() end
-        if espObjects[plr].tracer then espObjects[plr].tracer:Remove() end
-        espObjects[plr] = nil
+TopBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
     end
-end
+end)
 
-RunService.RenderStepped:Connect(function()
-    local myChar = localPlayer.Character
-    local myHrp = myChar and myChar:FindFirstChild("
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        MainPanel.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
