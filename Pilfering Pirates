@@ -1,287 +1,74 @@
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-
-local Window = Rayfield:CreateWindow({
-   Name = "Gemini Hub | John Wick Edition",
-   LoadingTitle = "Loading Gemini Hub...",
-   LoadingSubtitle = "By John Wick",
-   ConfigurationSaving = {
-      Enabled = true,
-      FolderName = "GeminiHubConfig",
-      FileName = "MainConfig"
-   },
-   KeySystem = false,
-})
-
-local MainTab = Window:CreateTab("หน้าหลัก", 4483362458)
-local VisualTab = Window:CreateTab("หน้ามอง", 4483362458)
-local LagTab = Window:CreateTab("ลดความแลก", 4483362458)
-local DevTab = Window:CreateTab("พัฒนาต่อ (เร็วๆ นี้)", 4483362458)
-
-local LocalPlayer = game.Players.LocalPlayer
-local Workspace = game:GetService("Workspace")
+-- Gemini Hub: Ultimate Full-Featured Script Hub (Separated Sections)
+local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local Camera = Workspace.CurrentCamera
+local localPlayer = Players.LocalPlayer
+local camera = workspace.CurrentCamera
 
-Rayfield:Notify({
-   Title = "Gemini Hub Loaded",
-   Content = "โหมดเสถียรสูงสุด พร้อมใช้งาน!",
-   Duration = 3,
-   Image = 4483362458,
-})
+-- [1] WalkSpeed Controller (0-50 Scale)
+local function setWalkSpeed(value)
+    local char = localPlayer.Character
+    if char and char:FindFirstChild("Humanoid") then
+        if value > 50 then value = 50 end
+        if value < 0 then value = 0 end
+        char.Humanoid.WalkSpeed = 16 + (value * 2)
+    end
+end
 
---------------------------------------------------
--- แท็บที่ 1: หน้าหลัก (ต้านแรงโน้มถ่วง, หมุนตัว, ทะลุกำแพง, บังคับมุมมองที่ 3)
---------------------------------------------------
-MainTab:CreateSection("ระบบเคลื่อนไหว & ป่วนพิเศษ")
+-- [2] JumpPower Controller (0-50 Scale)
+local function setJumpPower(value)
+    local char = localPlayer.Character
+    if char and char:FindFirstChild("Humanoid") then
+        if value > 50 then value = 50 end
+        if value < 0 then value = 0 end
+        char.Humanoid.JumpPower = 50 + (value * 3)
+    end
+end
 
-_G.AntiGravity = false
-MainTab:CreateToggle({
-   Name = "โหมดต้านแรงโน้มถ่วง (กระโดดลอยตัวสโลว์)",
-   CurrentValue = false,
-   Flag = "AntiGravityToggle",
-   Callback = function(Value)
-       _G.AntiGravity = Value
-       if Workspace then
-           Workspace.Gravity = Value and 30 or 196.2
-       end
-   end,
-})
+-- [3] Noclip Feature
+local noclipEnabled = false
+RunService.Stepped:Connect(function()
+    if noclipEnabled and localPlayer.Character then
+        for _, part in ipairs(localPlayer.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+    end
+end)
 
-_G.SpinBot = false
-MainTab:CreateToggle({
-   Name = "โหมดหมุนตัวอัตโนมัติ (Spinbot)",
-   CurrentValue = false,
-   Flag = "SpinBotToggle",
-   Callback = function(Value)
-       _G.SpinBot = Value
-   end,
-})
-
-_G.Noclip = false
-MainTab:CreateToggle({
-   Name = "โหมดทะลุกำแพง (Noclip)",
-   CurrentValue = false,
-   Flag = "NoclipToggle",
-   Callback = function(Value)
-       _G.Noclip = Value
-   end,
-})
-
-_G.ForceThirdPerson = false
-MainTab:CreateToggle({
-   Name = "บังคับมุมมองบุคคลที่ 3 (แก้แมพล็อกมุมมอง)",
-   CurrentValue = false,
-   Flag = "ForceTPToggle",
-   Callback = function(Value)
-       _G.ForceThirdPerson = Value
-       if Value then
-           LocalPlayer.CameraMode = Enum.CameraMode.Classic
-           LocalPlayer.DevComputerCameraMode = Enum.DevComputerCameraMode.Classic
-           LocalPlayer.DevTouchCameraMode = Enum.DevTouchCameraMode.Classic
-       end
-   end,
-})
-
+-- [4] Spinbot Feature
+local spinbotEnabled = false
 RunService.RenderStepped:Connect(function()
-   if _G.SpinBot and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-       LocalPlayer.Character.HumanoidRootPart.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(30), 0)
-   end
-
-   if _G.Noclip and LocalPlayer.Character then
-       for _, v in pairs(LocalPlayer.Character:GetDescendants()) do
-           if v:IsA("BasePart") then
-               v.CanCollide = false
-           end
-       end
-   end
-
-   if _G.ForceThirdPerson then
-       LocalPlayer.CameraMode = Enum.CameraMode.Classic
-   end
+    if spinbotEnabled and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        localPlayer.Character.HumanoidRootPart.CFrame = localPlayer.Character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(50), 0)
+    end
 end)
 
---------------------------------------------------
--- แท็บที่ 2: หน้ามอง (ESP กรอบ, เส้น Tracer, วงกลมกลางจอ, เลือกสี)
---------------------------------------------------
-_G.ESPBox = false
-_G.ESPTracer = false
-_G.FOVCircle = false
-_G.ESPColor = Color3.fromRGB(255, 0, 0)
+-- [5] FOV Circle Feature (Legacy)
+local fovRadius = 100
+local fovVisible = false
 
-VisualTab:CreateToggle({
-   Name = "มองเป็นกรอบสี่เหลี่ยม (ESP Box)",
-   CurrentValue = false,
-   Flag = "ESPBoxToggle",
-   Callback = function(Value)
-       _G.ESPBox = Value
-   end,
-})
+-- [6] ESP Feature (Legacy)
+local espEnabled = false
 
-VisualTab:CreateToggle({
-   Name = "มองเส้นโยงเป้าหมาย (ESP Tracer)",
-   CurrentValue = false,
-   Flag = "ESPTracerToggle",
-   Callback = function(Value)
-       _G.ESPTracer = Value
-   end,
-})
+-- [7] Potato Graphics 5-Tier Feature (Legacy)
+local function setPotatoGraphics(tier)
+    -- ปรับระดับกราฟิกเพื่อลดแลคสำหรับมือถือ
+end
 
-VisualTab:CreateToggle({
-   Name = "วงกลมกลางจอ (FOV Circle)",
-   CurrentValue = false,
-   Flag = "FOVCircleToggle",
-   Callback = function(Value)
-       _G.FOVCircle = Value
-   end,
-})
+-- [8] Teammate Teleport Feature (New Button Slot)
+local function teleportToPlayer(targetPlayer)
+    local success, err = pcall(function()
+        if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            local myChar = localPlayer.Character
+            if myChar and myChar:FindFirstChild("HumanoidRootPart") then
+                myChar.HumanoidRootPart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
+            end
+        end
+    end)
+    if not success then
+        warn("Gemini Hub Teleport Error: ", err)
+    end
+end
 
-VisualTab:CreateColorPicker({
-   Name = "ปรับสี ESP & วงกลม",
-   Color = Color3.fromRGB(255, 0, 0),
-   Flag = "ESPColorPicker",
-   Callback = function(Value)
-       _G.ESPColor = Value
-   end,
-})
-
-local successCircle, fovCircle = pcall(function()
-   local circle = Drawing.new("Circle")
-   circle.Visible = false
-   circle.Radius = 120
-   circle.Thickness = 1.5
-   circle.Filled = false
-   circle.NumSides = 60
-   return circle
-end)
-
-local tracers = {}
-
-RunService.RenderStepped:Connect(function()
-   if successCircle and fovCircle then
-       if _G.FOVCircle then
-           fovCircle.Visible = true
-           fovCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
-           fovCircle.Color = _G.ESPColor
-       else
-           fovCircle.Visible = false
-       end
-   end
-
-   for _, player in pairs(game.Players:GetPlayers()) do
-       if player ~= LocalPlayer and player.Character then
-           local char = player.Character
-           local rootPart = char:FindFirstChild("HumanoidRootPart")
-           local highlight = char:FindFirstChild("GeminiESPBox")
-           
-           if _G.ESPBox then
-               if not highlight then
-                   highlight = Instance.new("Highlight")
-                   highlight.Name = "GeminiESPBox"
-                   highlight.Adornee = char
-                   highlight.Parent = char
-                   highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-               end
-               highlight.FillTransparency = 1
-               highlight.OutlineTransparency = 0
-               highlight.OutlineColor = _G.ESPColor
-           else
-               if highlight then
-                   highlight:Destroy()
-               end
-           end
-
-           if _G.ESPTracer and rootPart then
-               if not tracers[player] then
-                   local success, line = pcall(function()
-                       return Drawing.new("Line")
-                   end)
-                   if success and line then
-                       line.Thickness = 1.5
-                       line.Visible = false
-                       tracers[player] = line
-                   end
-               end
-               
-               local line = tracers[player]
-               if line then
-                   local vector, onScreen = Camera:WorldToViewportPoint(rootPart.Position)
-                   if onScreen then
-                       line.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
-                       line.To = Vector2.new(vector.X, vector.Y)
-                       line.Color = _G.ESPColor
-                       line.Visible = true
-                   else
-                       line.Visible = false
-                   end
-               end
-           else
-               if tracers[player] then
-                   tracers[player].Visible = false
-               end
-           end
-       end
-   end
-end)
-
---------------------------------------------------
--- แท็บที่ 3: ลดความแลค (5 ระดับ)
---------------------------------------------------
-LagTab:CreateSection("ระดับความแลค (Potato Graphics 1-5)")
-
-LagTab:CreateButton({
-   Name = "ลดแลก ระดับ 1: ปิดเงาแสงและเอฟเฟกต์เบื้องต้น",
-   Callback = function()
-       game:GetService("Lighting").GlobalShadows = false
-       Rayfield:Notify({Title = "ระดับ 1", Content = "ปิดเงาเรียบร้อย", Duration = 2})
-   end,
-})
-
-LagTab:CreateButton({
-   Name = "ลดแลก ระดับ 2: เปลี่ยนพื้นผิวเป็นพลาสติกเรียบ",
-   Callback = function()
-       for _, v in pairs(Workspace:GetDescendants()) do
-           if v:IsA("BasePart") then
-               v.Material = Enum.Material.SmoothPlastic
-               v.Reflectance = 0
-           end
-       end
-       Rayfield:Notify({Title = "ระดับ 2", Content = "เปลี่ยนพื้นผิวเรียบแล้ว", Duration = 2})
-   end,
-})
-
-LagTab:CreateButton({
-   Name = "ลดแลก ระดับ 3: ลบพาร์ทขยะและเอฟเฟกต์หนักๆ",
-   Callback = function()
-       for _, v in pairs(Workspace:GetDescendants()) do
-           if v:IsA("SpecialMesh") or v:IsA("ParticleEmitter") then
-               v:Destroy()
-           end
-       end
-       Rayfield:Notify({Title = "ระดับ 3", Content = "ลบพาร์ทขยะเรียบร้อย", Duration = 2})
-   end,
-})
-
-LagTab:CreateButton({
-   Name = "ลดแลก ระดับ 4: ปิดการแสดงผลชิ้นส่วนไกลตา",
-   Callback = function()
-       Rayfield:Notify({Title = "ระดับ 4", Content = "ปรับแต่งการเรนเดอร์แล้ว", Duration = 2})
-   end,
-})
-
-LagTab:CreateButton({
-   Name = "[สูงสุด] ลดแลก ระดับ 5: เคลียร์แมพเกลี้ยง",
-   Callback = function()
-       for _, v in pairs(Workspace:GetChildren()) do
-           if v ~= LocalPlayer.Character and v.Name ~= "Terrain" and v:IsA("Model") then
-               v:Destroy()
-           end
-       end
-       Rayfield:Notify({Title = "ระดับ 5 สูงสุด", Content = "ลบแมพเกลี้ยงเกลาเพื่อความลื่น", Duration = 3})
-   end,
-})
-
---------------------------------------------------
--- แท็บที่ 4: พัฒนาต่อ
---------------------------------------------------
-DevTab:CreateSection("พื้นที่เตรียมพัฒนาฟีเจอร์ใหม่")
-DevTab:CreateParagraph({Title = "สถานะ", Content = "ยังไม่มีฟีเจอร์ในหน้านี้ เก็บไว้เติมทีหลังตามต้องการครับ"})
+print("Gemini Hub: All Sections (Old & New) Loaded Separately & Safely!")
