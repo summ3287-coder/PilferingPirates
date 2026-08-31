@@ -1,16 +1,16 @@
--- Gemini Hub: Clean UI Edition (No Language Switching, No ESP, Clean Structure)
+-- Gemini Hub: Ultimate Complete Edition (UI + Movement + ESP + Sound)
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local localPlayer = Players.LocalPlayer
 
-if CoreGui:FindFirstChild("GeminiHubCleanUI") then
-    CoreGui.GeminiHubCleanUI:Destroy()
+if CoreGui:FindFirstChild("GeminiHubUltimate") then
+    CoreGui.GeminiHubUltimate:Destroy()
 end
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "GeminiHubCleanUI"
+ScreenGui.Name = "GeminiHubUltimate"
 ScreenGui.Parent = CoreGui
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
@@ -30,8 +30,8 @@ Instance.new("UICorner", ToggleButton).CornerRadius = UDim.new(1, 0)
 -- 2. แผงหลัก
 local MainPanel = Instance.new("Frame")
 MainPanel.Name = "MainPanel"
-MainPanel.Size = UDim2.new(0, 520, 0, 340)
-MainPanel.Position = UDim2.new(0.5, -260, 0.5, -170)
+MainPanel.Size = UDim2.new(0, 520, 0, 380)
+MainPanel.Position = UDim2.new(0.5, -260, 0.5, -190)
 MainPanel.BackgroundColor3 = Color3.fromRGB(20, 20, 22)
 MainPanel.BorderSizePixel = 0
 MainPanel.Parent = ScreenGui
@@ -63,7 +63,7 @@ HubTitle.BackgroundTransparency = 1
 HubTitle.TextColor3 = Color3.fromRGB(240, 240, 240)
 HubTitle.TextSize = 13
 HubTitle.Font = Enum.Font.GothamBold
-HubTitle.Text = "เจมิไน ฮับ | โครงสร้าง UI หลัก"
+HubTitle.Text = "เจมิไน ฮับ | ตัวเต็มครบทุกฟีเจอร์"
 HubTitle.TextXAlignment = Enum.TextXAlignment.Left
 HubTitle.Parent = TopBar
 
@@ -78,7 +78,7 @@ CloseButton.Font = Enum.Font.GothamBold
 CloseButton.Parent = TopBar
 Instance.new("UICorner", CloseButton).CornerRadius = UDim.new(0, 8)
 
--- 3. แท็บเมนู (2 แท็บหลัก)
+-- 3. แท็บเมนู (3 แท็บ)
 local TabBar = Instance.new("Frame")
 TabBar.Size = UDim2.new(1, -24, 0, 42)
 TabBar.Position = UDim2.new(0, 12, 0, 55)
@@ -88,24 +88,34 @@ TabBar.Parent = MainPanel
 Instance.new("UICorner", TabBar).CornerRadius = UDim.new(0, 10)
 
 local Tab1Btn = Instance.new("TextButton")
-Tab1Btn.Size = UDim2.new(0.48, 0, 1, -6)
+Tab1Btn.Size = UDim2.new(0.32, 0, 1, -6)
 Tab1Btn.Position = UDim2.new(0, 3, 0, 3)
 Tab1Btn.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
-Tab1Btn.Text = "หลัก / การเคลื่อนไหว"
+Tab1Btn.Text = "การเคลื่อนไหว"
 Tab1Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
 Tab1Btn.TextSize, Tab1Btn.Font = 12, Enum.Font.GothamBold
 Tab1Btn.Parent = TabBar
 Instance.new("UICorner", Tab1Btn).CornerRadius = UDim.new(0, 8)
 
 local Tab2Btn = Instance.new("TextButton")
-Tab2Btn.Size = UDim2.new(0.48, 0, 1, -6)
-Tab2Btn.Position = UDim2.new(0.50, 3, 0, 3)
+Tab2Btn.Size = UDim2.new(0.32, 0, 1, -6)
+Tab2Btn.Position = UDim2.new(0.34, 3, 0, 3)
 Tab2Btn.BackgroundColor3 = Color3.fromRGB(26, 26, 30)
-Tab2Btn.Text = "ฟีเจอร์ป่วน (Troll)"
+Tab2Btn.Text = "ระบบมอง (ESP)"
 Tab2Btn.TextColor3 = Color3.fromRGB(160, 160, 160)
 Tab2Btn.TextSize, Tab2Btn.Font = 12, Enum.Font.GothamBold
 Tab2Btn.Parent = TabBar
 Instance.new("UICorner", Tab2Btn).CornerRadius = UDim.new(0, 8)
+
+local Tab3Btn = Instance.new("TextButton")
+Tab3Btn.Size = UDim2.new(0.32, 0, 1, -6)
+Tab3Btn.Position = UDim2.new(0.68, 3, 0, 3)
+Tab3Btn.BackgroundColor3 = Color3.fromRGB(26, 26, 30)
+Tab3Btn.Text = "เสียงปั่น (Sound)"
+Tab3Btn.TextColor3 = Color3.fromRGB(160, 160, 160)
+Tab3Btn.TextSize, Tab3Btn.Font = 12, Enum.Font.GothamBold
+Tab3Btn.Parent = TabBar
+Instance.new("UICorner", Tab3Btn).CornerRadius = UDim.new(0, 8)
 
 local function createModernToggle(parent, titleText, yPos, initialActive, callback)
     local frame = Instance.new("Frame")
@@ -235,10 +245,10 @@ local function createToggleSliderModern(parent, titleText, yPos, defaultVal, cal
     end)
 end
 
--- --- หน้าหลัก (Tab 1) ---
+-- --- หน้าที่ 1: การเคลื่อนไหว (Tab 1) ---
 local Content1 = Instance.new("ScrollingFrame")
-Content1.Size = UDim2.new(1, -24, 1, -115)
-Content1.Position = UDim2.new(0, 12, 0, 105)
+Content1.Size = UDim2.new(1, -24, 1, -125)
+Content1.Position = UDim2.new(0, 12, 0, 110)
 Content1.BackgroundTransparency = 1
 Content1.CanvasSize = UDim2.new(0, 0, 0, 240)
 Content1.ScrollBarThickness = 3
@@ -279,51 +289,89 @@ createModernToggle(Content1, "เดินทะลุกำแพง (Noclip)",
     end
 end)
 
--- --- หน้าฟีเจอร์ป่วน (Tab 2) ---
+-- --- หน้าที่ 2: ระบบมอง (Tab 2: ESP) ---
 local Content2 = Instance.new("ScrollingFrame")
-Content2.Size = UDim2.new(1, -24, 1, -115)
-Content2.Position = UDim2.new(0, 12, 0, 105)
+Content2.Size = UDim2.new(1, -24, 1, -125)
+Content2.Position = UDim2.new(0, 12, 0, 110)
 Content2.BackgroundTransparency = 1
 Content2.Visible = false
 Content2.CanvasSize = UDim2.new(0, 0, 0, 120)
 Content2.ScrollBarThickness = 3
 Content2.Parent = MainPanel
 
-local trollFrame = Instance.new("Frame")
-trollFrame.Size = UDim2.new(1, 0, 0, 90)
-trollFrame.Position = UDim2.new(0, 0, 0, 0)
-trollFrame.BackgroundColor3 = Color3.fromRGB(26, 26, 30)
-trollFrame.Parent = Content2
-Instance.new("UICorner", trollFrame).CornerRadius = UDim.new(0, 10)
+local espConnections = {}
+createModernToggle(Content2, "เปิดระบบมองตัวผู้เล่น (Player ESP)", 0, false, function(state)
+    if state then
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= localPlayer then
+                local function addBox(char)
+                    if char and not char:FindFirstChild("GeminiESPBox") then
+                        local highlight = Instance.new("Highlight")
+                        highlight.Name = "GeminiESPBox"
+                        highlight.Adornee = char
+                        highlight.FillColor = Color3.fromRGB(0, 162, 255)
+                        highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                        highlight.FillTransparency = 0.5
+                        highlight.Parent = char
+                    end
+                end
+                if p.Character then addBox(p.Character) end
+                table.insert(espConnections, p.CharacterAdded:Connect(addBox))
+            end
+        end
+        table.insert(espConnections, Players.PlayerAdded:Connect(function(p)
+            p.CharacterAdded:Connect(function(char)
+                if Content2.Visible then
+                    local highlight = Instance.new("Highlight")
+                    highlight.Name = "GeminiESPBox"
+                    highlight.Adornee = char
+                    highlight.FillColor = Color3.fromRGB(0, 162, 255)
+                    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                    highlight.FillTransparency = 0.5
+                    highlight.Parent = char
+                end
+            end)
+        end))
+    else
+        for _, conn in ipairs(espConnections) do conn:Disconnect() end
+        espConnections = {}
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p.Character and p.Character:FindFirstChild("GeminiESPBox") then
+                p.Character.GeminiESPBox:Destroy()
+            end
+        end
+    end
+end)
 
-local trollLbl = Instance.new("TextLabel")
-trollLbl.Size = UDim2.new(1, -20, 0, 30)
-trollLbl.Position = UDim2.new(0, 16, 0, 8)
-trollLbl.BackgroundTransparency = 1
-trollLbl.Text = "ใส่รหัสเสียง (Sound ID):"
-trollLbl.TextColor3 = Color3.fromRGB(230, 230, 230)
-trollLbl.TextSize, trollLbl.Font, trollLbl.TextXAlignment = 13, Enum.Font.GothamBold, Enum.TextXAlignment.Left
-trollLbl.Parent = trollFrame
+-- --- หน้าที่ 3: ระบบเสียง (Tab 3: Sound) ---
+local Content3 = Instance.new("ScrollingFrame")
+Content3.Size = UDim2.new(1, -24, 1, -125)
+Content3.Position = UDim2.new(0, 12, 0, 110)
+Content3.BackgroundTransparency = 1
+Content3.Visible = false
+Content3.CanvasSize = UDim2.new(0, 0, 0, 120)
+Content3.ScrollBarThickness = 3
+Content3.Parent = MainPanel
 
 local soundBox = Instance.new("TextBox")
-soundBox.Size = UDim2.new(0, 240, 0, 32)
-soundBox.Position = UDim2.new(0, 16, 0, 46)
+soundBox.Size = UDim2.new(1, 0, 0, 40)
+soundBox.Position = UDim2.new(0, 0, 0, 0)
 soundBox.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
-soundBox.Text = ""
-soundBox.PlaceholderText = "รหัสเสียง (เช่น 5410086218)"
+soundBox.Text = "5410086218"
+soundBox.PlaceholderText = "ใส่รหัสเสียง (Sound ID)..."
 soundBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-soundBox.TextSize, soundBox.Font = 12, Enum.Font.Gotham
-soundBox.Parent = trollFrame
+soundBox.TextSize, soundBox.Font = 13, Enum.Font.Gotham
+soundBox.Parent = Content3
 Instance.new("UICorner", soundBox).CornerRadius = UDim.new(0, 8)
 
 local playSoundBtn = Instance.new("TextButton")
-playSoundBtn.Size = UDim2.new(0, 130, 0, 32)
-playSoundBtn.Position = UDim2.new(1, -146, 0, 46)
+playSoundBtn.Size = UDim2.new(1, 0, 0, 45)
+playSoundBtn.Position = UDim2.new(0, 0, 0, 50)
 playSoundBtn.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
-playSoundBtn.Text = "เปิดเสียงปั่น"
+playSoundBtn.Text = "🎵 เล่นเสียงปั่น (จบแล้วจบเลย)"
 playSoundBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-playSoundBtn.TextSize, playSoundBtn.Font = 12, Enum.Font.GothamBold
-playSoundBtn.Parent = trollFrame
+playSoundBtn.TextSize, playSoundBtn.Font = 13, Enum.Font.GothamBold
+playSoundBtn.Parent = Content3
 Instance.new("UICorner", playSoundBtn).CornerRadius = UDim.new(0, 8)
 
 playSoundBtn.MouseButton1Click:Connect(function()
@@ -332,25 +380,39 @@ playSoundBtn.MouseButton1Click:Connect(function()
     if soundIdNum and char and char:FindFirstChild("HumanoidRootPart") then
         local sound = Instance.new("Sound")
         sound.SoundId = "rbxassetid://" .. tostring(soundIdNum)
-        sound.Volume = 10
-        sound.RollOffMaxDistance = 100
+        sound.Volume = 15
+        sound.RollOffMaxDistance = 1000
         sound.RollOffMinDistance = 10
         sound.Parent = char.HumanoidRootPart
+        
         sound:Play()
+        
+        sound.Ended:Connect(function()
+            sound:Destroy()
+        end)
     end
 end)
 
--- --- ระบบสลับหน้าแท็บ UI ---
+-- --- ระบบสลับหน้าแท็บ ---
 Tab1Btn.MouseButton1Click:Connect(function()
-    Content1.Visible = true; Content2.Visible = false
+    Content1.Visible = true; Content2.Visible = false; Content3.Visible = false
     Tab1Btn.BackgroundColor3 = Color3.fromRGB(0, 162, 255); Tab1Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     Tab2Btn.BackgroundColor3 = Color3.fromRGB(26, 26, 30); Tab2Btn.TextColor3 = Color3.fromRGB(160, 160, 160)
+    Tab3Btn.BackgroundColor3 = Color3.fromRGB(26, 26, 30); Tab3Btn.TextColor3 = Color3.fromRGB(160, 160, 160)
 end)
 
 Tab2Btn.MouseButton1Click:Connect(function()
-    Content1.Visible = false; Content2.Visible = true
+    Content1.Visible = false; Content2.Visible = true; Content3.Visible = false
     Tab2Btn.BackgroundColor3 = Color3.fromRGB(0, 162, 255); Tab2Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     Tab1Btn.BackgroundColor3 = Color3.fromRGB(26, 26, 30); Tab1Btn.TextColor3 = Color3.fromRGB(160, 160, 160)
+    Tab3Btn.BackgroundColor3 = Color3.fromRGB(26, 26, 30); Tab3Btn.TextColor3 = Color3.fromRGB(160, 160, 160)
+end)
+
+Tab3Btn.MouseButton1Click:Connect(function()
+    Content1.Visible = false; Content2.Visible = false; Content3.Visible = true
+    Tab3Btn.BackgroundColor3 = Color3.fromRGB(0, 162, 255); Tab3Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Tab1Btn.BackgroundColor3 = Color3.fromRGB(26, 26, 30); Tab1Btn.TextColor3 = Color3.fromRGB(160, 160, 160)
+    Tab2Btn.BackgroundColor3 = Color3.fromRGB(26, 26, 30); Tab2Btn.TextColor3 = Color3.fromRGB(160, 160, 160)
 end)
 
 CloseButton.MouseButton1Click:Connect(function()
