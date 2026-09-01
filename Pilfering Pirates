@@ -1,23 +1,24 @@
--- Gemini Sound: Floating Minimalist Edition
+-- Gemini Hub | John Wick Edition (Automation & Utility)
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 local localPlayer = Players.LocalPlayer
 
-if CoreGui:FindFirstChild("GeminiFloatSound") then
-    CoreGui.GeminiFloatSound:Destroy()
+if CoreGui:FindFirstChild("GeminiJohnWickHub") then
+    CoreGui.GeminiJohnWickHub:Destroy()
 end
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "GeminiFloatSound"
+ScreenGui.Name = "GeminiJohnWickHub"
 ScreenGui.Parent = CoreGui
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- 1. ปุ่มเปิด/ปิดลอย (รูปตัว G)
+-- ปุ่มเปิด/ปิดลอย (รูป G)
 local ToggleButton = Instance.new("TextButton")
 ToggleButton.Size = UDim2.new(0, 45, 0, 45)
 ToggleButton.Position = UDim2.new(0, 30, 0, 150)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(20, 20, 24)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(18, 18, 20)
 ToggleButton.BorderSizePixel = 0
 ToggleButton.Text = "G"
 ToggleButton.TextColor3 = Color3.fromRGB(0, 162, 255)
@@ -27,146 +28,244 @@ ToggleButton.Parent = ScreenGui
 Instance.new("UICorner", ToggleButton).CornerRadius = UDim.new(1, 0)
 
 local ToggleStroke = Instance.new("UIStroke")
-ToggleStroke.Color = Color3.fromRGB(45, 45, 55)
+ToggleStroke.Color = Color3.fromRGB(45, 45, 52)
 ToggleStroke.Thickness = 1
 ToggleStroke.Parent = ToggleButton
 
--- 2. หน้าต่างหลักสี่เหลี่ยมผืนผ้าขอบโค้งมน (ไร้เหลี่ยม)
+-- หน้าต่างหลัก
 local MainPanel = Instance.new("Frame")
-MainPanel.Size = UDim2.new(0, 320, 0, 175)
-MainPanel.Position = UDim2.new(0.5, -160, 0.5, -87)
-MainPanel.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
+MainPanel.Size = UDim2.new(0, 480, 0, 320)
+MainPanel.Position = UDim2.new(0.5, -240, 0.5, -160)
+MainPanel.BackgroundColor3 = Color3.fromRGB(18, 18, 20)
 MainPanel.BorderSizePixel = 0
 MainPanel.Parent = ScreenGui
-Instance.new("UICorner", MainPanel).CornerRadius = UDim.new(0, 16)
+Instance.new("UICorner", MainPanel).CornerRadius = UDim.new(0, 12)
 
 local MainStroke = Instance.new("UIStroke")
-MainStroke.Color = Color3.fromRGB(45, 45, 55)
+MainStroke.Color = Color3.fromRGB(45, 45, 52)
 MainStroke.Thickness = 1
 MainStroke.Parent = MainPanel
 
--- แถบบน (TopBar สำหรับลาก)
+-- แถบบน (TopBar)
 local TopBar = Instance.new("Frame")
-TopBar.Size = UDim2.new(1, 0, 0, 36)
-TopBar.BackgroundColor3 = Color3.fromRGB(24, 24, 30)
+TopBar.Size = UDim2.new(1, 0, 0, 42)
+TopBar.BackgroundColor3 = Color3.fromRGB(24, 24, 28)
 TopBar.BorderSizePixel = 0
 TopBar.Parent = MainPanel
-Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 16)
+Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 12)
 
 local FixTopBar = Instance.new("Frame")
-FixTopBar.Size = UDim2.new(1, 0, 0, 8)
-FixTopBar.Position = UDim2.new(0, 0, 1, -8)
-FixTopBar.BackgroundColor3 = Color3.fromRGB(24, 24, 30)
+FixTopBar.Size = UDim2.new(1, 0, 0, 10)
+FixTopBar.Position = UDim2.new(0, 0, 1, -10)
+FixTopBar.BackgroundColor3 = Color3.fromRGB(24, 24, 28)
 FixTopBar.BorderSizePixel = 0
 FixTopBar.Parent = TopBar
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -50, 1, 0)
-Title.Position = UDim2.new(0, 14, 0, 0)
+Title.Size = UDim2.new(1, -120, 1, 0)
+Title.Position = UDim2.new(0, 16, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "Gemini Sound Player"
-Title.TextColor3 = Color3.fromRGB(230, 230, 235)
-Title.TextSize = 12
+Title.Text = "Gemini Hub | John Wick Edition"
+Title.TextColor3 = Color3.fromRGB(235, 235, 235)
+Title.TextSize = 13
 Title.Font = Enum.Font.GothamBold
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = TopBar
 
--- ปุ่มปิด (X)
 local CloseButton = Instance.new("TextButton")
-CloseButton.Size = UDim2.new(0, 24, 0, 24)
-CloseButton.Position = UDim2.new(1, -30, 0.5, -12)
-CloseButton.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+CloseButton.Size = UDim2.new(0, 28, 0, 28)
+CloseButton.Position = UDim2.new(1, -36, 0.5, -14)
+CloseButton.BackgroundColor3 = Color3.fromRGB(32, 32, 38)
 CloseButton.Text = "✕"
 CloseButton.TextColor3 = Color3.fromRGB(180, 180, 180)
-CloseButton.TextSize = 11
+CloseButton.TextSize = 12
 CloseButton.Font = Enum.Font.GothamBold
 CloseButton.Parent = TopBar
 Instance.new("UICorner", CloseButton).CornerRadius = UDim.new(0, 6)
 
--- 3. ช่องใส่เสียง และปุ่มรัน
-local Content = Instance.new("Frame")
-Content.Size = UDim2.new(1, -28, 1, -48)
-Content.Position = UDim2.new(0, 14, 0, 42)
-Content.BackgroundTransparency = 1
-Content.Parent = MainPanel
+-- แถบเลือกหมวดหมู่ (Tabs) ด้านบนใต้หัวข้อ
+local TabContainer = Instance.new("Frame")
+TabContainer.Size = UDim2.new(1, -24, 0, 36)
+TabContainer.Position = UDim2.new(0, 12, 0, 50)
+TabContainer.BackgroundTransparency = 1
+TabContainer.Parent = MainPanel
 
-local soundBox = Instance.new("TextBox")
-soundBox.Size = UDim2.new(1, 0, 0, 36)
-soundBox.Position = UDim2.new(0, 0, 0, 8)
-soundBox.BackgroundColor3 = Color3.fromRGB(26, 26, 32)
-soundBox.Text = "5410086218"
-soundBox.PlaceholderText = "ใส่รหัสเสียง (Sound ID)..."
-soundBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-soundBox.TextSize = 12
-soundBox.Font = Enum.Font.Gotham
-soundBox.Parent = Content
-Instance.new("UICorner", soundBox).CornerRadius = UDim.new(0, 8)
+local function createTabBtn(name, posX)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 140, 1, 0)
+    btn.Position = UDim2.new(0, posX, 0, 0)
+    btn.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
+    btn.Text = name
+    btn.TextColor3 = Color3.fromRGB(180, 180, 180)
+    btn.TextSize = 11
+    btn.Font = Enum.Font.GothamBold
+    btn.Parent = TabContainer
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+    return btn
+end
 
-local BoxStroke = Instance.new("UIStroke")
-BoxStroke.Color = Color3.fromRGB(45, 45, 55)
-BoxStroke.Thickness = 1
-BoxStroke.Parent = soundBox
+local tabFarm = createTabBtn("⚡ ออโต้ฟาร์ม (ช่วยตัวเอง)", 0)
+local tabUtility = createTabBtn("🛠️ ตัวช่วยเสริม & วาร์ป", 148)
 
-local playBtn = Instance.new("TextButton")
-playBtn.Size = UDim2.new(0.48, 0, 0, 38)
-playBtn.Position = UDim2.new(0, 0, 0, 54)
-playBtn.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
-playBtn.Text = "▶ รันเพลง"
-playBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-playBtn.TextSize = 12
-playBtn.Font = Enum.Font.GothamBold
-playBtn.Parent = Content
-Instance.new("UICorner", playBtn).CornerRadius = UDim.new(0, 8)
+-- หน้าเนื้อหาของแต่ละแท็บ
+local pageFarm = Instance.new("ScrollingFrame")
+pageFarm.Size = UDim2.new(1, -24, 1, -100)
+pageFarm.Position = UDim2.new(0, 12, 0, 95)
+pageFarm.BackgroundTransparency = 1
+pageFarm.CanvasSize = UDim2.new(0, 0, 0, 250)
+pageFarm.ScrollBarThickness = 3
+pageFarm.Parent = MainPanel
 
-local stopBtn = Instance.new("TextButton")
-stopBtn.Size = UDim2.new(0.48, 0, 0, 38)
-stopBtn.Position = UDim2.new(0.52, 0, 0, 54)
-stopBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-stopBtn.Text = "⏹ หยุดเพลง"
-stopBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-stopBtn.TextSize = 12
-stopBtn.Font = Enum.Font.GothamBold
-stopBtn.Parent = Content
-Instance.new("UICorner", stopBtn).CornerRadius = UDim.new(0, 8)
+local pageUtility = Instance.new("ScrollingFrame")
+pageUtility.Size = UDim2.new(1, -24, 1, -100)
+pageUtility.Position = UDim2.new(0, 12, 0, 95)
+pageUtility.BackgroundTransparency = 1
+pageUtility.CanvasSize = UDim2.new(0, 0, 0, 250)
+pageUtility.ScrollBarThickness = 3
+pageUtility.Visible = false
+pageUtility.Parent = MainPanel
 
--- ระบบเล่น/หยุดเสียง
-local currentSound = nil
+-- สลับแท็บ
+tabFarm.MouseButton1Click:Connect(function()
+    pageFarm.Visible = true
+    pageUtility.Visible = false
+    tabFarm.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
+    tabFarm.TextColor3 = Color3.fromRGB(255, 255, 255)
+    tabUtility.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
+    tabUtility.TextColor3 = Color3.fromRGB(180, 180, 180)
+end)
 
-playBtn.MouseButton1Click:Connect(function()
-    local idNum = tonumber(soundBox.Text)
-    local char = localPlayer.Character
-    if idNum and char and char:FindFirstChild("HumanoidRootPart") then
-        if currentSound and currentSound.Parent then
-            currentSound:Stop()
-            currentSound:Destroy()
+tabUtility.MouseButton1Click:Connect(function()
+    pageFarm.Visible = false
+    pageUtility.Visible = true
+    tabUtility.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
+    tabUtility.TextColor3 = Color3.fromRGB(255, 255, 255)
+    tabFarm.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
+    tabFarm.TextColor3 = Color3.fromRGB(180, 180, 180)
+end)
+tabFarm.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
+tabFarm.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+-- ฟังก์ชันสร้างปุ่มกดเปิด-ปิดฟีเจอร์ (Toggle Buttons) ในหน้าฟาร์ม
+local function createFeatureToggle(parent, text, yPos, callback)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, 0, 0, 40)
+    btn.Position = UDim2.new(0, 0, 0, yPos)
+    btn.BackgroundColor3 = Color3.fromRGB(26, 26, 32)
+    btn.Text = "  " .. text .. " [ ปิด ]"
+    btn.TextColor3 = Color3.fromRGB(210, 210, 210)
+    btn.TextSize = 12
+    btn.Font = Enum.Font.GothamMedium
+    btn.TextXAlignment = Enum.TextXAlignment.Left
+    btn.Parent = parent
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+    
+    local active = false
+    btn.MouseButton1Click:Connect(function()
+        active = not active
+        if active then
+            btn.BackgroundColor3 = Color3.fromRGB(0, 120, 80)
+            btn.Text = "  " .. text .. " [ เปิดใช้งาน ]"
+        else
+            btn.BackgroundColor3 = Color3.fromRGB(26, 26, 32)
+            btn.Text = "  " .. text .. " [ ปิด ]"
         end
-        
-        local sound = Instance.new("Sound")
-        sound.SoundId = "rbxassetid://" .. tostring(idNum)
-        sound.Volume = 15
-        sound.RollOffMaxDistance = 1000
-        sound.RollOffMinDistance = 10
-        sound.Parent = char.HumanoidRootPart
-        
-        currentSound = sound
-        sound:Play()
-        
-        sound.Ended:Connect(function()
-            if currentSound == sound then currentSound = nil end
-            sound:Destroy()
+        callback(active)
+    end)
+end
+
+-- ฟีเจอร์ที่ 1: ออโต้คลิก / ฟาร์มรัวๆ
+local autoClicking = false
+RunService.RenderStepped:Connect(function()
+    if autoClicking then
+        pcall(function()
+            local vim = game:GetService("VirtualInputManager")
+            vim:SendMouseButtonEvent(0, 0, 0, true, game, 0)
+            task.wait(0.05)
+            vim:SendMouseButtonEvent(0, 0, 0, false, game, 0)
+        end)
+    end
+end)
+createFeatureToggle(pageFarm, "⚡ ออโต้คลิกฟาร์มรัวๆ (Auto Clicker)", 0, function(state)
+    autoClicking = state
+end)
+
+-- ฟีเจอร์ที่ 2: วิ่งเร็วพิเศษ (Speed Boost)
+local speedConn = nil
+createFeatureToggle(pageFarm, "🚀 วิ่งไวซิ่งสะใจ (WalkSpeed 50)", 50, function(state)
+    if state then
+        speedConn = RunService.RenderStepped:Connect(function()
+            pcall(function()
+                local char = localPlayer.Character
+                if char and char:FindFirstChild("Humanoid") then
+                    char.Humanoid.WalkSpeed = 50
+                end
+            end)
+        end)
+    else
+        if speedConn then speedConn:Disconnect() end
+        pcall(function() localPlayer.Character.Humanoid.WalkSpeed = 16 end)
+    end
+end)
+
+-- ฟีเจอร์ที่ 3: กระโดดสูงพิเศษ (JumpPower)
+local jumpConn = nil
+createFeatureToggle(pageFarm, "🦘 กระโดดสูงทะลุฟ้า (JumpPower 120)", 100, function(state)
+    if state then
+        jumpConn = RunService.RenderStepped:Connect(function()
+            pcall(function()
+                local char = localPlayer.Character
+                if char and char:FindFirstChild("Humanoid") then
+                    char.Humanoid.UseJumpPower = true
+                    char.Humanoid.JumpPower = 120
+                end
+            end)
+        end)
+    else
+        if jumpConn then jumpConn:Disconnect() end
+        pcall(function() 
+            localPlayer.Character.Humanoid.UseJumpPower = true
+            localPlayer.Character.Humanoid.JumpPower = 50 
         end)
     end
 end)
 
-stopBtn.MouseButton1Click:Connect(function()
-    if currentSound and currentSound.Parent then
-        currentSound:Stop()
-        currentSound:Destroy()
-        currentSound = nil
-    end
+-- ฟีเจอร์ในหน้าแท็บ Utility & Teleport
+local function createActionButton(parent, text, yPos, callback)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, 0, 0, 40)
+    btn.Position = UDim2.new(0, 0, 0, yPos)
+    btn.BackgroundColor3 = Color3.fromRGB(32, 32, 40)
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 12
+    btn.Font = Enum.Font.GothamBold
+    btn.Parent = parent
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+    
+    btn.MouseButton1Click:Connect(callback)
+end
+
+createActionButton(pageUtility, "🏠 รีเซ็ตตัวละครกลับจุดเกิด (Respawn)", 0, function()
+    pcall(function() localPlayer.Character.Humanoid.Health = 0 end)
 end)
 
--- กดปุ่ม X เพื่อปิดเมนู, กดตัว G เพื่อเปิดเมนูคืน
+createActionButton(pageUtility, "📍 บันทึกจุดวาร์ปปัจจุบัน (Save Position)", 50, function()
+    pcall(function()
+        getgenv.SavedPos = localPlayer.Character.HumanoidRootPart.CFrame
+        print("บันทึกพิกัดสำเร็จ!")
+    end)
+end)
+
+createActionButton(pageUtility, "🌀 วาร์ปกลับจุดที่บันทึกไว้ (Teleport)", 100, function()
+    pcall(function()
+        if getgenv.SavedPos then
+            localPlayer.Character.HumanoidRootPart.CFrame = getgenv.SavedPos
+        end
+    end)
+end)
+
+-- ระบบเปิด/ปิดหน้าต่างผ่านปุ่ม G
 CloseButton.MouseButton1Click:Connect(function()
     MainPanel.Visible = false
     ToggleButton.Visible = true
@@ -177,7 +276,7 @@ ToggleButton.MouseButton1Click:Connect(function()
     ToggleButton.Visible = false
 end)
 
--- ระบบลากหน้าต่างอิสระ
+-- ระบบลากหน้าต่าง
 local dragging, dragInput, dragStart, startPos
 TopBar.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
