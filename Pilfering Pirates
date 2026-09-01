@@ -1,4 +1,4 @@
--- Gemini Hub | Ultimate Edition (Fly + Part Dragger + Infinite Zoom)
+-- Gemini Hub | Ultimate Edition (Fly Fixed + Part Dragger + Infinite Zoom)
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
@@ -114,17 +114,6 @@ Title.Font = Enum.Font.GothamBold
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = TopBar
 
-local CoordLabel = Instance.new("TextLabel")
-CoordLabel.Size = UDim2.new(0, 180, 0, 20)
-CoordLabel.Position = UDim2.new(1, -190, 1, 6)
-CoordLabel.BackgroundTransparency = 1
-CoordLabel.Text = "XYZ: 0, 0, 0"
-CoordLabel.TextColor3 = Color3.fromRGB(150, 150, 160)
-CoordLabel.TextSize = 11
-CoordLabel.Font = Enum.Font.Code
-CoordLabel.TextXAlignment = Enum.TextXAlignment.Right
-CoordLabel.Parent = MainPanel
-
 local CloseButton = Instance.new("TextButton")
 CloseButton.Size = UDim2.new(0, 28, 0, 28)
 CloseButton.Position = UDim2.new(1, -36, 0.5, -14)
@@ -158,7 +147,7 @@ local function createTabBtn(name, posX)
 end
 
 local tabAuto = createTabBtn("⚡ ฟีเจอร์หลัก & เมนูบิน", 0)
-local tabSupport = createTabBtn("☕ ซัพพอร์ต & พิกัด", 148)
+local tabSupport = createTabBtn("☕ ซัพพอร์ต & วาร์ป", 148)
 
 local pageAuto = Instance.new("ScrollingFrame")
 pageAuto.Size = UDim2.new(1, -24, 1, -110)
@@ -263,45 +252,53 @@ end
 local FlyFloatBtn = createFloatingActionBtn("FlyBtn", "✈️ ปุ่มบิน", 210)
 local DragFloatBtn = createFloatingActionBtn("DragBtn", "📦 ลากบล็อก", 260)
 
--- --- ระบบบิน (Fly Mechanics) ---
+-- --- ระบบบินที่แก้ไขใหม่ (ใช้ BodyVelocity แก้บั๊กมุดดินและบินได้ชัวร์) ---
 local flyingActive = false
-local flyConnection = nil
+local bodyVelocity, bodyGyro
+
 FlyFloatBtn.MouseButton1Click:Connect(function()
     flyingActive = not flyingActive
+    local char = localPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    
     if flyingActive then
+        if not hrp or not hum then flyingActive = false return end
         FlyFloatBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 80)
         FlyFloatBtn.Text = "✈️ ปุ่มบิน [ON]"
         
-        flyConnection = RunService.RenderStepped:Connect(function()
-            pcall(function()
-                local char = localPlayer.Character
-                if char and char:FindFirstChild("HumanoidRootPart") then
-                    local hrp = char.HumanoidRootPart
-                    local hum = char:FindFirstChildOfClass("Humanoid")
-                    if hum then hum.PlatformStand = true end
-                    
-                    local camCFrame = Camera.CFrame
-                    local moveVector = Vector3.new()
-                    if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveVector = moveVector + camCFrame.LookVector end
-                    if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveVector = moveVector - camCFrame.LookVector end
-                    if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveVector = moveVector - camCFrame.RightVector end
-                    if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveVector = moveVector + camCFrame.RightVector end
-                    
-                    hrp.Velocity = moveVector * 50
-                    hrp.AssemblyLinearVelocity = moveVector * 50
-                end
-            end)
+        hum.PlatformStand = true
+        
+        bodyVelocity = Instance.new("BodyVelocity")
+        bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+        bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        bodyVelocity.Parent = hrp
+        
+        bodyGyro = Instance.new("BodyGyro")
+        bodyGyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+        bodyGyro.CFrame = hrp.CFrame
+        bodyGyro.Parent = hrp
+        
+        task.spawn(function()
+            while flyingactive and char and hrp.Parent do
+                local camCFrame = Camera.CFrame
+                local moveVector = Vector3.new()
+                if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveVector = moveVector + camCFrame.LookVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveVector = moveVector - camCFrame.LookVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveVector = moveVector - camCFrame.RightVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveVector = moveVector + camCFrame.RightVector end
+                
+                bodyVelocity.Velocity = moveVector * 50
+                bodyGyro.CFrame = camCFrame
+                task.wait()
+            end
         end)
     else
         FlyFloatBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 38)
         FlyFloatBtn.Text = "✈️ ปุ่มบิน [OFF]"
-        if flyConnection then flyConnection:Disconnect() end
-        pcall(function()
-            local char = localPlayer.Character
-            if char and char:FindFirstChildOfClass("Humanoid") then
-                char.Humanoid.PlatformStand = false
-            end
-        end)
+        if hum then hum.PlatformStand = false end
+        if bodyVelocity then bodyVelocity:Destroy() end
+        if bodyGyro then bodyGyro:Destroy() end
     end
 end)
 
@@ -336,8 +333,7 @@ end)
 createFeatureToggle(pageAuto, "🚀 เปิดเมนูปุ่มลอย (บิน + ลากบล็อก)", 0, "floatmenu", function(state)
     FloatButtonsContainer.Enabled = state
     if not state then
-        -- ปิดระบบข้างในอัตโนมัติเมื่อปิดฟังก์ชันจากเมนูหลัก
-        if flyingActive then FlyFloatBtn:CaptureFocus() FlyFloatBtn.MouseButton1Click:Fire() end
+        if flyingActive then FlyFloatBtn.MouseButton1Click:Fire() end
         if draggingPartActive then DragFloatBtn.MouseButton1Click:Fire() end
     end
 end)
@@ -400,7 +396,7 @@ local function createActionButton(parent, text, yPos, callback)
     btn.MouseButton1Click:Connect(callback)
 end
 
--- --- ระบบบันทึกพิกัดและวาร์ปกลับ (แก้บั๊ก 100%) ---
+-- --- ระบบบันทึกพิกัดและวาร์ปกลับ ---
 local savedPosition = nil
 
 createActionButton(pageSupport, "📌 บันทึกจุดยืนปัจจุบัน (Save Position)", 0, function()
@@ -430,17 +426,6 @@ createActionButton(pageSupport, "🔄 รีเซ็ตการตั้งค
             pcall(function() stateObj.callback(false) end)
         end
     end
-end)
-
--- อัปเดตพิกัด XYZ เรียลไทม์
-RunService.RenderStepped:Connect(function()
-    pcall(function()
-        local char = localPlayer.Character
-        if char and char:FindFirstChild("HumanoidRootPart") then
-            local pos = char.HumanoidRootPart.Position
-            CoordLabel.Text = string.Format("XYZ: %.0f, %.0f, %.0f", pos.X, pos.Y, pos.Z)
-        end
-    end)
 end)
 
 local function toggleUI()
