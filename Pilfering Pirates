@@ -1,4 +1,4 @@
--- Gemini Hub | Ultimate Edition (God Mode + Auto Up Fly 10s + Clean UI)
+-- Gemini Hub | Ultimate Edition (Math Key UI: 67 + Slow Up Fly 10s)
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
@@ -34,12 +34,72 @@ ToggleStroke.Color = Color3.fromRGB(45, 45, 52)
 ToggleStroke.Thickness = 1
 ToggleStroke.Parent = ToggleButton
 
--- 1. หน้าต่างดาวน์โหลด (Loading Screen)
+-- 1. หน้าต่างใส่รหัสยืนยัน (Math Key Screen)
+local KeyPanel = Instance.new("Frame")
+KeyPanel.Size = UDim2.new(0, 340, 0, 180)
+KeyPanel.Position = UDim2.new(0.5, -170, 0.5, -90)
+KeyPanel.BackgroundColor3 = Color3.fromRGB(18, 18, 20)
+KeyPanel.BorderSizePixel = 0
+KeyPanel.Parent = ScreenGui
+Instance.new("UICorner", KeyPanel).CornerRadius = UDim.new(0, 12)
+
+local KeyStroke = Instance.new("UIStroke")
+KeyStroke.Color = Color3.fromRGB(45, 45, 52)
+KeyStroke.Thickness = 1
+KeyStroke.Parent = KeyPanel
+
+local KeyTitle = Instance.new("TextLabel")
+KeyTitle.Size = UDim2.new(1, 0, 0, 40)
+KeyTitle.Position = UDim2.new(0, 0, 0, 10)
+KeyTitle.BackgroundTransparency = 1
+KeyTitle.Text = "🔒 ยืนยันรหัสเข้าใช้งาน Hub"
+KeyTitle.TextColor3 = Color3.fromRGB(235, 235, 235)
+KeyTitle.TextSize = 13
+KeyTitle.Font = Enum.Font.GothamBold
+KeyTitle.Parent = KeyPanel
+
+local QuestionLabel = Instance.new("TextLabel")
+QuestionLabel.Size = UDim2.new(1, -40, 0, 30)
+QuestionLabel.Position = UDim2.new(0, 20, 0, 50)
+QuestionLabel.BackgroundTransparency = 1
+QuestionLabel.Text = "โจทย์: 20 + 20 + 20 + 7 = ?"
+QuestionLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+QuestionLabel.TextSize = 12
+QuestionLabel.Font = Enum.Font.GothamMedium
+QuestionLabel.Parent = KeyPanel
+
+local KeyInputBox = Instance.new("TextBox")
+KeyInputBox.Size = UDim2.new(1, -40, 0, 36)
+KeyInputBox.Position = UDim2.new(0, 20, 0, 85)
+KeyInputBox.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
+KeyInputBox.BorderSizePixel = 0
+KeyInputBox.Text = ""
+KeyInputBox.PlaceholderText = "พิมพ์คำตอบที่นี่..."
+KeyInputBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+KeyInputBox.PlaceholderColor3 = Color3.fromRGB(100, 100, 110)
+KeyInputBox.TextSize = 12
+KeyInputBox.Font = Enum.Font.GothamMedium
+KeyInputBox.Parent = KeyPanel
+Instance.new("UICorner", KeyInputBox).CornerRadius = UDim.new(0, 8)
+
+local SubmitKeyBtn = Instance.new("TextButton")
+SubmitKeyBtn.Size = UDim2.new(1, -40, 0, 35)
+SubmitKeyBtn.Position = UDim2.new(0, 20, 0, 130)
+SubmitKeyBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 80)
+SubmitKeyBtn.Text = "ยืนยันรหัสเข้าสู่ระบบ"
+SubmitKeyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+SubmitKeyBtn.TextSize = 12
+SubmitKeyBtn.Font = Enum.Font.GothamBold
+SubmitKeyBtn.Parent = KeyPanel
+Instance.new("UICorner", SubmitKeyBtn).CornerRadius = UDim.new(0, 8)
+
+-- 2. หน้าต่างดาวน์โหลด (Loading Screen) - ซ่อนไว้ก่อน
 local LoadPanel = Instance.new("Frame")
 LoadPanel.Size = UDim2.new(0, 320, 0, 140)
 LoadPanel.Position = UDim2.new(0.5, -160, 0.5, -70)
 LoadPanel.BackgroundColor3 = Color3.fromRGB(18, 18, 20)
 LoadPanel.BorderSizePixel = 0
+LoadPanel.Visible = false
 LoadPanel.Parent = ScreenGui
 Instance.new("UICorner", LoadPanel).CornerRadius = UDim.new(0, 12)
 
@@ -73,7 +133,7 @@ BarFill.BorderSizePixel = 0
 BarFill.Parent = BarBackground
 Instance.new("UICorner", BarFill).CornerRadius = UDim.new(1, 0)
 
--- 2. หน้าต่างหลัก (Main Panel)
+-- 3. หน้าต่างหลัก (Main Panel)
 local MainPanel = Instance.new("Frame")
 MainPanel.Size = UDim2.new(0, 480, 0, 360)
 MainPanel.Position = UDim2.new(0.5, -240, 0.5, -180)
@@ -222,7 +282,7 @@ local function createFeatureToggle(parent, text, yPos, featureKey, callback)
     end)
 end
 
--- --- Container สำหรับปุ่มลอย (ปุ่มบินขึ้นฟ้าอัตโนมัติ) ---
+-- --- Container สำหรับปุ่มลอย (ปุ่มบินขึ้นฟ้าช้าๆ นิ่มๆ) ---
 local FloatButtonsContainer = Instance.new("ScreenGui")
 FloatButtonsContainer.Name = "GeminiFloatButtons"
 FloatButtonsContainer.Parent = CoreGui
@@ -245,7 +305,7 @@ fStroke.Color = Color3.fromRGB(60, 60, 70)
 fStroke.Thickness = 1
 fStroke.Parent = FlyFloatBtn
 
--- --- ระบบบินขึ้นฟ้าอัตโนมัติ 10 วินาที ทะลุกำแพง คืนค่าแรงโน้มถ่วงปกติ ---
+-- --- ระบบบินขึ้นฟ้าแบบช้าลง (ปรับความเร็วเหลือ 18) 10 วินาที คืนค่าแรงโน้มถ่วง ---
 local flyingActive = false
 local flyConnection = nil
 
@@ -288,7 +348,8 @@ FlyFloatBtn.MouseButton1Click:Connect(function()
                     local hrp = char.HumanoidRootPart
                     local hum = char:FindFirstChildOfClass("Humanoid")
                     if hum then hum.PlatformStand = true end
-                    hrp.AssemblyLinearVelocity = Vector3.new(0, 50, 0)
+                    -- ปรับความเร็วขึ้นฟ้าให้ช้าลงและสมูทขึ้น (จาก 50 ลดเหลือ 18)
+                    hrp.AssemblyLinearVelocity = Vector3.new(0, 18, 0)
                 end
             end)
         end)
@@ -303,32 +364,9 @@ createFeatureToggle(pageAuto, "🚀 เปิดเมนูปุ่มลอ�
     end
 end)
 
--- --- ฟีเจอร์ใหม่: สคริปต์อมตะ (God Mode / Immortal) ---
-local godModeConnection = nil
-createFeatureToggle(pageAuto, "🛡️ เปิดโหมดอมตะ (God Mode)", 50, "godmode", function(state)
-    if state then
-        godModeConnection = RunService.Stepped:Connect(function()
-            pcall(function()
-                local char = localPlayer.Character
-                if char then
-                    local hum = char:FindFirstChildOfClass("Humanoid")
-                    if hum then
-                        hum.Health = hum.MaxHealth -- ล็อกเลือดให้เต็มอยู่ตลอดเวลา
-                    end
-                end
-            end)
-        end)
-    else
-        if godModeConnection then
-            godModeConnection:Disconnect()
-            godModeConnection = nil
-        end
-    end
-end)
-
 -- --- ฟีเจอร์: กันหลุด AFK ---
 local afkConn = nil
-createFeatureToggle(pageAuto, "💤 ออโต้กันหลุด AFK", 100, "afk", function(state)
+createFeatureToggle(pageAuto, "💤 ออโต้กันหลุด AFK", 50, "afk", function(state)
     if state then
         local vu = game:GetService("VirtualUser")
         afkConn = localPlayer.Idled:Connect(function()
@@ -342,7 +380,7 @@ createFeatureToggle(pageAuto, "💤 ออโต้กันหลุด AFK", 1
 end)
 
 -- --- ฟีเจอร์: ปิดเอฟเฟกต์ ---
-createFeatureToggle(pageAuto, "✨ ปิดเอฟเฟกต์อลังการ (ลดแลค)", 150, "noeffects", function(state)
+createFeatureToggle(pageAuto, "✨ ปิดเอฟเฟกต์อลังการ (ลดแลค)", 100, "noeffects", function(state)
     pcall(function()
         for _, obj in pairs(workspace:GetDescendants()) do
             if obj:IsA("ParticleEmitter") or obj:IsA("Fire") or obj:IsA("Sparkles") or obj:IsA("Smoke") then
@@ -353,7 +391,7 @@ createFeatureToggle(pageAuto, "✨ ปิดเอฟเฟกต์อลัง
 end)
 
 -- --- ฟีเจอร์: ซูมกล้องไร้ขีดจำกัด (Infinite Zoom) ---
-createFeatureToggle(pageAuto, "🔭 ซูมกล้องไร้ขีดจำกัด (Infinite Zoom)", 200, "infzoom", function(state)
+createFeatureToggle(pageAuto, "🔭 ซูมกล้องไร้ขีดจำกัด (Infinite Zoom)", 150, "infzoom", function(state)
     pcall(function()
         if state then
             localPlayer.CameraMaxZoomDistance = 999999
@@ -364,7 +402,7 @@ createFeatureToggle(pageAuto, "🔭 ซูมกล้องไร้ขีด�
 end)
 
 -- --- ฟีเจอร์: ปรับมุมมอง FOV ---
-createFeatureToggle(pageAuto, "📷 ปรับมุมมองกล้องกว้างพิเศษ (FOV)", 250, "fov", function(state)
+createFeatureToggle(pageAuto, "📷 ปรับมุมมองกล้องกว้างพิเศษ (FOV)", 200, "fov", function(state)
     pcall(function()
         Camera.FieldOfView = state and 110 or 70
     end)
@@ -430,18 +468,28 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
--- ระบบโหลดหน้าจอ
-task.spawn(function()
-    for i = 1, 100 do
-        BarFill.Size = UDim2.new(i / 100, 0, 1, 0)
-        task.wait(0.015)
+-- ระบบตรวจสอบรหัส (ใส่ 67 ผ่านแล้วรันหน้าจอโหลด)
+SubmitKeyBtn.MouseButton1Click:Connect(function()
+    if KeyInputBox.Text == "67" then
+        KeyPanel:Destroy()
+        LoadPanel.Visible = true
+        
+        task.spawn(function()
+            for i = 1, 100 do
+                BarFill.Size = UDim2.new(i / 100, 0, 1, 0)
+                task.wait(0.015)
+            end
+            LoadPanel:Destroy()
+            MainPanel.Visible = true
+            ToggleButton.Visible = false
+        end)
+    else
+        KeyInputBox.Text = ""
+        KeyInputBox.PlaceholderText = "รหัสไม่ถูกต้อง! (คำตอบคือ 67)"
     end
-    LoadPanel:Destroy()
-    MainPanel.Visible = true
-    ToggleButton.Visible = false
 end)
 
--- ระบบลากหน้าต่าง
+-- ระบบลากหน้าต่างหลัก
 local dragging, dragInput, dragStart, startPos
 TopBar.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
