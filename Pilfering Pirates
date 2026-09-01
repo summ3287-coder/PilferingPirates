@@ -1,4 +1,4 @@
--- Gemini Hub | Ultimate Edition (Math Key UI: 67 + Slow Up Fly 10s)
+-- Gemini Hub | Ultimate Edition (Math Key 67 + Slow Fly + ESP Line/Box Custom Color + Quick Reset)
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
@@ -93,7 +93,7 @@ SubmitKeyBtn.Font = Enum.Font.GothamBold
 SubmitKeyBtn.Parent = KeyPanel
 Instance.new("UICorner", SubmitKeyBtn).CornerRadius = UDim.new(0, 8)
 
--- 2. หน้าต่างดาวน์โหลด (Loading Screen) - ซ่อนไว้ก่อน
+-- 2. หน้าต่างดาวน์โหลด (Loading Screen)
 local LoadPanel = Instance.new("Frame")
 LoadPanel.Size = UDim2.new(0, 320, 0, 140)
 LoadPanel.Position = UDim2.new(0.5, -160, 0.5, -70)
@@ -135,8 +135,8 @@ Instance.new("UICorner", BarFill).CornerRadius = UDim.new(1, 0)
 
 -- 3. หน้าต่างหลัก (Main Panel)
 local MainPanel = Instance.new("Frame")
-MainPanel.Size = UDim2.new(0, 480, 0, 360)
-MainPanel.Position = UDim2.new(0.5, -240, 0.5, -180)
+MainPanel.Size = UDim2.new(0, 480, 0, 380)
+MainPanel.Position = UDim2.new(0.5, -240, 0.5, -190)
 MainPanel.BackgroundColor3 = Color3.fromRGB(18, 18, 20)
 MainPanel.BorderSizePixel = 0
 MainPanel.Visible = false
@@ -207,13 +207,13 @@ local function createTabBtn(name, posX)
 end
 
 local tabAuto = createTabBtn("⚡ ฟีเจอร์หลัก & เมนูบิน", 0)
-local tabSupport = createTabBtn("☕ ซัพพอร์ต & วาร์ป", 148)
+local tabSupport = createTabBtn("☕ ซัพพอร์ต & วาร์ป & ESP", 148)
 
 local pageAuto = Instance.new("ScrollingFrame")
 pageAuto.Size = UDim2.new(1, -24, 1, -110)
 pageAuto.Position = UDim2.new(0, 12, 0, 95)
 pageAuto.BackgroundTransparency = 1
-pageAuto.CanvasSize = UDim2.new(0, 0, 0, 420)
+pageAuto.CanvasSize = UDim2.new(0, 0, 0, 450)
 pageAuto.ScrollBarThickness = 3
 pageAuto.Parent = MainPanel
 
@@ -221,7 +221,7 @@ local pageSupport = Instance.new("ScrollingFrame")
 pageSupport.Size = UDim2.new(1, -24, 1, -110)
 pageSupport.Position = UDim2.new(0, 12, 0, 95)
 pageSupport.BackgroundTransparency = 1
-pageSupport.CanvasSize = UDim2.new(0, 0, 0, 420)
+pageSupport.CanvasSize = UDim2.new(0, 0, 0, 520)
 pageSupport.ScrollBarThickness = 3
 pageSupport.Visible = false
 pageSupport.Parent = MainPanel
@@ -282,7 +282,7 @@ local function createFeatureToggle(parent, text, yPos, featureKey, callback)
     end)
 end
 
--- --- Container สำหรับปุ่มลอย (ปุ่มบินขึ้นฟ้าช้าๆ นิ่มๆ) ---
+-- --- Container สำหรับปุ่มลอย ---
 local FloatButtonsContainer = Instance.new("ScreenGui")
 FloatButtonsContainer.Name = "GeminiFloatButtons"
 FloatButtonsContainer.Parent = CoreGui
@@ -305,7 +305,6 @@ fStroke.Color = Color3.fromRGB(60, 60, 70)
 fStroke.Thickness = 1
 fStroke.Parent = FlyFloatBtn
 
--- --- ระบบบินขึ้นฟ้าแบบช้าลง (ปรับความเร็วเหลือ 18) 10 วินาที คืนค่าแรงโน้มถ่วง ---
 local flyingActive = false
 local flyConnection = nil
 
@@ -335,20 +334,17 @@ FlyFloatBtn.MouseButton1Click:Connect(function()
         FlyFloatBtn.Text = "✈️ บินขึ้นฟ้า [ON]"
         
         local startTime = tick()
-        
         flyConnection = RunService.RenderStepped:Connect(function()
             if tick() - startTime >= 10 then
                 stopFlying()
                 return
             end
-            
             pcall(function()
                 local char = localPlayer.Character
                 if char and char:FindFirstChild("HumanoidRootPart") then
                     local hrp = char.HumanoidRootPart
                     local hum = char:FindFirstChildOfClass("Humanoid")
                     if hum then hum.PlatformStand = true end
-                    -- ปรับความเร็วขึ้นฟ้าให้ช้าลงและสมูทขึ้น (จาก 50 ลดเหลือ 18)
                     hrp.AssemblyLinearVelocity = Vector3.new(0, 18, 0)
                 end
             end)
@@ -356,7 +352,6 @@ FlyFloatBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- --- ควบคุมเปิด/ปิดชุดปุ่มลอยผ่านเมนูหลัก ---
 createFeatureToggle(pageAuto, "🚀 เปิดเมนูปุ่มลอย (บินขึ้นฟ้า)", 0, "floatmenu", function(state)
     FloatButtonsContainer.Enabled = state
     if not state and flyingActive then
@@ -364,8 +359,6 @@ createFeatureToggle(pageAuto, "🚀 เปิดเมนูปุ่มลอ�
     end
 end)
 
--- --- ฟีเจอร์: กันหลุด AFK ---
-local afkConn = nil
 createFeatureToggle(pageAuto, "💤 ออโต้กันหลุด AFK", 50, "afk", function(state)
     if state then
         local vu = game:GetService("VirtualUser")
@@ -379,7 +372,6 @@ createFeatureToggle(pageAuto, "💤 ออโต้กันหลุด AFK", 5
     end
 end)
 
--- --- ฟีเจอร์: ปิดเอฟเฟกต์ ---
 createFeatureToggle(pageAuto, "✨ ปิดเอฟเฟกต์อลังการ (ลดแลค)", 100, "noeffects", function(state)
     pcall(function()
         for _, obj in pairs(workspace:GetDescendants()) do
@@ -390,7 +382,6 @@ createFeatureToggle(pageAuto, "✨ ปิดเอฟเฟกต์อลัง
     end)
 end)
 
--- --- ฟีเจอร์: ซูมกล้องไร้ขีดจำกัด (Infinite Zoom) ---
 createFeatureToggle(pageAuto, "🔭 ซูมกล้องไร้ขีดจำกัด (Infinite Zoom)", 150, "infzoom", function(state)
     pcall(function()
         if state then
@@ -401,7 +392,6 @@ createFeatureToggle(pageAuto, "🔭 ซูมกล้องไร้ขีด�
     end)
 end)
 
--- --- ฟีเจอร์: ปรับมุมมอง FOV ---
 createFeatureToggle(pageAuto, "📷 ปรับมุมมองกล้องกว้างพิเศษ (FOV)", 200, "fov", function(state)
     pcall(function()
         Camera.FieldOfView = state and 110 or 70
@@ -422,10 +412,108 @@ local function createActionButton(parent, text, yPos, callback)
     btn.MouseButton1Click:Connect(callback)
 end
 
--- --- ระบบบันทึกพิกัดและวาร์ปกลับ ---
-local savedPosition = nil
+-- --- ระบบ ESP (เส้นตรง & กรอบสี่เหลี่ยม ปรับสีได้) ---
+local espLineEnabled = false
+local espBoxEnabled = false
+local espColor = Color3.fromRGB(0, 255, 255) -- ค่าเริ่มต้นสีฟ้า
+local espDrawings = {}
 
-createActionButton(pageSupport, "📌 บันทึกจุดยืนปัจจุบัน (Save Position)", 0, function()
+-- ฟังก์ชันสร้างปุ่มเปลี่ยนสี ESP ในแท็บซัพพอร์ต
+local colorLabel = Instance.new("TextLabel")
+colorLabel.Size = UDim2.new(1, 0, 0, 25)
+colorLabel.Position = UDim2.new(0, 0, 0, 0)
+colorLabel.BackgroundTransparency = 1
+colorLabel.Text = "🎨 เปลี่ยนสีระบบมอง (ESP Color)"
+colorLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+colorLabel.TextSize = 11
+colorLabel.Font = Enum.Font.GothamBold
+colorLabel.TextXAlignment = Enum.TextXAlignment.Left
+colorLabel.Parent = pageSupport
+
+local colors = {
+    {Name = "ฟ้า", Color = Color3.fromRGB(0, 162, 255)},
+    {Name = "เขียว", Color = Color3.fromRGB(0, 255, 100)},
+    {Name = "แดง", Color = Color3.fromRGB(255, 50, 50)},
+    {Name = "เหลือง", Color = Color3.fromRGB(255, 220, 0)}
+}
+
+for i, colData in ipairs(colors) do
+    local cBtn = Instance.new("TextButton")
+    cBtn.Size = UDim2.new(0, 110, 0, 30)
+    cBtn.Position = UDim2.new(0, (i-1)*120, 0, 30)
+    cBtn.BackgroundColor3 = colData.Color
+    cBtn.Text = colData.Name
+    cBtn.TextColor3 = Color3.fromRGB(20, 20, 20)
+    cBtn.TextSize = 11
+    cBtn.Font = Enum.Font.GothamBold
+    cBtn.Parent = pageSupport
+    Instance.new("UICorner", cBtn).CornerRadius = UDim.new(0, 6)
+    
+    cBtn.MouseButton1Click:Connect(function()
+        espColor = colData.Color
+    end)
+end
+
+local yOffsetESP = 75
+createFeatureToggle(pageSupport, "👀 เปิดระบบมอง (ESP เส้นตรง)", yOffsetESP, "espline", function(state)
+    espLineEnabled = state
+end)
+
+createFeatureToggle(pageSupport, "📦 เปิดระบบมอง (ESP กรอบสี่เหลี่ยม)", yOffsetESP + 50, "espbox", function(state)
+    espBoxEnabled = state
+end)
+
+-- ลูปวาด ESP
+RunService.RenderStepped:Connect(function()
+    -- ล้างภาพเก่าทิ้งก่อน
+    for _, obj in pairs(espDrawings) do
+        pcall(function() obj:Remove() end)
+    end
+    espDrawings = {}
+
+    if not espLineEnabled and not espBoxEnabled then return end
+
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= localPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") and p.Character:FindFirstChildOfClass("Humanoid") then
+            local hum = p.Character:FindFirstChildOfClass("Humanoid")
+            if hum.Health > 0 then
+                local hrp = p.Character.HumanoidRootPart
+                local vector, onScreen = Camera:WorldToViewportPoint(hrp.Position)
+                
+                if onScreen then
+                    -- วาดเส้นตรง (Line)
+                    if espLineEnabled then
+                        local line = Drawing.new("Line")
+                        line.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
+                        line.To = Vector2.new(vector.X, vector.Y)
+                        line.Color = espColor
+                        line.Thickness = 1.5
+                        line.Transparency = 1
+                        table.insert(espDrawings, line)
+                    end
+                    
+                    -- วาดกรอบสี่เหลี่ยม (Box)
+                    if espBoxEnabled then
+                        local box = Drawing.new("Square")
+                        box.Size = Vector2.new(2000 / vector.Z, 3000 / vector.Z)
+                        box.Position = Vector2.new(vector.X - box.Size.X / 2, vector.Y - box.Size.Y / 2)
+                        box.Color = espColor
+                        box.Thickness = 1.5
+                        box.Filled = false
+                        box.Transparency = 1
+                        table.insert(espDrawings, box)
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- --- ระบบบันทึกพิกัด วาร์ป และรีเซ็ตตัว ---
+local savedPosition = nil
+local yOffsetTools = 185
+
+createActionButton(pageSupport, "📌 บันทึกจุดยืนปัจจุบัน (Save Position)", yOffsetTools, function()
     pcall(function()
         local char = localPlayer.Character
         if char and char:FindFirstChild("HumanoidRootPart") then
@@ -434,7 +522,7 @@ createActionButton(pageSupport, "📌 บันทึกจุดยืนปั
     end)
 end)
 
-createActionButton(pageSupport, "🏠 วาร์ปกลับไปยังจุดที่บันทึกไว้", 50, function()
+createActionButton(pageSupport, "🏠 วาร์ปกลับไปยังจุดที่บันทึกไว้", yOffsetTools + 50, function()
     pcall(function()
         local char = localPlayer.Character
         if char and char:FindFirstChild("HumanoidRootPart") and savedPosition then
@@ -443,69 +531,23 @@ createActionButton(pageSupport, "🏠 วาร์ปกลับไปยัง
     end)
 end)
 
-createActionButton(pageSupport, "🔄 รีเซ็ตการตั้งค่าและปิดฟีเจอร์ทั้งหมด", 100, function()
+-- เพิ่มปุ่มรีเซ็ตตัวละครในหน้า UI ทันที
+createActionButton(pageSupport, "💀 รีเซ็ตตัวละคร (Quick Reset)", yOffsetTools + 100, function()
+    pcall(function()
+        local char = localPlayer.Character
+        if char then
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then
+                hum.Health = 0
+            else
+                char:BreakJoints()
+            end
+        end
+    end)
+end)
+
+createActionButton(pageSupport, "🔄 รีเซ็ตการตั้งค่าและปิดฟีเจอร์ทั้งหมด", yOffsetTools + 150, function()
     for key, stateObj in pairs(featureStates) do
         if stateObj.active then
             stateObj.active = false
-            stateObj.button.BackgroundColor3 = Color3.fromRGB(26, 26, 32)
-            stateObj.button.Text = "  " .. stateObj.defaultText .. " [ ปิด ]"
-            pcall(function() stateObj.callback(false) end)
-        end
-    end
-end)
-
-local function toggleUI()
-    MainPanel.Visible = not MainPanel.Visible
-    ToggleButton.Visible = not MainPanel.Visible
-end
-
-CloseButton.MouseButton1Click:Connect(toggleUI)
-ToggleButton.MouseButton1Click:Connect(toggleUI)
-
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if not gameProcessed and input.KeyCode == Enum.KeyCode.Zero then
-        toggleUI()
-    end
-end)
-
--- ระบบตรวจสอบรหัส (ใส่ 67 ผ่านแล้วรันหน้าจอโหลด)
-SubmitKeyBtn.MouseButton1Click:Connect(function()
-    if KeyInputBox.Text == "67" then
-        KeyPanel:Destroy()
-        LoadPanel.Visible = true
-        
-        task.spawn(function()
-            for i = 1, 100 do
-                BarFill.Size = UDim2.new(i / 100, 0, 1, 0)
-                task.wait(0.015)
-            end
-            LoadPanel:Destroy()
-            MainPanel.Visible = true
-            ToggleButton.Visible = false
-        end)
-    else
-        KeyInputBox.Text = ""
-        KeyInputBox.PlaceholderText = "รหัสไม่ถูกต้อง! (คำตอบคือ 67)"
-    end
-end)
-
--- ระบบลากหน้าต่างหลัก
-local dragging, dragInput, dragStart, startPos
-TopBar.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true; dragStart = input.Position; startPos = MainPanel.Position
-    end
-end)
-
-TopBar.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-        dragInput = input
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
-        local delta = input.Position - dragStart
-        MainPanel.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
+            stateObj.button.Ba
