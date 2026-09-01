@@ -1,20 +1,20 @@
--- Gemini Hub | John Wick Edition (Automation & Utility)
+-- Gemini Hub | ยินดีต้อนรับ (Self-Support & Reset Utility Edition)
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local localPlayer = Players.LocalPlayer
 
-if CoreGui:FindFirstChild("GeminiJohnWickHub") then
-    CoreGui.GeminiJohnWickHub:Destroy()
+if CoreGui:FindFirstChild("GeminiWelcomeHub") then
+    CoreGui.GeminiWelcomeHub:Destroy()
 end
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "GeminiJohnWickHub"
+ScreenGui.Name = "GeminiWelcomeHub"
 ScreenGui.Parent = CoreGui
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- ปุ่มเปิด/ปิดลอย (รูป G)
+-- ปุ่มเปิด/ปิดลอย (รูปโลโก้ G)
 local ToggleButton = Instance.new("TextButton")
 ToggleButton.Size = UDim2.new(0, 45, 0, 45)
 ToggleButton.Position = UDim2.new(0, 30, 0, 150)
@@ -24,6 +24,7 @@ ToggleButton.Text = "G"
 ToggleButton.TextColor3 = Color3.fromRGB(0, 162, 255)
 ToggleButton.TextSize = 20
 ToggleButton.Font = Enum.Font.GothamBold
+ToggleButton.Visible = false
 ToggleButton.Parent = ScreenGui
 Instance.new("UICorner", ToggleButton).CornerRadius = UDim.new(1, 0)
 
@@ -32,12 +33,52 @@ ToggleStroke.Color = Color3.fromRGB(45, 45, 52)
 ToggleStroke.Thickness = 1
 ToggleStroke.Parent = ToggleButton
 
--- หน้าต่างหลัก
+-- 1. หน้าต่างดาวน์โหลด (Loading Screen)
+local LoadPanel = Instance.new("Frame")
+LoadPanel.Size = UDim2.new(0, 320, 0, 140)
+LoadPanel.Position = UDim2.new(0.5, -160, 0.5, -70)
+LoadPanel.BackgroundColor3 = Color3.fromRGB(18, 18, 20)
+LoadPanel.BorderSizePixel = 0
+LoadPanel.Parent = ScreenGui
+Instance.new("UICorner", LoadPanel).CornerRadius = UDim.new(0, 12)
+
+local LoadStroke = Instance.new("UIStroke")
+LoadStroke.Color = Color3.fromRGB(45, 45, 52)
+LoadStroke.Thickness = 1
+LoadStroke.Parent = LoadPanel
+
+local LoadTitle = Instance.new("TextLabel")
+LoadTitle.Size = UDim2.new(1, 0, 0, 40)
+LoadTitle.Position = UDim2.new(0, 0, 0, 15)
+LoadTitle.BackgroundTransparency = 1
+LoadTitle.Text = "กำลังโหลดข้อมูลระบบ..."
+LoadTitle.TextColor3 = Color3.fromRGB(235, 235, 235)
+LoadTitle.TextSize = 13
+LoadTitle.Font = Enum.Font.GothamBold
+LoadTitle.Parent = LoadPanel
+
+local BarBackground = Instance.new("Frame")
+BarBackground.Size = UDim2.new(1, -40, 0, 10)
+BarBackground.Position = UDim2.new(0, 20, 0, 75)
+BarBackground.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
+BarBackground.BorderSizePixel = 0
+BarBackground.Parent = LoadPanel
+Instance.new("UICorner", BarBackground).CornerRadius = UDim.new(1, 0)
+
+local BarFill = Instance.new("Frame")
+BarFill.Size = UDim2.new(0, 0, 1, 0)
+BarFill.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
+BarFill.BorderSizePixel = 0
+BarFill.Parent = BarBackground
+Instance.new("UICorner", BarFill).CornerRadius = UDim.new(1, 0)
+
+-- 2. หน้าต่างหลัก (Main Panel)
 local MainPanel = Instance.new("Frame")
-MainPanel.Size = UDim2.new(0, 480, 0, 320)
-MainPanel.Position = UDim2.new(0.5, -240, 0.5, -160)
+MainPanel.Size = UDim2.new(0, 480, 0, 340)
+MainPanel.Position = UDim2.new(0.5, -240, 0.5, -170)
 MainPanel.BackgroundColor3 = Color3.fromRGB(18, 18, 20)
 MainPanel.BorderSizePixel = 0
+MainPanel.Visible = false
 MainPanel.Parent = ScreenGui
 Instance.new("UICorner", MainPanel).CornerRadius = UDim.new(0, 12)
 
@@ -65,7 +106,7 @@ local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, -120, 1, 0)
 Title.Position = UDim2.new(0, 16, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "Gemini Hub | John Wick Edition"
+Title.Text = "ยินดีต้อนรับ"
 Title.TextColor3 = Color3.fromRGB(235, 235, 235)
 Title.TextSize = 13
 Title.Font = Enum.Font.GothamBold
@@ -83,7 +124,7 @@ CloseButton.Font = Enum.Font.GothamBold
 CloseButton.Parent = TopBar
 Instance.new("UICorner", CloseButton).CornerRadius = UDim.new(0, 6)
 
--- แถบเลือกหมวดหมู่ (Tabs) ด้านบนใต้หัวข้อ
+-- แถบเลือกหมวดหมู่ (Tabs)
 local TabContainer = Instance.new("Frame")
 TabContainer.Size = UDim2.new(1, -24, 0, 36)
 TabContainer.Position = UDim2.new(0, 12, 0, 50)
@@ -104,50 +145,51 @@ local function createTabBtn(name, posX)
     return btn
 end
 
-local tabFarm = createTabBtn("⚡ ออโต้ฟาร์ม (ช่วยตัวเอง)", 0)
-local tabUtility = createTabBtn("🛠️ ตัวช่วยเสริม & วาร์ป", 148)
+local tabAuto = createTabBtn("🤖 ออโต้ช่วยตัวเอง", 0)
+local tabSupport = createTabBtn("☕ ซัพพอร์ต & ตั้งค่า", 148)
 
--- หน้าเนื้อหาของแต่ละแท็บ
-local pageFarm = Instance.new("ScrollingFrame")
-pageFarm.Size = UDim2.new(1, -24, 1, -100)
-pageFarm.Position = UDim2.new(0, 12, 0, 95)
-pageFarm.BackgroundTransparency = 1
-pageFarm.CanvasSize = UDim2.new(0, 0, 0, 250)
-pageFarm.ScrollBarThickness = 3
-pageFarm.Parent = MainPanel
+-- หน้าเนื้อหา
+local pageAuto = Instance.new("ScrollingFrame")
+pageAuto.Size = UDim2.new(1, -24, 1, -100)
+pageAuto.Position = UDim2.new(0, 12, 0, 95)
+pageAuto.BackgroundTransparency = 1
+pageAuto.CanvasSize = UDim2.new(0, 0, 0, 320)
+pageAuto.ScrollBarThickness = 3
+pageAuto.Parent = MainPanel
 
-local pageUtility = Instance.new("ScrollingFrame")
-pageUtility.Size = UDim2.new(1, -24, 1, -100)
-pageUtility.Position = UDim2.new(0, 12, 0, 95)
-pageUtility.BackgroundTransparency = 1
-pageUtility.CanvasSize = UDim2.new(0, 0, 0, 250)
-pageUtility.ScrollBarThickness = 3
-pageUtility.Visible = false
-pageUtility.Parent = MainPanel
+local pageSupport = Instance.new("ScrollingFrame")
+pageSupport.Size = UDim2.new(1, -24, 1, -100)
+pageSupport.Position = UDim2.new(0, 12, 0, 95)
+pageSupport.BackgroundTransparency = 1
+pageSupport.CanvasSize = UDim2.new(0, 0, 0, 320)
+pageSupport.ScrollBarThickness = 3
+pageSupport.Visible = false
+pageSupport.Parent = MainPanel
 
--- สลับแท็บ
-tabFarm.MouseButton1Click:Connect(function()
-    pageFarm.Visible = true
-    pageUtility.Visible = false
-    tabFarm.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
-    tabFarm.TextColor3 = Color3.fromRGB(255, 255, 255)
-    tabUtility.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
-    tabUtility.TextColor3 = Color3.fromRGB(180, 180, 180)
+tabAuto.MouseButton1Click:Connect(function()
+    pageAuto.Visible = true
+    pageSupport.Visible = false
+    tabAuto.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
+    tabAuto.TextColor3 = Color3.fromRGB(255, 255, 255)
+    tabSupport.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
+    tabSupport.TextColor3 = Color3.fromRGB(180, 180, 180)
 end)
 
-tabUtility.MouseButton1Click:Connect(function()
-    pageFarm.Visible = false
-    pageUtility.Visible = true
-    tabUtility.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
-    tabUtility.TextColor3 = Color3.fromRGB(255, 255, 255)
-    tabFarm.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
-    tabFarm.TextColor3 = Color3.fromRGB(180, 180, 180)
+tabSupport.MouseButton1Click:Connect(function()
+    pageAuto.Visible = false
+    pageSupport.Visible = true
+    tabSupport.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
+    tabSupport.TextColor3 = Color3.fromRGB(255, 255, 255)
+    tabAuto.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
+    tabAuto.TextColor3 = Color3.fromRGB(180, 180, 180)
 end)
-tabFarm.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
-tabFarm.TextColor3 = Color3.fromRGB(255, 255, 255)
+tabAuto.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
+tabAuto.TextColor3 = Color3.fromRGB(255, 255, 255)
 
--- ฟังก์ชันสร้างปุ่มกดเปิด-ปิดฟีเจอร์ (Toggle Buttons) ในหน้าฟาร์ม
-local function createFeatureToggle(parent, text, yPos, callback)
+-- ตัวแปรเก็บสถานะฟีเจอร์ทั้งหมด เพื่อให้ปุ่มรีเซ็ตควบคุมได้
+local featureStates = {}
+
+local function createFeatureToggle(parent, text, yPos, featureKey, callback)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1, 0, 0, 40)
     btn.Position = UDim2.new(0, 0, 0, yPos)
@@ -160,21 +202,28 @@ local function createFeatureToggle(parent, text, yPos, callback)
     btn.Parent = parent
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
     
-    local active = false
+    featureStates[featureKey] = {
+        active = false,
+        button = btn,
+        defaultText = text,
+        callback = callback
+    }
+    
     btn.MouseButton1Click:Connect(function()
-        active = not active
-        if active then
+        local stateObj = featureStates[featureKey]
+        stateObj.active = not stateObj.active
+        if stateObj.active then
             btn.BackgroundColor3 = Color3.fromRGB(0, 120, 80)
             btn.Text = "  " .. text .. " [ เปิดใช้งาน ]"
         else
             btn.BackgroundColor3 = Color3.fromRGB(26, 26, 32)
             btn.Text = "  " .. text .. " [ ปิด ]"
         end
-        callback(active)
+        callback(stateObj.active)
     end)
 end
 
--- ฟีเจอร์ที่ 1: ออโต้คลิก / ฟาร์มรัวๆ
+-- ฟีเจอร์ที่ 1: ออโต้คลิก
 local autoClicking = false
 RunService.RenderStepped:Connect(function()
     if autoClicking then
@@ -186,51 +235,48 @@ RunService.RenderStepped:Connect(function()
         end)
     end
 end)
-createFeatureToggle(pageFarm, "⚡ ออโต้คลิกฟาร์มรัวๆ (Auto Clicker)", 0, function(state)
-    autoClicking = state
-end)
+createFeatureToggle(pageAuto, "🤖 ออโต้คลิกช่วยเก็บของ/ตีมอน", 0, "autoclick", function(state) autoClicking = state end)
 
--- ฟีเจอร์ที่ 2: วิ่งเร็วพิเศษ (Speed Boost)
-local speedConn = nil
-createFeatureToggle(pageFarm, "🚀 วิ่งไวซิ่งสะใจ (WalkSpeed 50)", 50, function(state)
+-- ฟีเจอร์ที่ 2: กันหลุด AFK
+local afkConn = nil
+createFeatureToggle(pageAuto, "💤 ออโต้กันหลุด AFK (ไม่โดนเตะตอนปล่อยจอย)", 50, "afk", function(state)
     if state then
-        speedConn = RunService.RenderStepped:Connect(function()
-            pcall(function()
-                local char = localPlayer.Character
-                if char and char:FindFirstChild("Humanoid") then
-                    char.Humanoid.WalkSpeed = 50
-                end
-            end)
+        local vu = game:GetService("VirtualUser")
+        afkConn = localPlayer.Idled:Connect(function()
+            vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+            task.wait(1)
+            vu:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
         end)
     else
-        if speedConn then speedConn:Disconnect() end
-        pcall(function() localPlayer.Character.Humanoid.WalkSpeed = 16 end)
+        if afkConn then afkConn:Disconnect() end
     end
 end)
 
--- ฟีเจอร์ที่ 3: กระโดดสูงพิเศษ (JumpPower)
-local jumpConn = nil
-createFeatureToggle(pageFarm, "🦘 กระโดดสูงทะลุฟ้า (JumpPower 120)", 100, function(state)
-    if state then
-        jumpConn = RunService.RenderStepped:Connect(function()
-            pcall(function()
-                local char = localPlayer.Character
-                if char and char:FindFirstChild("Humanoid") then
-                    char.Humanoid.UseJumpPower = true
-                    char.Humanoid.JumpPower = 120
-                end
-            end)
-        end)
-    else
-        if jumpConn then jumpConn:Disconnect() end
-        pcall(function() 
-            localPlayer.Character.Humanoid.UseJumpPower = true
-            localPlayer.Character.Humanoid.JumpPower = 50 
-        end)
-    end
+-- ฟีเจอร์ใหม่ที่ 3: ซูมกล้องไกลพิเศษ (MaxZoomDistance ช่วยมองรอบตัว)
+createFeatureToggle(pageAuto, "🔍 ปลดล็อกซูมกล้องไกลพิเศษ", 100, "maxzoom", function(state)
+    pcall(function()
+        localPlayer.CameraMaxZoomDistance = state and 9999 or 400
+    end)
 end)
 
--- ฟีเจอร์ในหน้าแท็บ Utility & Teleport
+-- ฟีเจอร์ใหม่ที่ 4: ลบหมอก/ปรับภาพเคลียร์ (Fullbright ช่วยมองเห็นชัดเจน)
+local lighting = game:GetService("Lighting")
+local originalClock = lighting.ClockTime
+createFeatureToggle(pageAuto, "☀️ เปิดไฟสว่างทั่วแมพ (มองเห็นชัดเจน)", 150, "fullbright", function(state)
+    pcall(function()
+        if state then
+            originalClock = lighting.ClockTime
+            lighting.ClockTime = 12
+            lighting.Brightness = 2
+            lighting.GlobalShadows = false
+        else
+            lighting.ClockTime = originalClock
+            lighting.Brightness = 1
+            lighting.GlobalShadows = true
+        end
+    end)
+end)
+
 local function createActionButton(parent, text, yPos, callback)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1, 0, 0, 40)
@@ -242,36 +288,51 @@ local function createActionButton(parent, text, yPos, callback)
     btn.Font = Enum.Font.GothamBold
     btn.Parent = parent
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
-    
     btn.MouseButton1Click:Connect(callback)
 end
 
-createActionButton(pageUtility, "🏠 รีเซ็ตตัวละครกลับจุดเกิด (Respawn)", 0, function()
-    pcall(function() localPlayer.Character.Humanoid.Health = 0 end)
+createActionButton(pageSupport, "📌 บันทึกจุดยืนปัจจุบัน (Save Position)", 0, function()
+    pcall(function() getgenv.MySavedPos = localPlayer.Character.HumanoidRootPart.CFrame end)
 end)
 
-createActionButton(pageUtility, "📍 บันทึกจุดวาร์ปปัจจุบัน (Save Position)", 50, function()
-    pcall(function()
-        getgenv.SavedPos = localPlayer.Character.HumanoidRootPart.CFrame
-        print("บันทึกพิกัดสำเร็จ!")
-    end)
+createActionButton(pageSupport, "🏠 กลับมายังจุดที่บันทึกไว้", 50, function()
+    pcall(function() if getgenv.MySavedPos then localPlayer.Character.HumanoidRootPart.CFrame = getgenv.MySavedPos end end)
 end)
 
-createActionButton(pageUtility, "🌀 วาร์ปกลับจุดที่บันทึกไว้ (Teleport)", 100, function()
-    pcall(function()
-        if getgenv.SavedPos then
-            localPlayer.Character.HumanoidRootPart.CFrame = getgenv.SavedPos
+-- ฟังก์ชันปุ่มรีเซ็ตค่าสถานะทั้งหมดตามที่ขอ
+createActionButton(pageSupport, "🔄 รีเซ็ตการตั้งค่าและปิดฟีเจอร์ทั้งหมด", 100, function()
+    for key, stateObj in pairs(featureStates) do
+        if stateObj.active then
+            stateObj.active = false
+            stateObj.button.BackgroundColor3 = Color3.fromRGB(26, 26, 32)
+            stateObj.button.Text = "  " .. stateObj.defaultText .. " [ ปิด ]"
+            pcall(function() stateObj.callback(false) end)
         end
-    end)
+    end
 end)
 
--- ระบบเปิด/ปิดหน้าต่างผ่านปุ่ม G
-CloseButton.MouseButton1Click:Connect(function()
-    MainPanel.Visible = false
-    ToggleButton.Visible = true
+-- ควบคุมการแสดงผลหน้าต่างและปุ่ม G / เลข 0
+local function toggleUI()
+    MainPanel.Visible = not MainPanel.Visible
+    ToggleButton.Visible = not MainPanel.Visible
+end
+
+CloseButton.MouseButton1Click:Connect(toggleUI)
+ToggleButton.MouseButton1Click:Connect(toggleUI)
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.Zero then
+        toggleUI()
+    end
 end)
 
-ToggleButton.MouseButton1Click:Connect(function()
+-- ระบบโหลดหน้าจอ
+task.spawn(function()
+    for i = 1, 100 do
+        BarFill.Size = UDim2.new(i / 100, 0, 1, 0)
+        task.wait(0.015)
+    end
+    LoadPanel:Destroy()
     MainPanel.Visible = true
     ToggleButton.Visible = false
 end)
