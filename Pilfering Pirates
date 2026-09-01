@@ -1,8 +1,10 @@
--- Gemini Hub | ยินดีต้อนรับ (Self-Support & Reset Utility Edition)
+-- Gemini Hub | ยินดีต้อนรับ (Ultimate Utility & ESP Edition)
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+local Camera = workspace.CurrentCamera
 local localPlayer = Players.LocalPlayer
 
 if CoreGui:FindFirstChild("GeminiWelcomeHub") then
@@ -74,8 +76,8 @@ Instance.new("UICorner", BarFill).CornerRadius = UDim.new(1, 0)
 
 -- 2. หน้าต่างหลัก (Main Panel)
 local MainPanel = Instance.new("Frame")
-MainPanel.Size = UDim2.new(0, 480, 0, 340)
-MainPanel.Position = UDim2.new(0.5, -240, 0.5, -170)
+MainPanel.Size = UDim2.new(0, 480, 0, 360)
+MainPanel.Position = UDim2.new(0.5, -240, 0.5, -180)
 MainPanel.BackgroundColor3 = Color3.fromRGB(18, 18, 20)
 MainPanel.BorderSizePixel = 0
 MainPanel.Visible = false
@@ -112,6 +114,18 @@ Title.TextSize = 13
 Title.Font = Enum.Font.GothamBold
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = TopBar
+
+-- ป้ายแสดงพิกัด XYZ ที่ขอบหน้าต่าง (ไม่บังเนื้อหา เล็กแต่พอมองเห็น)
+local CoordLabel = Instance.new("TextLabel")
+CoordLabel.Size = UDim2.new(0, 180, 0, 20)
+CoordLabel.Position = UDim2.new(1, -190, 1, 6)
+CoordLabel.BackgroundTransparency = 1
+CoordLabel.Text = "XYZ: 0, 0, 0"
+CoordLabel.TextColor3 = Color3.fromRGB(150, 150, 160)
+CoordLabel.TextSize = 11
+CoordLabel.Font = Enum.Font.Code
+CoordLabel.TextXAlignment = Enum.TextXAlignment.Right
+CoordLabel.Parent = MainPanel
 
 local CloseButton = Instance.new("TextButton")
 CloseButton.Size = UDim2.new(0, 28, 0, 28)
@@ -150,18 +164,18 @@ local tabSupport = createTabBtn("☕ ซัพพอร์ต & ตั้งค�
 
 -- หน้าเนื้อหา
 local pageAuto = Instance.new("ScrollingFrame")
-pageAuto.Size = UDim2.new(1, -24, 1, -100)
+pageAuto.Size = UDim2.new(1, -24, 1, -110)
 pageAuto.Position = UDim2.new(0, 12, 0, 95)
 pageAuto.BackgroundTransparency = 1
-pageAuto.CanvasSize = UDim2.new(0, 0, 0, 320)
+pageAuto.CanvasSize = UDim2.new(0, 0, 0, 420)
 pageAuto.ScrollBarThickness = 3
 pageAuto.Parent = MainPanel
 
 local pageSupport = Instance.new("ScrollingFrame")
-pageSupport.Size = UDim2.new(1, -24, 1, -100)
+pageSupport.Size = UDim2.new(1, -24, 1, -110)
 pageSupport.Position = UDim2.new(0, 12, 0, 95)
 pageSupport.BackgroundTransparency = 1
-pageSupport.CanvasSize = UDim2.new(0, 0, 0, 320)
+pageSupport.CanvasSize = UDim2.new(0, 0, 0, 420)
 pageSupport.ScrollBarThickness = 3
 pageSupport.Visible = false
 pageSupport.Parent = MainPanel
@@ -186,7 +200,6 @@ end)
 tabAuto.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
 tabAuto.TextColor3 = Color3.fromRGB(255, 255, 255)
 
--- ตัวแปรเก็บสถานะฟีเจอร์ทั้งหมด เพื่อให้ปุ่มรีเซ็ตควบคุมได้
 local featureStates = {}
 
 local function createFeatureToggle(parent, text, yPos, featureKey, callback)
@@ -223,7 +236,7 @@ local function createFeatureToggle(parent, text, yPos, featureKey, callback)
     end)
 end
 
--- ฟีเจอร์ที่ 1: ออโต้คลิก
+-- --- 1. ฟีเจอร์: ออโต้คลิก ---
 local autoClicking = false
 RunService.RenderStepped:Connect(function()
     if autoClicking then
@@ -237,42 +250,126 @@ RunService.RenderStepped:Connect(function()
 end)
 createFeatureToggle(pageAuto, "🤖 ออโต้คลิกช่วยเก็บของ/ตีมอน", 0, "autoclick", function(state) autoClicking = state end)
 
--- ฟีเจอร์ที่ 2: กันหลุด AFK
+-- --- 2. ฟีเจอร์: กันหลุด AFK ---
 local afkConn = nil
-createFeatureToggle(pageAuto, "💤 ออโต้กันหลุด AFK (ไม่โดนเตะตอนปล่อยจอย)", 50, "afk", function(state)
+createFeatureToggle(pageAuto, "💤 ออโต้กันหลุด AFK (ไม่โดนเตะ)", 50, "afk", function(state)
     if state then
         local vu = game:GetService("VirtualUser")
         afkConn = localPlayer.Idled:Connect(function()
-            vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+            vu:Button2Down(Vector2.new(0,0), Camera.CFrame)
             task.wait(1)
-            vu:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+            vu:Button2Up(Vector2.new(0,0), Camera.CFrame)
         end)
     else
         if afkConn then afkConn:Disconnect() end
     end
 end)
 
--- ฟีเจอร์ใหม่ที่ 3: ซูมกล้องไกลพิเศษ (MaxZoomDistance ช่วยมองรอบตัว)
-createFeatureToggle(pageAuto, "🔍 ปลดล็อกซูมกล้องไกลพิเศษ", 100, "maxzoom", function(state)
+-- --- 3. ฟีเจอร์ใหม่: ปิดเอฟเฟกต์อลังการทั้งหมด ---
+createFeatureToggle(pageAuto, "✨ ปิดเอฟเฟกต์อลังการทั้งหมด (ลดแลค)", 100, "noeffects", function(state)
     pcall(function()
-        localPlayer.CameraMaxZoomDistance = state and 9999 or 400
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj:IsA("ParticleEmitter") or obj:IsA("Fire") or obj:IsA("Sparkles") or obj:IsA("Smoke") then
+                obj.Enabled = not state
+            end
+        end
     end)
 end)
 
--- ฟีเจอร์ใหม่ที่ 4: ลบหมอก/ปรับภาพเคลียร์ (Fullbright ช่วยมองเห็นชัดเจน)
-local lighting = game:GetService("Lighting")
-local originalClock = lighting.ClockTime
-createFeatureToggle(pageAuto, "☀️ เปิดไฟสว่างทั่วแมพ (มองเห็นชัดเจน)", 150, "fullbright", function(state)
+-- --- 4. ฟีเจอร์ใหม่: ระบบมอง (ESP เส้นโยง + กรอบสี่เหลี่ยม) ---
+local espActive = false
+local espDrawings = {}
+createFeatureToggle(pageAuto, "👁️ ระบบมอง (ESP กรอบ & เส้นโยงศัตรู)", 150, "esp", function(state)
+    espActive = state
+    if not state then
+        for _, d in pairs(espDrawings) do
+            if d.box then d.box:Remove() end
+            if d.line then d.line:Remove() end
+        end
+        espDrawings = {}
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    if not espActive then return end
     pcall(function()
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= localPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                local hrp = p.Character.HumanoidRootPart
+                local vector, onScreen = Camera:WorldToViewportPoint(hrp.Position)
+                
+                if not espDrawings[p] then
+                    local box = Drawing.new("Square")
+                    box.Visible = false
+                    box.Color = Color3.fromRGB(0, 162, 255)
+                    box.Thickness = 1
+                    box.Filled = false
+                    
+                    local line = Drawing.new("Line")
+                    line.Visible = false
+                    line.Color = Color3.fromRGB(0, 162, 255)
+                    line.Thickness = 1
+                    
+                    espDrawings[p] = {box = box, line = line}
+                end
+                
+                local d = espDrawings[p]
+                if onScreen then
+                    d.box.Visible = true
+                    d.box.Size = Vector2.new(2000 / vector.Z, 3500 / vector.Z)
+                    d.box.Position = Vector2.new(vector.X - d.box.Size.X / 2, vector.Y - d.box.Size.Y / 2)
+                    
+                    d.line.Visible = true
+                    d.line.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
+                    d.line.To = Vector2.new(vector.X, vector.Y)
+                else
+                    d.box.Visible = false
+                    d.line.Visible = false
+                end
+            elseif espDrawings[p] then
+                if espDrawings[p].box then espDrawings[p].box:Remove() end
+                if espDrawings[p].line then espDrawings[p].line:Remove() end
+                espDrawings[p] = nil
+            end
+        end
+    end)
+end)
+
+-- --- 5. ฟีเจอร์ใหม่: ปรับมุมมอง FOV กว้างพิเศษ ---
+createFeatureToggle(pageAuto, "🔭 ปรับมุมมองกล้องกว้างพิเศษ (FOV)", 200, "fov", function(state)
+    pcall(function()
+        Camera.FieldOfView = state and 110 or 70
+    end)
+end)
+
+-- --- 6. ฟีเจอร์ใหม่: ระบบลอยตัวทะลุกำแพงช้าๆ (10 วินาทีแล้วค้าง) ---
+local floatTween = nil
+createFeatureToggle(pageAuto, "🛸 ลอยตัวทะลุกำแพงช้าๆ (ค้างบนฟ้า)", 250, "floatup", function(state)
+    pcall(function()
+        local char = localPlayer.Character
+        if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+        local hrp = char.HumanoidRootPart
+        
         if state then
-            originalClock = lighting.ClockTime
-            lighting.ClockTime = 12
-            lighting.Brightness = 2
-            lighting.GlobalShadows = false
+            local bv = Instance.new("BodyVelocity")
+            bv.Name = "GeminiFloat"
+            bv.MaxForce = Vector3.new(0, math.huge, 0)
+            bv.Velocity = Vector3.new(0, 15, 0) -- ค่อยๆ ลอยขึ้นช้าๆ
+            bv.Parent = hrp
+            
+            -- ปิดแรงโน้มถ่วงชั่วคราวเพื่อให้ค้างอยู่ข้างบนได้
+            local bg = Instance.new("BodyGyro")
+            bg.Name = "GeminiGyro"
+            bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+            bg.CFrame = hrp.CFrame
+            bg.Parent = hrp
+            
+            task.delay(10, function()
+                if bv and bv.Parent then bv.Velocity = Vector3.new(0, 0, 0) end
+            end)
         else
-            lighting.ClockTime = originalClock
-            lighting.Brightness = 1
-            lighting.GlobalShadows = true
+            if hrp:FindFirstChild("GeminiFloat") then hrp.GeminiFloat:Destroy() end
+            if hrp:FindFirstChild("GeminiGyro") then hrp.GeminiGyro:Destroy() end
         end
     end)
 end)
@@ -291,15 +388,29 @@ local function createActionButton(parent, text, yPos, callback)
     btn.MouseButton1Click:Connect(callback)
 end
 
+-- --- ระบบบันทึกพิกัดและวาร์ปกลับ (ปรับปรุงใหม่ ไม่บั๊ก) ---
+local savedPosition = nil
+
 createActionButton(pageSupport, "📌 บันทึกจุดยืนปัจจุบัน (Save Position)", 0, function()
-    pcall(function() getgenv.MySavedPos = localPlayer.Character.HumanoidRootPart.CFrame end)
+    pcall(function()
+        local char = localPlayer.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            savedPosition = char.HumanoidRootPart.CFrame
+            print("บันทึกพิกัดสำเร็จ!")
+        end
+    end)
 end)
 
-createActionButton(pageSupport, "🏠 กลับมายังจุดที่บันทึกไว้", 50, function()
-    pcall(function() if getgenv.MySavedPos then localPlayer.Character.HumanoidRootPart.CFrame = getgenv.MySavedPos end end)
+createActionButton(pageSupport, "🏠 วาร์ปกลับไปยังจุดที่บันทึกไว้", 50, function()
+    pcall(function()
+        local char = localPlayer.Character
+        if char and char:FindFirstChild("HumanoidRootPart") and savedPosition then
+            char.HumanoidRootPart.CFrame = savedPosition
+            print("วาร์ปกลับจุดเดิมสำเร็จ!")
+        end
+    end)
 end)
 
--- ฟังก์ชันปุ่มรีเซ็ตค่าสถานะทั้งหมดตามที่ขอ
 createActionButton(pageSupport, "🔄 รีเซ็ตการตั้งค่าและปิดฟีเจอร์ทั้งหมด", 100, function()
     for key, stateObj in pairs(featureStates) do
         if stateObj.active then
@@ -309,6 +420,17 @@ createActionButton(pageSupport, "🔄 รีเซ็ตการตั้งค
             pcall(function() stateObj.callback(false) end)
         end
     end
+end)
+
+-- อัปเดตพิกัด XYZ เรียลไทม์ที่ขอบหน้าต่าง
+RunService.RenderStepped:Connect(function()
+    pcall(function()
+        local char = localPlayer.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            local pos = char.HumanoidRootPart.Position
+            CoordLabel.Text = string.Format("XYZ: %.0f, %.0f, %.0f", pos.X, pos.Y, pos.Z)
+        end
+    end)
 end)
 
 -- ควบคุมการแสดงผลหน้าต่างและปุ่ม G / เลข 0
