@@ -1,4 +1,4 @@
--- Gemini Hub | Ultimate Edition (Fly Fixed + Part Dragger + Infinite Zoom)
+-- Gemini Hub | Ultimate Edition (God Mode + Auto Up Fly 10s + Clean UI)
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
@@ -222,125 +222,113 @@ local function createFeatureToggle(parent, text, yPos, featureKey, callback)
     end)
 end
 
--- --- สร้าง Container สำหรับปุ่มลอย 2 ปุ่ม (บิน + ลากบล็อก) ---
+-- --- Container สำหรับปุ่มลอย (ปุ่มบินขึ้นฟ้าอัตโนมัติ) ---
 local FloatButtonsContainer = Instance.new("ScreenGui")
 FloatButtonsContainer.Name = "GeminiFloatButtons"
 FloatButtonsContainer.Parent = CoreGui
-FloatButtonsContainer.Enabled = false -- ซ่อนไว้จนกว่าจะเปิดฟังก์ชันในเมนู
+FloatButtonsContainer.Enabled = false
 
-local function createFloatingActionBtn(name, text, posY)
-    local fBtn = Instance.new("TextButton")
-    fBtn.Size = UDim2.new(0, 120, 0, 40)
-    fBtn.Position = UDim2.new(0, 30, 0, posY)
-    fBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 38)
-    fBtn.BorderSizePixel = 0
-    fBtn.Text = text .. " [OFF]"
-    fBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-    fBtn.TextSize = 11
-    fBtn.Font = Enum.Font.GothamBold
-    fBtn.Parent = FloatButtonsContainer
-    Instance.new("UICorner", fBtn).CornerRadius = UDim.new(0, 8)
-    
-    local fStroke = Instance.new("UIStroke")
-    fStroke.Color = Color3.fromRGB(60, 60, 70)
-    fStroke.Thickness = 1
-    fStroke.Parent = fBtn
-    
-    return fBtn
+local FlyFloatBtn = Instance.new("TextButton")
+FlyFloatBtn.Size = UDim2.new(0, 140, 0, 40)
+FlyFloatBtn.Position = UDim2.new(0, 30, 0, 210)
+FlyFloatBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 38)
+FlyFloatBtn.BorderSizePixel = 0
+FlyFloatBtn.Text = "✈️ บินขึ้นฟ้า [OFF]"
+FlyFloatBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+FlyFloatBtn.TextSize = 11
+FlyFloatBtn.Font = Enum.Font.GothamBold
+FlyFloatBtn.Parent = FloatButtonsContainer
+Instance.new("UICorner", FlyFloatBtn).CornerRadius = UDim.new(0, 8)
+
+local fStroke = Instance.new("UIStroke")
+fStroke.Color = Color3.fromRGB(60, 60, 70)
+fStroke.Thickness = 1
+fStroke.Parent = FlyFloatBtn
+
+-- --- ระบบบินขึ้นฟ้าอัตโนมัติ 10 วินาที ทะลุกำแพง คืนค่าแรงโน้มถ่วงปกติ ---
+local flyingActive = false
+local flyConnection = nil
+
+local function stopFlying()
+    if not flyingActive then return end
+    flyingActive = false
+    FlyFloatBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 38)
+    FlyFloatBtn.Text = "✈️ บินขึ้นฟ้า [OFF]"
+    if flyConnection then flyConnection:Disconnect() end
+    pcall(function()
+        local char = localPlayer.Character
+        if char then
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            if hum then hum.PlatformStand = false end
+            if hrp then hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0) end
+        end
+    end)
 end
 
-local FlyFloatBtn = createFloatingActionBtn("FlyBtn", "✈️ ปุ่มบิน", 210)
-local DragFloatBtn = createFloatingActionBtn("DragBtn", "📦 ลากบล็อก", 260)
-
--- --- ระบบบินที่แก้ไขใหม่ (ใช้ BodyVelocity แก้บั๊กมุดดินและบินได้ชัวร์) ---
-local flyingActive = false
-local bodyVelocity, bodyGyro
-
 FlyFloatBtn.MouseButton1Click:Connect(function()
-    flyingActive = not flyingActive
-    local char = localPlayer.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    local hum = char and char:FindFirstChildOfClass("Humanoid")
-    
     if flyingActive then
-        if not hrp or not hum then flyingActive = false return end
-        FlyFloatBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 80)
-        FlyFloatBtn.Text = "✈️ ปุ่มบิน [ON]"
-        
-        hum.PlatformStand = true
-        
-        bodyVelocity = Instance.new("BodyVelocity")
-        bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-        bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-        bodyVelocity.Parent = hrp
-        
-        bodyGyro = Instance.new("BodyGyro")
-        bodyGyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-        bodyGyro.CFrame = hrp.CFrame
-        bodyGyro.Parent = hrp
-        
-        task.spawn(function()
-            while flyingactive and char and hrp.Parent do
-                local camCFrame = Camera.CFrame
-                local moveVector = Vector3.new()
-                if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveVector = moveVector + camCFrame.LookVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveVector = moveVector - camCFrame.LookVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveVector = moveVector - camCFrame.RightVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveVector = moveVector + camCFrame.RightVector end
-                
-                bodyVelocity.Velocity = moveVector * 50
-                bodyGyro.CFrame = camCFrame
-                task.wait()
-            end
-        end)
+        stopFlying()
     else
-        FlyFloatBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 38)
-        FlyFloatBtn.Text = "✈️ ปุ่มบิน [OFF]"
-        if hum then hum.PlatformStand = false end
-        if bodyVelocity then bodyVelocity:Destroy() end
-        if bodyGyro then bodyGyro:Destroy() end
-    end
-end)
-
--- --- ระบบลากและดึงบล็อก (Part Dragger Mechanics) ---
-local draggingPartActive = false
-local selectedPart = nil
-local dragConnection = nil
-DragFloatBtn.MouseButton1Click:Connect(function()
-    draggingPartActive = not draggingPartActive
-    if draggingPartActive then
-        DragFloatBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 80)
-        DragFloatBtn.Text = "📦 ลากบล็อก [ON]"
+        flyingActive = true
+        FlyFloatBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 80)
+        FlyFloatBtn.Text = "✈️ บินขึ้นฟ้า [ON]"
         
-        dragConnection = RunService.RenderStepped:Connect(function()
+        local startTime = tick()
+        
+        flyConnection = RunService.RenderStepped:Connect(function()
+            if tick() - startTime >= 10 then
+                stopFlying()
+                return
+            end
+            
             pcall(function()
-                local mouse = localPlayer:GetMouse()
-                if mouse.Target and mouse.Target:IsA("BasePart") and mouse.Target.Anchored == false then
-                    selectedPart = mouse.Target
-                    selectedPart.CFrame = Camera.CFrame + (Camera.CFrame.LookVector * 8)
+                local char = localPlayer.Character
+                if char and char:FindFirstChild("HumanoidRootPart") then
+                    local hrp = char.HumanoidRootPart
+                    local hum = char:FindFirstChildOfClass("Humanoid")
+                    if hum then hum.PlatformStand = true end
+                    hrp.AssemblyLinearVelocity = Vector3.new(0, 50, 0)
                 end
             end)
         end)
-    else
-        DragFloatBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 38)
-        DragFloatBtn.Text = "📦 ลากบล็อก [OFF]"
-        if dragConnection then dragConnection:Disconnect() end
-        selectedPart = nil
     end
 end)
 
 -- --- ควบคุมเปิด/ปิดชุดปุ่มลอยผ่านเมนูหลัก ---
-createFeatureToggle(pageAuto, "🚀 เปิดเมนูปุ่มลอย (บิน + ลากบล็อก)", 0, "floatmenu", function(state)
+createFeatureToggle(pageAuto, "🚀 เปิดเมนูปุ่มลอย (บินขึ้นฟ้า)", 0, "floatmenu", function(state)
     FloatButtonsContainer.Enabled = state
-    if not state then
-        if flyingActive then FlyFloatBtn.MouseButton1Click:Fire() end
-        if draggingPartActive then DragFloatBtn.MouseButton1Click:Fire() end
+    if not state and flyingActive then
+        stopFlying()
+    end
+end)
+
+-- --- ฟีเจอร์ใหม่: สคริปต์อมตะ (God Mode / Immortal) ---
+local godModeConnection = nil
+createFeatureToggle(pageAuto, "🛡️ เปิดโหมดอมตะ (God Mode)", 50, "godmode", function(state)
+    if state then
+        godModeConnection = RunService.Stepped:Connect(function()
+            pcall(function()
+                local char = localPlayer.Character
+                if char then
+                    local hum = char:FindFirstChildOfClass("Humanoid")
+                    if hum then
+                        hum.Health = hum.MaxHealth -- ล็อกเลือดให้เต็มอยู่ตลอดเวลา
+                    end
+                end
+            end)
+        end)
+    else
+        if godModeConnection then
+            godModeConnection:Disconnect()
+            godModeConnection = nil
+        end
     end
 end)
 
 -- --- ฟีเจอร์: กันหลุด AFK ---
 local afkConn = nil
-createFeatureToggle(pageAuto, "💤 ออโต้กันหลุด AFK", 50, "afk", function(state)
+createFeatureToggle(pageAuto, "💤 ออโต้กันหลุด AFK", 100, "afk", function(state)
     if state then
         local vu = game:GetService("VirtualUser")
         afkConn = localPlayer.Idled:Connect(function()
@@ -354,7 +342,7 @@ createFeatureToggle(pageAuto, "💤 ออโต้กันหลุด AFK", 5
 end)
 
 -- --- ฟีเจอร์: ปิดเอฟเฟกต์ ---
-createFeatureToggle(pageAuto, "✨ ปิดเอฟเฟกต์อลังการ (ลดแลค)", 100, "noeffects", function(state)
+createFeatureToggle(pageAuto, "✨ ปิดเอฟเฟกต์อลังการ (ลดแลค)", 150, "noeffects", function(state)
     pcall(function()
         for _, obj in pairs(workspace:GetDescendants()) do
             if obj:IsA("ParticleEmitter") or obj:IsA("Fire") or obj:IsA("Sparkles") or obj:IsA("Smoke") then
@@ -365,7 +353,7 @@ createFeatureToggle(pageAuto, "✨ ปิดเอฟเฟกต์อลัง
 end)
 
 -- --- ฟีเจอร์: ซูมกล้องไร้ขีดจำกัด (Infinite Zoom) ---
-createFeatureToggle(pageAuto, "🔭 ซูมกล้องไร้ขีดจำกัด (Infinite Zoom)", 150, "infzoom", function(state)
+createFeatureToggle(pageAuto, "🔭 ซูมกล้องไร้ขีดจำกัด (Infinite Zoom)", 200, "infzoom", function(state)
     pcall(function()
         if state then
             localPlayer.CameraMaxZoomDistance = 999999
@@ -376,7 +364,7 @@ createFeatureToggle(pageAuto, "🔭 ซูมกล้องไร้ขีด�
 end)
 
 -- --- ฟีเจอร์: ปรับมุมมอง FOV ---
-createFeatureToggle(pageAuto, "📷 ปรับมุมมองกล้องกว้างพิเศษ (FOV)", 200, "fov", function(state)
+createFeatureToggle(pageAuto, "📷 ปรับมุมมองกล้องกว้างพิเศษ (FOV)", 250, "fov", function(state)
     pcall(function()
         Camera.FieldOfView = state and 110 or 70
     end)
